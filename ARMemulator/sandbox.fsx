@@ -1,3 +1,5 @@
+// for scripting purposes
+
 #load "CommonData.fs"
 #load "CommonLex.fs"
 #load "DP.fs"
@@ -13,17 +15,3 @@ open CommonTop
 
 
 
-let asmLine = "LDRB R10, [R15, #5]!"
-
-let splitIntoWords ( line:string ) =
-    line.Split( ([||] : char array), 
-        System.StringSplitOptions.RemoveEmptyEntries)
-
-let makeOperands words =
-    match words with
-    | opc :: operands -> String.concat "" operands
-    | _ -> failwithf "NO"
-
-let operands = splitIntoWords asmLine |> Array.toList |> makeOperands
-
-operands.Split(',') |> Array.toList

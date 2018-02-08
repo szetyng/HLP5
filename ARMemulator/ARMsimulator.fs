@@ -1,4 +1,4 @@
-module ARMemulator
+module ARMsimulator
 
 [<EntryPoint>]
 let main argv =
