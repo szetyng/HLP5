@@ -5,14 +5,7 @@ module Memory
 
 open CommonLex
 open CommonData
-open System.Runtime.Remoting.Metadata.W3cXsd2001
 
-/// sample specification for set of instructions
-
-// change these types as required
-
-/// instruction (dummy: must change)
-// type Instr =  {MemDummy: Unit}
 type InstrName = LDR | STR
 type MemType = B
 type OffsetVal = Literal of uint32 | Reg of RName
@@ -48,6 +41,11 @@ let opCodes = opCodeExpand memSpec
     
 let makeLS typeLS ls suffix = 
     let operandLst = (ls.Operands).Split(',') |> Array.toList
+    let getSuffix suffStr = 
+        match suffStr with
+        | "B" -> Some B
+        | "" -> None
+        | _ -> failwithf "Incorrect suffix for LDR/STR"
     let getRName (srcStr:string) = regNames.[srcStr.Trim [|'[' ; ']'|] ] //maybe check for case where operand is wrong
     let getOffsetVal (valStr:string) = 
         match valStr with
@@ -56,7 +54,7 @@ let makeLS typeLS ls suffix =
         | _ -> failwithf "Incorrect offset value"
 
     let instrDummy = {
-        Instr=typeLS; Type=suffix ; RContents=regNames.[operandLst.[0]] ; // suffix option?
+        Instr=typeLS; Type=getSuffix suffix ; RContents=regNames.[operandLst.[0]] ; 
         RAdd=getRName operandLst.[1] ; Offset=None }        
     match operandLst.Length with
     | 2 -> instrDummy
@@ -71,11 +69,7 @@ let makeLS typeLS ls suffix =
 
 let makeLDR lineASM suffix = makeLS LDR lineASM suffix 
 let makeSTR lineASM suffix = makeLS STR lineASM suffix 
-     
-              
-
-        
-
+                  
 /// main function to parse a line of assembler
 /// ls contains the line input
 /// and other state needed to generate output
@@ -87,7 +81,7 @@ let parse (ls: LineData) : Result<Parse<InstrLine>,string> option =
         | MEM ->
             let parsedInstr = 
                 match root with
-                | "LDR" -> makeLDR ls suffix //SUFFIX IS A STRING
+                | "LDR" -> makeLDR ls suffix 
                 | "STR" -> makeSTR ls suffix
                 | _ -> failwithf "What?"
             Ok { PInstr= parsedInstr ; PLabel = None ; PSize = 4u; PCond = pCond }
