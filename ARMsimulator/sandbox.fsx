@@ -13,5 +13,68 @@ open Memory
 open CommonTop
 // open Test
 
+let asmLine = "STR R10, [R15]"
+// let splitIntoWords ( line:string ) =
+//     line.Split( ([||] : char array), 
+//         System.StringSplitOptions.RemoveEmptyEntries)
+
+// let makeOperands words =
+//     match words with
+//     | opc :: operands -> String.concat "" operands
+//     | _ -> failwithf "NO"
+
+// let operands = splitIntoWords asmLine |> Array.toList |> makeOperands
+// let opList = operands.Split(',') |> Array.toList
+// let op2 = opList.[2]
+// op2.Contains("!")
+
+let myMatch someLine = Memory.parse someLine
+
+let parseLine (asmLine:string) =
+    /// put parameters into a LineData record
+    let makeLineData opcode operands = {
+        OpCode=opcode
+        Operands=String.concat "" operands
+        Label=None
+        LoadAddr = WA 0u // dummy
+        SymTab = None // dummy
+    }
+    /// remove comments from string
+    let removeComment (txt:string) =
+        txt.Split(';')
+        |> function 
+            | [|x|] -> x 
+            | [||] -> "" 
+            | lineWithComment -> lineWithComment.[0]
+    /// split line on whitespace into an array
+    let splitIntoWords ( line:string ) =
+        line.Split( ([||] : char array), 
+            System.StringSplitOptions.RemoveEmptyEntries)
+    /// try to parse 1st word, or 2nd word, as opcode
+    /// If 2nd word is opcode 1st word must be label
+    let matchLine words =
+        let pNoLabel =
+            match words with
+            | opc :: operands -> 
+                makeLineData opc operands 
+                |> myMatch
+            | _ -> None
+        match pNoLabel, words with
+        | Some pa, _ -> pa
+        | None, label :: opc :: operands -> 
+            match { makeLineData opc operands 
+                    with Label=Some label} 
+                  |> IMatch with
+            | None -> 
+                Error "error"
+            | Some pa -> Error "error"
+        | _ -> Error "error"
+    asmLine
+    |> removeComment
+    |> splitIntoWords
+    |> Array.toList
+    |> matchLine
+
+parseLine asmLine
 
 

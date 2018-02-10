@@ -8,7 +8,7 @@ open CommonData
 
 /// allows different modules to return different instruction types
 type Instr =
-    | IMEM of Memory.Instr
+    | IMEM of Memory.InstrLine //changed?
     | IDP of DP.Instr
 
 /// allows different modules to return different error info
