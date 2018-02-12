@@ -2,6 +2,11 @@
 - Write specification for parsing and simulation code
 - Write proper error codes (mentioned some in comments). How to avoid using `failwithf`??
 
+## Error when:  
+1. Absence of `#` in front of offset values (rmb to add functionality for hex and bin)
+2. Missing brackets
+3. Currently not accepting lower case instructions
+
 **For each instruction:**
 - Write initial tests for the code
 - Write code that passes these tests
