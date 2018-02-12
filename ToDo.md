@@ -1,6 +1,6 @@
 # Todo
 - Write specification for parsing and simulation code
-- Write proper error codes (mentioned some in comments)
+- Write proper error codes (mentioned some in comments). How to avoid using `failwithf`??
 
 **For each instruction:**
 - Write initial tests for the code
