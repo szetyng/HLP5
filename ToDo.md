@@ -12,7 +12,7 @@
 1. LDR{B}
 2. STR{B}
 
-**Usage:**
+**Usage:**  
 LDR{B}{cond} dest, \[source\]                    -> source contains an add, loads contents from that add to dest  
 LDR{B}{cond} RDest, \[RSrc , OFFSET\]            -> Offset  
 LDR{B}{cond} RDest, \[RSrc , OFFSET\]!           -> Pre-indexed offset  
