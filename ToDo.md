@@ -1,5 +1,6 @@
 # Todo
 - Write specification for parsing and simulation code
+- Write proper error codes (mentioned some in comments)
 
 **For each instruction:**
 - Write initial tests for the code
