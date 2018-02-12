@@ -1,6 +1,12 @@
 # Todo
-1. Learn markdown
-2. Translate list of things to do / task sequence into this file for easy tracking
+[ ] Write specification for parsing and simulation code
+
+For each instruction:
+[ ] Write initial tests for the code
+[ ] Write code that passes these tests
+[ ] Add testing against VisUAL (single and/or complex, randomised tests)
+
+[ ] Add randomised VisUAL tests
 
 ## Instructions to be implemented
 
