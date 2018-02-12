@@ -5,7 +5,6 @@
 - Write initial tests for the code
 - Write code that passes these tests
 - Add testing against VisUAL (single and/or complex, randomised tests)
-
 - Add randomised VisUAL tests
 
 ## Instructions to be implemented
