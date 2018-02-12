@@ -12,7 +12,6 @@
     <Compile Include="Memory.fs" />
     <Compile Include="CommonTop.fs" />
     <Compile Include="Test.fs" />
-    <Compile Include="ARMsimulator.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />

@@ -21,8 +21,8 @@ type InstrLine =
     {
         Instr: InstrName;
         Type: MemType option;
-        RContents: RName; // RDest
-        RAdd: RName; // RSrc
+        RContents: RName;   // register holding the contents to be loaded/stored to/from (LDR/STR respectively)
+        RAdd: RName;        // register holding the address
         Offset: (OffsetVal * OffsetType) option
     }
 
@@ -49,7 +49,7 @@ let makeLS typeLS ls suffix =
     let getRName (srcStr:string) = regNames.[srcStr.Trim [|'[' ; ']'|] ] //maybe check for case where operand is wrong
     let getOffsetVal (valStr:string) = 
         match valStr with
-        | dec when dec.Contains("#") -> dec.Trim [|'#' ; ']' ; '!' |] |> uint32 |> Literal
+        | dec when dec.Contains("#") -> dec.Trim [|'#' ; ']' ; '!' |] |> uint32 |> Literal //todo: other number bases
         | reg -> getRName reg |> Reg  
         | _ -> failwithf "Incorrect offset value"
 
@@ -62,9 +62,10 @@ let makeLS typeLS ls suffix =
         let op2 = operandLst.[2]
         let offsetVal = getOffsetVal op2
         match op2.Contains("!"), op2.Contains("]") with
-        | true, _ -> {instrDummy with Offset=Some (offsetVal,PreIndexed)}
+        | true, true -> {instrDummy with Offset=Some (offsetVal,PreIndexed)}
         | false, false -> {instrDummy with Offset=Some (offsetVal,PostIndexed)}
         | false, true -> {instrDummy with Offset=Some (offsetVal,Normal)}
+        | _ , _ -> failwithf "Incorrect way of setting offset"    
     | _ -> failwithf "Incorrect number of operands"    
 
 let makeLDR lineASM suffix = makeLS LDR lineASM suffix 
