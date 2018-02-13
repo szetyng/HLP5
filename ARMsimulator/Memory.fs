@@ -82,9 +82,9 @@ let parse (ls: LineData) : Result<Parse<InstrLine>,string> option =
         | MEM ->
             let parsedInstr = 
                 match root with
-                | "LDR" -> makeLDR ls suffix 
+                | "LDR" -> makeLDR ls suffix
                 | "STR" -> makeSTR ls suffix
-                | _ -> failwithf "What?"
+                | _ -> failwithf "What? InstrC = MEM but root != LDR or STR" // top level code not expecting Result here
             Ok { PInstr= parsedInstr ; PLabel = None ; PSize = 4u; PCond = pCond }
         | _ -> Error "Wrong instruction class passed to the Memory module"        
     

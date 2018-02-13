@@ -50,16 +50,24 @@ let makeParseLSTestList name listIOpairs =
     |> List.map (fun (i,pair) -> (makeOneTest i pair))
     |> Expecto.Tests.testList name
 
-let makeParseLDRTests listIOpairs = makeParseLSTestList "LDR parse tests" listIOpairs
-let makeParseSTRTests listIOpairs = makeParseLSTestList "STR parse tests" listIOpairs
+let makeParseLDRTests listIOpairs = makeParseLSTestList "LDR and STR parse tests" listIOpairs 
+//let makeParseSTRTests listIOpairs = makeParseLSTestList "STR parse tests" listIOpairs 
 
 [<Tests>]
 let t1 = 
     makeParseLDRTests
         [
-            "LDR R10, [R15, #5]!" , {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=Some (Literal 5u, PreIndexed)}
+            "STRB R10, [R15, #5]!" , {Instr=STR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 5u, PreIndexed)}
+            "STR R5, [R2]", {Instr=STR ; Type=None; RContents=R5; RAdd=R2 ; Offset=None}
+            "LDR R4, [R8], #3", {Instr=LDR ; Type=None; RContents=R4; RAdd=R8 ; Offset=Some (Literal 3u, PostIndexed)}
+            "LDRB R7, [R11, #11]", {Instr=LDR ; Type=Some B; RContents=R7; RAdd=R11 ; Offset=Some (Literal 11u, Memory.Normal)} 
+            // SHOULD FAIL
+            "LDR R10, [R15, ", {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=None} //failing. Good? 
             "LDR R10, [R15" , {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=None} //ERROR, NO BRACKETS
-            
+            "LDR R10, R15]", {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=None} // ERROR, NO BRACKETS
+            "LDR R10, R15", {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=None} // ERROR, NO BRACKETS
+            // SHOULD PASS
+            "ldrb r10, [r15, #4]", {Instr=LDR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 4u, Memory.Normal)} //failing
         ]    
 
 
