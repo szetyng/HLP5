@@ -52,20 +52,36 @@ let makeLS typeLS ls suffix =
         | dec when dec.Contains("#") -> dec.Trim [|'#' ; ']' ; '!' |] |> uint32 |> Literal //todo: other number bases
         | reg -> getRName reg |> Reg  
         | _ -> failwithf "Incorrect offset value"
+    let getRn (reg:string) offset = 
+        match reg.StartsWith("["), reg.EndsWith("]"), offset with
+        | true, true, None -> getRName reg
+        | true, false, Some PreIndexed | true, false, Some Normal -> getRName reg
+        | true, true, Some PostIndexed-> getRName reg
+        | _, _, _ -> failwithf "Incorrect formatting"
 
     let instrDummy = {
         Instr=typeLS; Type=getSuffix suffix ; RContents=regNames.[operandLst.[0]] ; 
-        RAdd=getRName operandLst.[1] ; Offset=None }        
+        RAdd=regNames.[operandLst.[0]] ; Offset=None }       // RAdd is dummy 
     match operandLst.Length with
-    | 2 -> instrDummy
-    | 3 ->      
+    | 2 -> 
+        let rn = operandLst.[1]
+        let rnVal = getRn rn None
+        {instrDummy with RAdd = rnVal}
+    | 3 -> 
+        let rn = operandLst.[1]
         let op2 = operandLst.[2]
         let offsetVal = getOffsetVal op2
-        match op2.Contains("!"), op2.Contains("]") with
-        | true, true -> {instrDummy with Offset=Some (offsetVal,PreIndexed)}
-        | false, false -> {instrDummy with Offset=Some (offsetVal,PostIndexed)}
-        | false, true -> {instrDummy with Offset=Some (offsetVal,Normal)}
-        | _ , _ -> failwithf "Incorrect way of setting offset"    
+        match op2.EndsWith("!"), op2.Contains("]"), op2.EndsWith("]"), op2.Contains("[") with
+        | true, true, false, false -> 
+            let rnVal = getRn rn (Some PreIndexed)
+            {instrDummy with RAdd=rnVal ; Offset=Some (offsetVal,PreIndexed)}
+        | false, false, false, false -> 
+            let rnVal = getRn rn (Some PostIndexed)
+            {instrDummy with RAdd=rnVal ; Offset=Some (offsetVal,PostIndexed)}
+        | false, true, true, false -> 
+            let rnVal = getRn rn (Some Normal)
+            {instrDummy with RAdd=rnVal ; Offset=Some (offsetVal,Normal)}
+        | _ , _, _ , _ -> failwithf "Incorrect way of setting offset"    
     | _ -> failwithf "Incorrect number of operands"    
 
 let makeLDR lineASM suffix = makeLS LDR lineASM suffix 
