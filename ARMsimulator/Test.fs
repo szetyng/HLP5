@@ -79,5 +79,3 @@ let main argv =
     Expecto.Tests.runTestsInAssembly Expecto.Tests.defaultConfig [||] |> ignore
     Console.ReadKey() |> ignore  
     0 // return an integer exit code
-
-

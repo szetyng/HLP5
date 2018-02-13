@@ -39,11 +39,12 @@ let memSpec = {
 /// map of all possible opcodes recognised
 let opCodes = opCodeExpand memSpec
     
+// makeLS needs to be InstrName -> LineData -> string -> Result<InstrLine,string>
 let makeLS typeLS ls suffix = 
     let operandLst = (ls.Operands).Split(',') |> Array.toList
     let getSuffix suffStr = 
         match suffStr with
-        | "B" -> Some B
+        | "B" | "b" -> Some B
         | "" -> None
         | _ -> failwithf "Incorrect suffix for LDR/STR"
     let getRName (srcStr:string) = regNames.[srcStr.Trim [|'[' ; ']'|] ] //maybe check for case where operand is wrong
@@ -59,30 +60,44 @@ let makeLS typeLS ls suffix =
         | true, true, Some PostIndexed-> getRName reg
         | _, _, _ -> failwithf "Incorrect formatting"
 
+    // Errors from (getSuffix suffix), getRName RAddthing, getOffsetVal valStr, getRn?
+    let resSuffix = getSuffix suffix |> Ok
+    
     let instrDummy = {
-        Instr=typeLS; Type=getSuffix suffix ; RContents=regNames.[operandLst.[0]] ; 
+        Instr=typeLS; Type=None ; RContents=regNames.[operandLst.[0]] ; 
         RAdd=regNames.[operandLst.[0]] ; Offset=None }       // RAdd is dummy 
-    match operandLst.Length with
-    | 2 -> 
-        let rn = operandLst.[1]
-        let rnVal = getRn rn None
-        {instrDummy with RAdd = rnVal}
-    | 3 -> 
+    
+    let rnVal = 
         let rn = operandLst.[1]
         let op2 = operandLst.[2]
-        let offsetVal = getOffsetVal op2
-        match op2.EndsWith("!"), op2.Contains("]"), op2.EndsWith("]"), op2.Contains("[") with
-        | true, true, false, false -> 
-            let rnVal = getRn rn (Some PreIndexed)
-            {instrDummy with RAdd=rnVal ; Offset=Some (offsetVal,PreIndexed)}
-        | false, false, false, false -> 
-            let rnVal = getRn rn (Some PostIndexed)
-            {instrDummy with RAdd=rnVal ; Offset=Some (offsetVal,PostIndexed)}
-        | false, true, true, false -> 
-            let rnVal = getRn rn (Some Normal)
-            {instrDummy with RAdd=rnVal ; Offset=Some (offsetVal,Normal)}
-        | _ , _, _ , _ -> failwithf "Incorrect way of setting offset"    
-    | _ -> failwithf "Incorrect number of operands"    
+        match operandLst.Length with
+        | 2 ->     
+            Ok (getRn rn None)
+        | 3 -> 
+            match op2.EndsWith("!"), op2.Contains("]"), op2.EndsWith("]"), op2.Contains("[") with
+            | true, true, false, false -> getRn rn (Some PreIndexed) |> Ok
+            | false, false, false, false -> getRn rn (Some PostIndexed) |> Ok
+            | false, true, true, false -> getRn rn (Some Normal) |> Ok
+            | _ , _, _ , _ -> Error "rnVal error"//"Incorrect way of setting offset"                  
+        | _ -> Error "rnVal error"        
+
+    // result.bind this shit
+    let offsetVal = 
+        let op2 = operandLst.[2]
+        let value = getOffsetVal op2
+        match operandLst.Length with
+        //| 3 -> Ok (getOffsetVal (operandLst.[2]))
+        | 3 ->
+            match op2.EndsWith("!"), op2.Contains("]"), op2.EndsWith("]"), op2.Contains("[") with
+            | true, true, false, false -> Some (value, PreIndexed) |> Ok
+            | false, false, false, false -> Some (value, PostIndexed) |> Ok
+            | false, true, true, false -> Some (value, Normal) |> Ok
+            | _ , _, _ , _ -> Error "offset error"//"Incorrect way of setting offset"                  
+        | _ -> Error "IDK" 
+
+    match resSuffix, rnVal, offsetVal with
+    | Ok suff, Ok regVal, Ok offsetVal -> Ok {instrDummy with Type=suff ; RAdd=regVal ; Offset=offsetVal}
+    | Error _,_,_ | _,Error _,_ | _,_,Error _ -> Error "Incorrect formatting"
 
 let makeLDR lineASM suffix = makeLS LDR lineASM suffix 
 let makeSTR lineASM suffix = makeLS STR lineASM suffix 
@@ -98,9 +113,9 @@ let parse (ls: LineData) : Result<Parse<InstrLine>,string> option =
         | MEM ->
             let parsedInstr = 
                 match root with
-                | "LDR" -> makeLDR ls suffix
-                | "STR" -> makeSTR ls suffix
-                | _ -> failwithf "What? InstrC = MEM but root != LDR or STR" // top level code not expecting Result here
+                | "LDR" -> (makeLDR ls suffix) |> Result.bind
+                | "STR" -> (makeSTR ls suffix) |> Result.bind
+                | _ -> Error "What? InstrC = MEM but root != LDR or STR" // top level code not expecting Result here
             Ok { PInstr= parsedInstr ; PLabel = None ; PSize = 4u; PCond = pCond }
         | _ -> Error "Wrong instruction class passed to the Memory module"        
     
