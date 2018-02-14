@@ -34,7 +34,9 @@ let onlyParseLine (asmLine:string) =
             | _ -> None
         match pNoLabel with
         | Some (Ok pa) -> pa.PInstr
-        | _ -> failwithf "Please write proper tests"
+        | x -> 
+            printfn "WHAT %A" x
+            failwithf "Please write proper tests"
     asmLine
     |> splitIntoWords
     |> Array.toList
@@ -63,10 +65,15 @@ let t1 =
             "STR R5, [R2]", {Instr=STR ; Type=None; RContents=R5; RAdd=R2 ; Offset=None}
             // SHOULD FAIL
             //"LDR R10, [R15, ", {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=None} //failing. Good? 
+            
+
             "LDR R10, [R15" , {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=None} //ERROR, NO BRACKETS
             "LDR R10, R15]", {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=None} // ERROR, NO BRACKETS
             "LDR R10, R15", {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=None} // ERROR, NO BRACKETS
-            "LDR R10, [R15, R2!]", {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=None}
+            // "LDR R10, [R15, R2!]", {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=None}
+            
+            
+            
             // SHOULD PASS
             //"ldrb r10, [r15, #4]", {Instr=LDR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 4u, Memory.Normal)} //failing
         ]    
