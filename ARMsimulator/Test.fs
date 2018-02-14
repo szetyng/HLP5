@@ -33,8 +33,9 @@ let onlyParseLine (asmLine:string) =
                 |> Memory.parse
             | _ -> None
         match pNoLabel with
-        | Some (Ok pa) -> pa.PInstr
-        | x -> 
+        | Some (Ok pa) -> Ok pa.PInstr
+        | Some (Error e) -> Error e
+        | x ->
             printfn "WHAT %A" x
             failwithf "Please write proper tests"
     asmLine
@@ -59,23 +60,17 @@ let makeParseLDRTests listIOpairs = makeParseLSTestList "LDR and STR parse tests
 let t1 = 
     makeParseLDRTests
         [
-            "STRB R10, [R15, #5]!" , {Instr=STR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 5u, PreIndexed)}
-            "LDR R4, [R8], #3", {Instr=LDR ; Type=None; RContents=R4; RAdd=R8 ; Offset=Some (Literal 3u, PostIndexed)}
-            "LDRB R7, [R11, #11]", {Instr=LDR ; Type=Some B; RContents=R7; RAdd=R11 ; Offset=Some (Literal 11u, Memory.Normal)} 
-            "STR R5, [R2]", {Instr=STR ; Type=None; RContents=R5; RAdd=R2 ; Offset=None}
-            // SHOULD FAIL
-            //"LDR R10, [R15, ", {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=None} //failing. Good? 
-            
-
-            "LDR R10, [R15" , {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=None} //ERROR, NO BRACKETS
-            "LDR R10, R15]", {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=None} // ERROR, NO BRACKETS
-            "LDR R10, R15", {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=None} // ERROR, NO BRACKETS
-            // "LDR R10, [R15, R2!]", {Instr=LDR ; Type=None; RContents=R10; RAdd=R15 ; Offset=None}
-            
-            
-            
+            "STRB R10, [R15, #5]!" , Ok {Instr=STR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 5u, PreIndexed)}
+            "LDR R4, [R8], #3", Ok {Instr=LDR ; Type=None; RContents=R4; RAdd=R8 ; Offset=Some (Literal 3u, PostIndexed)}
+            "LDRB R7, [R11, #11]", Ok {Instr=LDR ; Type=Some B; RContents=R7; RAdd=R11 ; Offset=Some (Literal 11u, Memory.Normal)} 
+            "STR R5, [R2]", Ok {Instr=STR ; Type=None; RContents=R5; RAdd=R2 ; Offset=None}
+            "LDR R10, [R15, ", Error "Incorrect formatting" //failing. Good? 
+            "LDR R10, [R15" , Error "Incorrect formatting" //ERROR, NO BRACKETS
+            "LDR R10, R15]", Error "Incorrect formatting" // ERROR, NO BRACKETS
+            "LDR R10, R15", Error "Incorrect formatting" // ERROR, NO BRACKETS
+            "LDR R10, [R15, R2!]", Error "Incorrect formatting"
             // SHOULD PASS
-            //"ldrb r10, [r15, #4]", {Instr=LDR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 4u, Memory.Normal)} //failing
+            //"ldrb r10, [r15, #4]", Ok {Instr=LDR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 4u, Memory.Normal)} //failing
         ]    
 
 

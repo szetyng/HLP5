@@ -5,6 +5,7 @@ module Memory
 
 open CommonLex
 open CommonData
+open System.Xml
 
 type InstrName = LDR | STR
 type MemType = B
@@ -33,73 +34,82 @@ let memSpec = {
 /// map of all possible opcodes recognised
 let opCodes = opCodeExpand memSpec
     
-// makeLS needs to be InstrName -> LineData -> string -> Result<InstrLine,string>
+// makeLS needs to return Result<InstrLine,string>
 let makeLS root ls suffix = 
     let typeLS =
         match root with
-        | "LDR" | "ldr" -> Ok LDR
-        | "STR" | "str" -> Ok STR
-        | _ -> Error "Wrong root"
-    let operandLst = (ls.Operands).Split(',') |> Array.toList
+        | "LDR" -> LDR
+        | "STR" -> STR
+        | _ -> failwithf "What? Wrong root" // won't happen bc root is expanded from memSpec
     let getSuffix suffStr = 
         match suffStr with
-        | "B" | "b" -> Some B
+        | "B" -> Some B
         | "" -> None
-        | _ -> failwithf "Incorrect suffix for LDR/STR"
-    let getRName (srcStr:string) = regNames.[srcStr.Trim [|'[' ; ']'|] ] //maybe check for case where operand is wrong
+        | _ -> failwithf "What? Incorrect suffix for LDR/STR"  // wont' happen bc suffix is expanded from memSpec
+    let resSuffix = getSuffix suffix     
+
+    // no more failwithf's, very possible for errors here
+    let operandLst = (ls.Operands).Split(',') |> Array.toList    
+    let getRName (regStr:string) = 
+        let regNameStr = regStr.Trim [|'[' ; ']'|]
+        match Map.containsKey regNameStr regNames with
+        | true -> regNames.[regNameStr] |> Ok
+        | false -> Error "Invalid register name"
     let getOffsetVal (valStr:string) = 
         match valStr with
-        | dec when dec.Contains("#") -> dec.Trim [|'#' ; ']' ; '!' |] |> uint32 |> Literal //todo: other number bases
-        | reg -> getRName reg |> Reg  
-        | _ -> failwithf "Incorrect offset value"
-    let getRn (reg:string) offset = 
-        match reg.StartsWith("["), reg.EndsWith("]"), offset with
-        | true, true, None -> getRName reg
-        | true, false, Some PreIndexed | true, false, Some Normal -> getRName reg
-        | true, true, Some PostIndexed-> getRName reg
-        | _, _, _ -> failwithf "Incorrect formatting"
+        | dec when dec.Contains("#") -> 
+            dec.Trim [|'#' ; ']' ; '!' |] 
+            |> uint32 |> Literal |> Ok //todo: other number bases
+        | reg -> 
+            match reg.Trim [|']' ; '!'|] |> getRName with 
+            | Ok r -> Ok (Reg r)
+            | Error e -> Error e
+        | _ -> failwithf "Incorrect offset value" // will never happen?
+    let getRn ((reg:string),offset) = 
+        match reg.StartsWith("["), reg.EndsWith("]"), offset, getRName reg with
+        | true, true, None, Ok r  -> Ok r
+        | true, false, Some PreIndexed, Ok r | true, false, Some Normal, Ok r -> Ok r
+        | true, true, Some PostIndexed, Ok r-> Ok r
+        | _, _, _, Error e -> Error e
+        | _ -> Error "Incorrect formatting of offset" 
 
-    // Errors from (getSuffix suffix), getRName RAddthing, getOffsetVal valStr, getRn?
-    let resSuffix = getSuffix suffix |> Ok
+    let rContents = Result.bind getRName (Ok operandLst.[0])
     let rnVal = 
         let rn = operandLst.[1]
         match operandLst.Length with
         | 2 ->     
-            Ok (getRn rn None)
+            Ok (rn,None) |> Result.bind getRn
         | 3 -> 
             let op2 = operandLst.[2]
-            match op2.EndsWith("!"), op2.Contains("]"), op2.EndsWith("]"), op2.Contains("[") with
-            | true, true, false, false -> getRn rn (Some PreIndexed) |> Ok
-            | false, false, false, false -> getRn rn (Some PostIndexed) |> Ok
-            | false, true, true, false -> getRn rn (Some Normal) |> Ok
-            | _ , _, _ , _ -> Error "rnVal error" //"Incorrect way of setting offset"                  
+            match op2.EndsWith("]!"), op2.EndsWith("]"), op2.Contains("!"), op2.Contains("[") with
+            | true, false, true, false -> Ok (rn,(Some PreIndexed)) |> Result.bind getRn
+            | false, false, false, false -> Ok (rn,(Some PostIndexed)) |> Result.bind getRn
+            | false, true, false, false -> Ok (rn,(Some Normal)) |> Result.bind getRn
+            | _ -> Error "rnVal error" //"Incorrect way of setting offset"                  
         | _ -> Error "rnVal error"        
-    // result.bind this shit
     let offsetVal = 
         match operandLst.Length with
         | 2 -> Ok None
         | 3 ->
             let op2 = operandLst.[2]
-            let value = getOffsetVal op2
-            match op2.EndsWith("!"), op2.Contains("]"), op2.EndsWith("]"), op2.Contains("[") with
-            | true, true, false, false -> Some (value, PreIndexed) |> Ok
-            | false, false, false, false -> Some (value, PostIndexed) |> Ok
-            | false, true, true, false -> Some (value, Normal) |> Ok
-            | _ , _, _ , _ -> Error "offset error"//"Incorrect way of setting offset"                  
-        | _ -> Error "IDK" 
-
+            let value = Ok op2 |> Result.bind getOffsetVal 
+            match op2.EndsWith("]!"), op2.EndsWith("]"), op2.Contains("!"), value with
+            | true, false, true, Ok v -> Some (v, PreIndexed) |> Ok
+            | false, false, false, Ok v -> Some (v, PostIndexed) |> Ok
+            | false, true, false, Ok v -> Some (v, Normal) |> Ok
+            | _, _, _, Error e -> Error e
+            | _ -> Error "Formatting offset error"                
+        | _ -> Error "Too many operands" 
 
     let instrDummy = {
-        Instr=LDR; Type=None ; RContents=regNames.[operandLst.[0]] ; 
-        RAdd=regNames.[operandLst.[0]] ; Offset=None }       // RAdd is dummy 
+        Instr=typeLS; Type=resSuffix ; RContents=R1 ; 
+        RAdd=R1 ; Offset=None }       // RAdd is dummy 
 
-    match typeLS, resSuffix, rnVal, offsetVal with
-    | Ok ls, Ok suff, Ok regVal, Ok offsetVal -> Ok {instrDummy with Instr=ls ; Type=suff ; RAdd=regVal ; Offset=offsetVal}
-    | Error _,_,_,_ | _,Error _,_,_ | _,_,Error _,_ | _,_,_,Error _ -> Error "Incorrect formatting"
-
-// let makeLDR lineASM suffix = makeLS LDR lineASM suffix 
-// let makeSTR lineASM suffix = makeLS STR lineASM suffix 
-                  
+    match rContents, rnVal, offsetVal with
+    | Ok rc, Ok ra, Ok offsetVal -> Ok {instrDummy with RContents=rc ; RAdd=ra ; Offset=offsetVal}
+    | _ -> Error "Incorrect formatting"
+    //| Error _,_,_ | _,Error _,_ | _,_,Error _ -> Error "Incorrect formatting"
+        
 /// main function to parse a line of assembler
 /// ls contains the line input
 /// and other state needed to generate output
@@ -113,7 +123,6 @@ let parse (ls: LineData) : Result<Parse<InstrLine>,string> option =
             | Ok parsedInstr -> Ok { PInstr= parsedInstr ; PLabel = None ; PSize = 4u; PCond = pCond }
             | Error e -> Error e
         | _ -> Error "Wrong instruction class passed to the Memory module"        
-    
     Map.tryFind ls.OpCode opCodes
     |> Option.map parse'
 
