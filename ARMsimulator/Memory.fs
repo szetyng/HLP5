@@ -107,7 +107,65 @@ let parse (ls: LineData) : Result<Parse<InstrLine>,string> option =
     Map.tryFind ls.OpCode opCodes
     |> Option.map parse'
 
-
-
 /// Parse Active Pattern used by top-level code
 let (|IMatch|_|)  = parse
+//**********************************************Execution************************************************************//
+let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
+    let instrName = ins.Instr
+    let off = ins.Offset
+    let regAdd = ins.RAdd
+    let regCont = ins.RContents
+    let macMem = data.MM
+    let macRegs = data.Regs
+
+    let executeLDR d = 
+        // get address stored in the regSource
+        let add = macRegs.[regAdd]
+        // get address containing value we want to use to load to regDest (ie consider offset)
+        let memLoc = 
+            match off with
+            | None -> add
+            | Some (Literal v,Normal) -> add + v 
+            | Some (Literal v, PreIndexed) | Some (Literal v, PostIndexed) -> add + v
+            | Some (Reg r, _) -> failwithf "ya need to fix this"
+        // get value we want to load to regDest
+        let payload = 
+            match macMem.[WA memLoc] with
+            | DataLoc d -> d
+            | Code _ -> failwithf "Should not access this memory location"
+        // update registers with the payload (ie load the contents)
+        let newRegs = 
+            match off with
+            | None | Some (_, Normal) -> macRegs.Add (regCont,payload)
+            | Some(_, PreIndexed) | Some(_, PostIndexed) ->
+                macRegs.Add (regCont,payload)
+                |> Map.add regAdd memLoc // update offset if nec    
+        {d with Regs=newRegs}   
+
+    let executeSTR d =
+        // get address where we want to store contents to
+        let add = macRegs.[regAdd]        
+        let memLoc = 
+            match off with
+            | None -> add
+            | Some (Literal v, Normal) -> add + v
+            | Some (Literal v, PreIndexed) | Some (Literal v, PostIndexed) -> add + v
+            | Some (Reg r, _) -> failwithf "FIX THIS TOO"
+        let payload = macRegs.[regCont]
+        // updating memory
+        let newMem = macMem.Add ((WA add) , (DataLoc payload))
+        let newRegs = 
+            match off with 
+            | Some(_, PreIndexed) | Some(_, PostIndexed) -> macRegs.Add (regAdd, memLoc)
+            | _ -> macRegs
+        {d with Regs=newRegs ; MM=newMem}        
+
+
+
+                
+
+
+
+    match instrName with
+    | LDR -> executeLDR data
+    | STR -> executeSTR data
