@@ -7,6 +7,13 @@
 2. Missing brackets
 3. Currently not accepting lower case instructions
 
+## Memory locations:
+- Can only be accessed by LDR and STR instructions
+- LDR/STR: access the whole 32-bit memory (i.e. one word i.e. 4 bytes)
+- LDRB/STRB: access one byte of the memory location
+
+More details can be found in the [CT5 worksheet](https://intranet.ee.ic.ac.uk/t.clarke/arch/html16/CT5.html) and [memory lecture](https://intranet.ee.ic.ac.uk/t.clarke/arch/html16/lect16/memory.pdf), including information about symbols and labels.
+
 **For each instruction:**
 - Write initial tests for the code
 - Write code that passes these tests
