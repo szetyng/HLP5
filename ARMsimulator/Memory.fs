@@ -143,22 +143,21 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
     // LOAD it to R1
     // do some offset things
     let executeLDR memLoc d = 
-        // 
-        // add: address stored in the regSource
-        // memLoc: address containing value we want to use to load to regDest (ie consider offset)
-
-        // get value we want to load to regDest
         let payload = 
             match macMem.[WA memLoc] with
             | DataLoc d -> d
             | Code _ -> failwithf "Should not access this memory location"
-        // update registers with the payload (ie load the contents)
+        // load the contents into register
         let newRegs = 
             match off with
             | None | Some (_, Normal) -> macRegs.Add (regCont,payload)
-            | Some(_, PreIndexed) | Some(_, PostIndexed) ->
+            | Some (Literal v, PostIndexed) -> 
+                macRegs.Add (regCont, payload)
+                |> Map.add regAdd (memLoc + v)
+            | Some (_, PreIndexed) ->
                 macRegs.Add (regCont,payload)
-                |> Map.add regAdd memLoc // update offset if nec    
+                |> Map.add regAdd memLoc // update offset if nec   
+            | _ -> failwithf "uncovered yet"             
         {d with Regs=newRegs}   
     let executeSTR add memLoc d =
         // add: address where we want to store contents to
@@ -178,7 +177,8 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
         let effecAdd = 
             match off with
             | None -> add
-            | Some (Literal v, _) -> add + v
+            | Some (Literal v, Normal) | Some (Literal v, PreIndexed) -> add + v
+            | Some (Literal v, PostIndexed) -> add
             | Some (Reg _, _) -> add // FIX THIS 
         match typeLS with
         | LDR -> executeLDR effecAdd d
