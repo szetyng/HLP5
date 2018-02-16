@@ -161,7 +161,6 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
                 |> Map.add regAdd memLoc // update offset if nec    
         {d with Regs=newRegs}   
 
-<<<<<<< HEAD
     let executeSTR d =
         // get address where we want to store contents to
         let add = macRegs.[regAdd]        
@@ -189,10 +188,3 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
     match instrName with
     | LDR -> executeLDR data
     | STR -> executeSTR data
-=======
-/// Parse Active Pattern used by top-level code
-let (|IMatch|_|)  = parse
-
-
-// PIPELINE SHIT***********************************************************************************************
->>>>>>> bfeb273ca59449ccec45c01873d7f4f0d37d5aff
