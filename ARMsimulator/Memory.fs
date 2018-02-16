@@ -34,8 +34,6 @@ let memSpec = {
 /// map of all possible opcodes recognised
 let opCodes = opCodeExpand memSpec
     
-let makeLS typeLS ls suffix = 
-    let operandLst = (ls.Operands).Split(',') |> Array.toList
 // makeLS needs to return Result<InstrLine,string>
 let makeLS root ls suffix = 
     let typeLS =
