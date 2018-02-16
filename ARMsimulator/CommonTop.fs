@@ -5,6 +5,8 @@ module CommonTop
 
 open CommonLex
 open CommonData
+open DP
+open System.Security.Principal
 
 /// allows different modules to return different instruction types
 type Instr =
@@ -78,3 +80,32 @@ let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
     |> splitIntoWords
     |> Array.toList
     |> matchLine
+
+// let memDummyList = 
+//     [WA 0x100u, DataLoc 0x2000u ; WA 0x104u, DataLoc 0x202u]
+
+// let seepeeyouData = {
+//     Fl = {N=false ; C=false ; Z=false ; V=false} ;
+//     Regs = Map.ofList [ 
+//             R0,0u ; R1,3u ; R2,0x412u ; R3,0u ; R4,0u ; R5,0u ; R6,0u ; R7,0u;
+//             R8,0u ; R9,0u ; R10,0u ; R11,0u ; R12,0u ; R13,0u ; R14,0u ; R15,0u
+//         ] ;
+//     MM = Map.ofList memDummyList
+// }
+
+// let asmLine = "STR R10, [R5]"
+// let parsed = parseLine None (WA 0u) asmLine 
+
+// let executeAnyInstr (instr:Instr) (d:DataPath<Memory.InstrLine>) = //lazy way out
+//     let execute d =
+//         match instr with
+//         | IMEM ins -> Memory.executeMemInstr ins d
+//         | IDP _ -> failwithf "not yet implemented"
+//     execute d  
+
+// // extract Instr from Result<Parse<Instr>,errortype>
+// let exec parsedIns = 
+//     match parsedIns with
+//     | Ok ({PInstr=ins} as pr) -> executeAnyInstr ins seepeeyouData
+//     | _ -> failwithf "idk"
+
