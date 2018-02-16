@@ -1,7 +1,12 @@
 # Todo
+- Document STR/LDR executions properly
+- Fix executeAnyInstr in CommonTop 
+- Create unit tests for LDR/STR executions
+- Write proper error codes for LDR/STR executions
+- Start understanding VisualTesting
+
+## Delayed todo
 - Write specification for parsing and simulation codee
-- What is your code doing when offset value is a Register??
-- INCORRECT UNDERSTANDING OF POST-INDEXED
 
 ## Error when:  
 1. Absence of `#` in front of offset values (rmb to add functionality for hex and bin)

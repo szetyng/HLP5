@@ -137,7 +137,7 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
     let macMem = data.MM
     let macRegs = data.Regs
 
-    // e.g. LDR R1, [R2, #4]!
+    // pre-indexing e.g. LDR R1, [R2, #4]! 
     // get address stored in R2 and add the offset to it
     // get value/DataLoc stored in that address
     // LOAD it to R1
@@ -149,25 +149,30 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
             | Code _ -> failwithf "Should not access this memory location"
         // load the contents into register
         let newRegs = 
+            let loadedReg = macRegs.Add (regCont, payload)
             match off with
-            | None | Some (_, Normal) -> macRegs.Add (regCont,payload)
-            | Some (Literal v, PostIndexed) -> 
-                macRegs.Add (regCont, payload)
-                |> Map.add regAdd (memLoc + v)
-            | Some (_, PreIndexed) ->
-                macRegs.Add (regCont,payload)
-                |> Map.add regAdd memLoc // update offset if nec   
-            | _ -> failwithf "uncovered yet"             
+            | None | Some (_, Normal) -> loadedReg
+            | Some (vOrR, PostIndexed) ->
+                match vOrR with
+                | Literal v -> loadedReg.Add (regAdd, (memLoc + v))
+                | Reg r -> macRegs.[r] 
+                            |> fun v -> loadedReg.Add (regAdd, (memLoc + v))               
+            | Some (_, PreIndexed) -> loadedReg.Add (regAdd, memLoc) // update offset if nec           
         {d with Regs=newRegs}   
-    let executeSTR add memLoc d =
+    
+    let executeSTR memLoc d =
         // add: address where we want to store contents to
         let payload = macRegs.[regCont]
         // updating memory (i.e. storing the payload to the memory location)
-        let newMem = macMem.Add ((WA add) , (DataLoc payload))
+        let newMem = macMem.Add ((WA memLoc) , (DataLoc payload))
         let newRegs = 
             match off with 
-            | Some(_, PreIndexed) | Some(_, PostIndexed) -> macRegs.Add (regAdd, memLoc)
-            | _ -> macRegs
+            | None | Some (_, Normal) -> macRegs
+            | Some(_, PreIndexed) -> macRegs.Add (regAdd, memLoc)
+            | Some(vOrR, PostIndexed) -> 
+                match vOrR with
+                | Literal v -> macRegs.Add (regAdd, memLoc + v)
+                | Reg r -> macRegs.[r] |> fun v -> macRegs.Add (regAdd, memLoc + v)
         {d with Regs=newRegs ; MM=newMem}        
     
     let executeLS typeLS d = 
@@ -176,12 +181,13 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
         // address might have an offset, get the effective address
         let effecAdd = 
             match off with
-            | None -> add
-            | Some (Literal v, Normal) | Some (Literal v, PreIndexed) -> add + v
-            | Some (Literal v, PostIndexed) -> add
-            | Some (Reg _, _) -> add // FIX THIS 
+            | None | Some (_, PostIndexed) -> add
+            | Some (vOrR, Normal) | Some (vOrR, PreIndexed) -> 
+                match vOrR with
+                | Literal v -> add + v
+                | Reg r -> add + macRegs.[r]      
         match typeLS with
         | LDR -> executeLDR effecAdd d
-        | STR -> executeSTR add effecAdd d
+        | STR -> executeSTR effecAdd d
 
     executeLS instrName data
