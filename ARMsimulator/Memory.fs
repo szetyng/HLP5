@@ -137,7 +137,13 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
     let macMem = data.MM
     let macRegs = data.Regs
 
+    // e.g. LDR R1, [R2, #4]!
+    // get address stored in R2 and add the offset to it
+    // get value/DataLoc stored in that address
+    // LOAD it to R1
+    // do some offset things
     let executeLDR memLoc d = 
+        // 
         // add: address stored in the regSource
         // memLoc: address containing value we want to use to load to regDest (ie consider offset)
 
@@ -157,22 +163,25 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
     let executeSTR add memLoc d =
         // add: address where we want to store contents to
         let payload = macRegs.[regCont]
-        // updating memory
+        // updating memory (i.e. storing the payload to the memory location)
         let newMem = macMem.Add ((WA add) , (DataLoc payload))
         let newRegs = 
             match off with 
             | Some(_, PreIndexed) | Some(_, PostIndexed) -> macRegs.Add (regAdd, memLoc)
             | _ -> macRegs
         {d with Regs=newRegs ; MM=newMem}        
+    
     let executeLS typeLS d = 
+        // register stores address, get that address
         let add = macRegs.[regAdd]
-        let memLoc = 
+        // address might have an offset, get the effective address
+        let effecAdd = 
             match off with
             | None -> add
             | Some (Literal v, _) -> add + v
             | Some (Reg _, _) -> add // FIX THIS 
         match typeLS with
-        | LDR -> executeLDR memLoc d
-        | STR -> executeSTR add memLoc d
+        | LDR -> executeLDR effecAdd d
+        | STR -> executeSTR add effecAdd d
 
     executeLS instrName data

@@ -1,6 +1,7 @@
 # Todo
 - Write specification for parsing and simulation codee
 - What is your code doing when offset value is a Register??
+- INCORRECT UNDERSTANDING OF POST-INDEXED
 
 ## Error when:  
 1. Absence of `#` in front of offset values (rmb to add functionality for hex and bin)
