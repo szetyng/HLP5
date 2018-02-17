@@ -81,6 +81,8 @@ let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
     |> Array.toList
     |> matchLine
 
+
+
 // let memDummyList = 
 //     [WA 0x100u, DataLoc 0x2000u ; WA 0x104u, DataLoc 0x202u]
 
@@ -93,19 +95,21 @@ let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
 //     MM = Map.ofList memDummyList
 // }
 
-// let asmLine = "STR R10, [R5]"
-// let parsed = parseLine None (WA 0u) asmLine 
+//let asmLine = "STR R10, [R5]"
+//let parsed = parseLine None (WA 0u) asmLine 
 
-// let executeAnyInstr (instr:Instr) (d:DataPath<Memory.InstrLine>) = //lazy way out
-//     let execute d =
-//         match instr with
-//         | IMEM ins -> Memory.executeMemInstr ins d
-//         | IDP _ -> failwithf "not yet implemented"
-//     execute d  
+let executeAnyInstr (instr:Instr) (d:DataPath<Memory.InstrLine>) = //lazy way out
+    let execute d =
+        match instr with
+        | IMEM ins -> Memory.executeMemInstr ins d
+        | IDP _ -> failwithf "not yet implemented"
+    execute d  
 
-// // extract Instr from Result<Parse<Instr>,errortype>
-// let exec parsedIns = 
-//     match parsedIns with
-//     | Ok ({PInstr=ins} as pr) -> executeAnyInstr ins seepeeyouData
-//     | _ -> failwithf "idk"
+// extract Instr from Result<Parse<Instr>,errortype>
+let execute asmLine d = 
+    parseLine None (WA 0u) asmLine
+    |> fun p ->
+        match p with
+        | Ok ({PInstr=ins} as pr) -> executeAnyInstr ins d
+        | _ -> failwithf "Idk"
 

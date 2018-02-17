@@ -26,7 +26,7 @@ let seepeeyouData = {
 }
 
 let asmLine = "LDR R10, [R5]"
-let parsed = parseLine None (WA 0u) asmLine 
+//let parsed = parseLine None (WA 0u) asmLine 
 
 let executeAnyInstr (instr:Instr) (d:DataPath<Memory.InstrLine>) = //lazy way out
     let execute d =
@@ -41,6 +41,8 @@ let exec parsedIns =
     | Ok ({PInstr=ins} as pr) -> executeAnyInstr ins seepeeyouData
     | _ -> failwithf "idk"
 
-let x = parsed |> exec
+let x = 
+    parseLine None (WA 0u) asmLine  
+    |> exec
 let regmap = x.Regs
 regmap.[R10]

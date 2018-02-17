@@ -138,14 +138,17 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
     let macMem = data.MM
     let macRegs = data.Regs
 
-    let executeLDR memLoc d = 
+    let executeLDR isByte memLoc d = 
         let payload = 
             match macMem.[WA memLoc] with
             | DataLoc d -> d
             | Code _ -> failwithf "Should not access this memory location"
         // load the contents into register
         let newRegs = 
-            let loadedReg = macRegs.Add (regCont, payload)
+            let loadedReg = 
+                match isByte with
+                | None -> macRegs.Add (regCont, payload)
+                | Some B -> macRegs.Add (regCont, 0u) |> Map.add regCont payload
             match off with
             | None | Some (_, Normal) -> loadedReg
             | Some (vOrR, PostIndexed) ->
@@ -156,9 +159,12 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
             | Some (_, PreIndexed) -> loadedReg.Add (regAdd, memLoc) // update offset if nec           
         {d with Regs=newRegs}   
     
-    let executeSTR memLoc d =
+    let executeSTR isByte memLoc d =
         // add: address where we want to store contents to
-        let payload = macRegs.[regCont]
+        let payload = 
+            match isByte with
+            | None -> macRegs.[regCont]
+            | Some B -> macRegs.[regCont] % 256u
         // updating memory (i.e. storing the payload to the memory location)
         let newMem = macMem.Add ((WA memLoc) , (DataLoc payload))
         let newRegs = 
@@ -188,9 +194,9 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
             | None, false -> failwithf "Memory address accessed must be divisible by 4"   
             | Some B, _ -> effecAdd'                            
         match typeLS, isByte with
-        | LDR, None -> executeLDR effecAdd d
-        | STR, None -> executeSTR effecAdd d
-        | LDR, Some B -> executeLDRB effecAdd d
-        | STR, Some B -> executeSTRB effecAdd d
+        | LDR, None -> executeLDR isByte effecAdd d
+        | STR, None -> executeSTR isByte effecAdd d
+        | LDR, Some B -> executeLDR isByte effecAdd d
+        | STR, Some B -> executeSTR isByte effecAdd d
 
     executeLS instrName isByte data
