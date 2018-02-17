@@ -6,11 +6,22 @@ Note: Exteremely repetitive, for own use when writing code to avoid confusion.
 
 ### Summary
 |Code                               |Offset type        |Notes     |
-|-----------------------------------|-------------------|----------|
-|`LDR RDest, [RSrc]`                |None               |Get address stored in `RSrc`, get value from that address, load value into `RDest` |
-|`LDR RDest, [RSrc, #4]`            |Normal             |Get effective address by adding offset to address in `RSrc`    |
-|`LDR RDest, [Rsrc, ROffset]!`      |Pre-indexed        |Get effective address by adding offset to address in `RSrc`, and also update `RSrc` to this new effective address  |
-|`LDR RDest, [Rsrc], ROffset!`      |Post-indexed       |Update address in `RSrc` by adding offset value to it, after loading value from original `RSrc` address    |
+|-----------------------------------|:-----------------:|----------|
+|`LDR RDest, [RSrc]`                |None               |Get address stored in `RSrc`, get value from that address, **load** value into `RDest` |
+|`LDR RDest, [RSrc, #4]`            |Normal             |Get _effective address_ by adding offset to address in `RSrc`    |
+|`LDR RDest, [Rsrc, ROffset]!`      |Pre-indexed        |Get _effective address_ by adding offset to address in `RSrc`, and also _update_ `RSrc` to this new effective address  |
+|`LDR RDest, [Rsrc], ROffset!`      |Post-indexed       |_Update_ address in `RSrc` by adding offset value to it, after loading value from original `RSrc` address    |
+|`STR RSrc, [RDest]`                |None               |Get address stored in `RDest`, get value from `RSrc`, **store** value into that address    |
+|`STR RSrc, [RDest, ROffset]`       |Normal             |Get _effective address_ by adding offset to address in `RDest`   |
+|`STR RSrc, [RDest, #4]!`           |Pre-indexed        |Get _effective address_ by adding offset to address in `RDest`, and also _update_ `RDest` to this new effective address |
+|`STR RSrc, [RDest], #4`            |Post-indexed       |_Update address_ in `RDest` by adding offset value to it, after storing value to original `RDest` address    |
+Note: All memory addresses being accessed must be divisible by 4
+
+|Code                               |Offset type        |Notes     |
+|-----------------------------------|:-----------------:|----------|
+|`LDRB RDest, [RSrc{, ROffset}]`    |All                |Get address/effective address stored in `RSrc`, get value from that address. **Set `RDest` to zero**, then **load** value into `RDest`    |
+|`STRB RSrc, [RDest{, #2}]`         |All                |Get address/effective address stored in `RDest`. Get **LS 8-bits of the value stored in `RSrc`** (modul0 256), then **store** that value into the address/effective address    |
+
 
 ### LDR
 #### No offset
