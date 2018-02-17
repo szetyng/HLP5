@@ -1,5 +1,7 @@
 # Todo
 - Document STR/LDR executions properly
+- Implement execution for LDRB and STRB
+- Must we restrict offset values to multiples of 4?
 - Fix executeAnyInstr in CommonTop 
 - Create unit tests for LDR/STR executions
 - Write proper error codes for LDR/STR executions

@@ -183,9 +183,13 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
             match off with
             | None | Some (_, PostIndexed) -> add
             | Some (vOrR, Normal) | Some (vOrR, PreIndexed) -> 
-                match vOrR with
-                | Literal v -> add + v
-                | Reg r -> add + macRegs.[r]      
+                let va = 
+                    match vOrR with
+                    | Literal v -> v
+                    | Reg r -> macRegs.[r]   
+                match (va % 4u = 0u) with 
+                | true -> add + va
+                | false -> failwithf "offset not divisible by 4"
         match typeLS with
         | LDR -> executeLDR effecAdd d
         | STR -> executeSTR effecAdd d
