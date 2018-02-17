@@ -101,7 +101,7 @@ let makeExecLDRTestList name listIOpairs =
 let t2 = 
     makeExecLDRTestList "LDR and STR execution tests"
         [
-            "LDR R0, [R1]", dataDummy
+            "LDR R0, [R1]", Ok dataDummy
         ]    
 
 
