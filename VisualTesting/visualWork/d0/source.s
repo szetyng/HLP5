@@ -1,0 +1,55 @@
+MOV R0, #0xFFFFFFFF
+ADDS R0, R0, R0
+MOVS R0, #0
+MOV R0, #0xfe
+ADD R0, R0, #0xff00
+ADD R0, R0, #0xff0000
+ADD R0, R0, #0xff000000
+MOV R1, #0xfe
+ADD R1, R1, #0xff00
+ADD R1, R1, #0xff0000
+ADD R1, R1, #0xff000000
+MOV R2, #0x1
+MOV R3, #0x1
+MOV R4, #0xfe
+ADD R4, R4, #0xff00
+ADD R4, R4, #0xff0000
+ADD R4, R4, #0xff000000
+MOV R5, #0xfe
+ADD R5, R5, #0xff00
+ADD R5, R5, #0xff0000
+ADD R5, R5, #0xff000000
+MOV R6, #0xff
+ADD R6, R6, #0xff00
+ADD R6, R6, #0xff0000
+ADD R6, R6, #0xff000000
+MOV R7, #0x2
+MOV R8, #0xff
+ADD R8, R8, #0xff00
+ADD R8, R8, #0xff0000
+ADD R8, R8, #0xff000000
+MOV R9, #0xfe
+ADD R9, R9, #0xff00
+ADD R9, R9, #0xff0000
+ADD R9, R9, #0xff000000
+MOV R10, #0xff
+ADD R10, R10, #0xff00
+ADD R10, R10, #0xff0000
+ADD R10, R10, #0xff000000
+MOV R11, #0x1
+MOV R12, #0x0
+MOV R13, #0xff
+ADD R13, R13, #0xff00
+ADD R13, R13, #0xff0000
+ADD R13, R13, #0xff000000
+MOV R14, #0x0
+
+
+
+MOV R13, #0x1000
+LDMIA R13, {R0-R12}
+MOV R0, #0
+              ADDMI R0, R0, #8
+              ADDEQ R0, R0, #4
+              ADDCS R0, R0, #2
+              ADDVS R0, R0, #1

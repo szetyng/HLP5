@@ -1,0 +1,1043 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<VisUAL xmlns="http://bitbucket.org/salmanarif/visual">
+    <line id="1">
+        <code>MOV R0, #0xFFFFFFFF</code>
+        <register name="R0">0xFFFFFFFF</register>
+        <register name="R1">0x0</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x8</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="2">
+        <code>ADDS R0, R0, R0</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0x0</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0xC</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="3">
+        <code>MOVS R0, #0</code>
+        <register name="R0">0x0</register>
+        <register name="R1">0x0</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x10</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="4">
+        <code>MOV R0, #0xfe</code>
+        <register name="R0">0xFE</register>
+        <register name="R1">0x0</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x14</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="5">
+        <code>ADD R0, R0, #0xff00</code>
+        <register name="R0">0xFFFE</register>
+        <register name="R1">0x0</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x18</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="6">
+        <code>ADD R0, R0, #0xff0000</code>
+        <register name="R0">0xFFFFFE</register>
+        <register name="R1">0x0</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x1C</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="7">
+        <code>ADD R0, R0, #0xff000000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0x0</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x20</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="8">
+        <code>MOV R1, #0xfe</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFE</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x24</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="9">
+        <code>ADD R1, R1, #0xff00</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFE</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x28</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="10">
+        <code>ADD R1, R1, #0xff0000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFE</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x2C</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="11">
+        <code>ADD R1, R1, #0xff000000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x30</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="12">
+        <code>MOV R2, #0x1</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x34</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="13">
+        <code>MOV R3, #0x1</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x38</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="14">
+        <code>MOV R4, #0xfe</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFE</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x3C</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="15">
+        <code>ADD R4, R4, #0xff00</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFE</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x40</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="16">
+        <code>ADD R4, R4, #0xff0000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFE</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x44</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="17">
+        <code>ADD R4, R4, #0xff000000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x48</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="18">
+        <code>MOV R5, #0xfe</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFE</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x4C</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="19">
+        <code>ADD R5, R5, #0xff00</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFE</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x50</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="20">
+        <code>ADD R5, R5, #0xff0000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFE</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x54</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="21">
+        <code>ADD R5, R5, #0xff000000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x58</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="22">
+        <code>MOV R6, #0xff</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFF</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x5C</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="23">
+        <code>ADD R6, R6, #0xff00</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFF</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x60</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="24">
+        <code>ADD R6, R6, #0xff0000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFF</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x64</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="25">
+        <code>ADD R6, R6, #0xff000000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x68</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="26">
+        <code>MOV R7, #0x2</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x6C</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="27">
+        <code>MOV R8, #0xff</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFF</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x70</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="28">
+        <code>ADD R8, R8, #0xff00</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFF</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x74</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="29">
+        <code>ADD R8, R8, #0xff0000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFF</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x78</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="30">
+        <code>ADD R8, R8, #0xff000000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x7C</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="31">
+        <code>MOV R9, #0xfe</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFE</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x80</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="32">
+        <code>ADD R9, R9, #0xff00</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFFFE</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x84</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="33">
+        <code>ADD R9, R9, #0xff0000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFFFFFE</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x88</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="34">
+        <code>ADD R9, R9, #0xff000000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFFFFFFFE</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x8C</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="35">
+        <code>MOV R10, #0xff</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFFFFFFFE</register>
+        <register name="R10">0xFF</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x90</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="36">
+        <code>ADD R10, R10, #0xff00</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFFFFFFFE</register>
+        <register name="R10">0xFFFF</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x94</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="37">
+        <code>ADD R10, R10, #0xff0000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFFFFFFFE</register>
+        <register name="R10">0xFFFFFF</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x98</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="38">
+        <code>ADD R10, R10, #0xff000000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFFFFFFFE</register>
+        <register name="R10">0xFFFFFFFF</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0x9C</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="39">
+        <code>MOV R11, #0x1</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFFFFFFFE</register>
+        <register name="R10">0xFFFFFFFF</register>
+        <register name="R11">0x1</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0xA0</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="40">
+        <code>MOV R12, #0x0</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFFFFFFFE</register>
+        <register name="R10">0xFFFFFFFF</register>
+        <register name="R11">0x1</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF000000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0xA4</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="41">
+        <code>MOV R13, #0xff</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFFFFFFFE</register>
+        <register name="R10">0xFFFFFFFF</register>
+        <register name="R11">0x1</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFF</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0xA8</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="42">
+        <code>ADD R13, R13, #0xff00</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFFFFFFFE</register>
+        <register name="R10">0xFFFFFFFF</register>
+        <register name="R11">0x1</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFFFF</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0xAC</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="43">
+        <code>ADD R13, R13, #0xff0000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFFFFFFFE</register>
+        <register name="R10">0xFFFFFFFF</register>
+        <register name="R11">0x1</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFFFFFF</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0xB0</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="44">
+        <code>ADD R13, R13, #0xff000000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFFFFFFFE</register>
+        <register name="R10">0xFFFFFFFF</register>
+        <register name="R11">0x1</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFFFFFFFF</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0xB4</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="45">
+        <code>MOV R14, #0x0</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFFFFFFFE</register>
+        <register name="R10">0xFFFFFFFF</register>
+        <register name="R11">0x1</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0xFFFFFFFF</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0xB8</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="49">
+        <code>MOV R13, #0x1000</code>
+        <register name="R0">0xFFFFFFFE</register>
+        <register name="R1">0xFFFFFFFE</register>
+        <register name="R2">0x1</register>
+        <register name="R3">0x1</register>
+        <register name="R4">0xFFFFFFFE</register>
+        <register name="R5">0xFFFFFFFE</register>
+        <register name="R6">0xFFFFFFFF</register>
+        <register name="R7">0x2</register>
+        <register name="R8">0xFFFFFFFF</register>
+        <register name="R9">0xFFFFFFFE</register>
+        <register name="R10">0xFFFFFFFF</register>
+        <register name="R11">0x1</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0x1000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0xBC</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="50">
+        <code>LDMIA R13, {R0-R12}</code>
+        <register name="R0">0x0</register>
+        <register name="R1">0x0</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0x1000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0xC0</register>
+        <cycles>15</cycles>
+    </line>
+    <line id="51">
+        <code>MOV R0, #0</code>
+        <register name="R0">0x0</register>
+        <register name="R1">0x0</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0x1000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0xC4</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="52">
+        <code>ADDMI R0, R0, #8</code>
+        <register name="R0">0x0</register>
+        <register name="R1">0x0</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0x1000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0xC8</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="53">
+        <code>ADDEQ R0, R0, #4</code>
+        <register name="R0">0x4</register>
+        <register name="R1">0x0</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0x1000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0xCC</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="54">
+        <code>ADDCS R0, R0, #2</code>
+        <register name="R0">0x6</register>
+        <register name="R1">0x0</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0x1000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0xD0</register>
+        <cycles>1</cycles>
+    </line>
+    <line id="55">
+        <code>ADDVS R0, R0, #1</code>
+        <register name="R0">0x6</register>
+        <register name="R1">0x0</register>
+        <register name="R2">0x0</register>
+        <register name="R3">0x0</register>
+        <register name="R4">0x0</register>
+        <register name="R5">0x0</register>
+        <register name="R6">0x0</register>
+        <register name="R7">0x0</register>
+        <register name="R8">0x0</register>
+        <register name="R9">0x0</register>
+        <register name="R10">0x0</register>
+        <register name="R11">0x0</register>
+        <register name="R12">0x0</register>
+        <register name="R13">0x1000</register>
+        <register name="R14">0x0</register>
+        <register name="R15">0xD4</register>
+        <cycles>1</cycles>
+    </line>
+</VisUAL>

@@ -1,1 +1,9 @@
 C:\src17\VisualTesting\VisualTest\obj\Debug\netcoreapp2.0\VisualTest.fsprojResolveAssemblyReference.cache
+C:\Users\Sze Tyng\AppData\Roaming\Code\User\HLP5\VisualTesting\VisualTest\bin\Debug\netcoreapp2.0\VisualTest.deps.json
+C:\Users\Sze Tyng\AppData\Roaming\Code\User\HLP5\VisualTesting\VisualTest\bin\Debug\netcoreapp2.0\VisualTest.runtimeconfig.json
+C:\Users\Sze Tyng\AppData\Roaming\Code\User\HLP5\VisualTesting\VisualTest\bin\Debug\netcoreapp2.0\VisualTest.runtimeconfig.dev.json
+C:\Users\Sze Tyng\AppData\Roaming\Code\User\HLP5\VisualTesting\VisualTest\bin\Debug\netcoreapp2.0\VisualTest.dll
+C:\Users\Sze Tyng\AppData\Roaming\Code\User\HLP5\VisualTesting\VisualTest\bin\Debug\netcoreapp2.0\VisualTest.pdb
+C:\Users\Sze Tyng\AppData\Roaming\Code\User\HLP5\VisualTesting\VisualTest\obj\Debug\netcoreapp2.0\VisualTest.fsprojResolveAssemblyReference.cache
+C:\Users\Sze Tyng\AppData\Roaming\Code\User\HLP5\VisualTesting\VisualTest\obj\Debug\netcoreapp2.0\VisualTest.dll
+C:\Users\Sze Tyng\AppData\Roaming\Code\User\HLP5\VisualTesting\VisualTest\obj\Debug\netcoreapp2.0\VisualTest.pdb

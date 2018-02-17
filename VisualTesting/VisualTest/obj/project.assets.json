@@ -58,7 +58,7 @@
           "lib/netstandard1.6/FsCheck.dll": {}
         }
       },
-      "FSharp.Core/4.2.3": {
+      "FSharp.Core/4.1.18": {
         "type": "package",
         "dependencies": {
           "System.Collections": "4.0.11",
@@ -90,6 +90,16 @@
         },
         "runtime": {
           "lib/netstandard1.6/FSharp.Core.dll": {}
+        },
+        "runtimeTargets": {
+          "runtimes/any/native/FSharp.Core.optdata": {
+            "assetType": "native",
+            "rid": "any"
+          },
+          "runtimes/any/native/FSharp.Core.sigdata": {
+            "assetType": "native",
+            "rid": "any"
+          }
         }
       },
       "Microsoft.NETCore.App/2.0.0": {
@@ -1485,13 +1495,21 @@
         "lib/portable-net45+netcore45/FsCheck.pdb"
       ]
     },
-    "FSharp.Core/4.2.3": {
-      "sha512": "PthzJd0cY9L7+mPHoMB0B9Z9moR4oO1rU5RDrVW44cfMm0R9AYFf+F3BsuTvP9clr9w/Wa0wbSfEwbJV8sV80A==",
+    "FSharp.Core/4.1.18": {
+      "sha512": "LxCp5pMcNbqoIWAaE76/rqJp/2/O6rrmIvnWXoxx5NDiIOV7X4NcLYC1RdImReroq2m/AUAa1RrvraBEWrMOmQ==",
       "type": "package",
-      "path": "fsharp.core/4.2.3",
+      "path": "fsharp.core/4.1.18",
       "files": [
-        "fsharp.core.4.2.3.nupkg.sha512",
+        "fsharp.core.4.1.18.nupkg.sha512",
         "fsharp.core.nuspec",
+        "lib/net20/FSharp.Core.dll",
+        "lib/net20/FSharp.Core.optdata",
+        "lib/net20/FSharp.Core.sigdata",
+        "lib/net20/FSharp.Core.xml",
+        "lib/net40/FSharp.Core.dll",
+        "lib/net40/FSharp.Core.optdata",
+        "lib/net40/FSharp.Core.sigdata",
+        "lib/net40/FSharp.Core.xml",
         "lib/net45/FSharp.Core.dll",
         "lib/net45/FSharp.Core.optdata",
         "lib/net45/FSharp.Core.sigdata",
@@ -1499,7 +1517,33 @@
         "lib/netstandard1.6/FSharp.Core.dll",
         "lib/netstandard1.6/FSharp.Core.optdata",
         "lib/netstandard1.6/FSharp.Core.sigdata",
-        "lib/netstandard1.6/FSharp.Core.xml"
+        "lib/netstandard1.6/FSharp.Core.xml",
+        "lib/portable-net45+monoandroid10+monotouch10+xamarinios10/FSharp.Core.dll",
+        "lib/portable-net45+monoandroid10+monotouch10+xamarinios10/FSharp.Core.optdata",
+        "lib/portable-net45+monoandroid10+monotouch10+xamarinios10/FSharp.Core.sigdata",
+        "lib/portable-net45+monoandroid10+monotouch10+xamarinios10/FSharp.Core.xml",
+        "lib/portable-net45+netcore45+wp8/FSharp.Core.dll",
+        "lib/portable-net45+netcore45+wp8/FSharp.Core.optdata",
+        "lib/portable-net45+netcore45+wp8/FSharp.Core.sigdata",
+        "lib/portable-net45+netcore45+wp8/FSharp.Core.xml",
+        "lib/portable-net45+netcore45+wpa81+wp8/FSharp.Core.dll",
+        "lib/portable-net45+netcore45+wpa81+wp8/FSharp.Core.optdata",
+        "lib/portable-net45+netcore45+wpa81+wp8/FSharp.Core.sigdata",
+        "lib/portable-net45+netcore45+wpa81+wp8/FSharp.Core.xml",
+        "lib/portable-net45+netcore45/FSharp.Core.dll",
+        "lib/portable-net45+netcore45/FSharp.Core.optdata",
+        "lib/portable-net45+netcore45/FSharp.Core.sigdata",
+        "lib/portable-net45+netcore45/FSharp.Core.xml",
+        "lib/portable-net45+sl5+netcore45/FSharp.Core.dll",
+        "lib/portable-net45+sl5+netcore45/FSharp.Core.optdata",
+        "lib/portable-net45+sl5+netcore45/FSharp.Core.sigdata",
+        "lib/portable-net45+sl5+netcore45/FSharp.Core.xml",
+        "lib/xamarinmac20/FSharp.Core.dll",
+        "lib/xamarinmac20/FSharp.Core.optdata",
+        "lib/xamarinmac20/FSharp.Core.sigdata",
+        "lib/xamarinmac20/FSharp.Core.xml",
+        "runtimes/any/native/FSharp.Core.optdata",
+        "runtimes/any/native/FSharp.Core.sigdata"
       ]
     },
     "Microsoft.NETCore.App/2.0.0": {
@@ -1822,10 +1866,10 @@
       "path": "microsoft.netcore.platforms/2.0.0",
       "files": [
         "LICENSE.TXT",
-        "Microsoft.NETCore.Platforms.2.0.0.nupkg.sha512",
-        "Microsoft.NETCore.Platforms.nuspec",
         "THIRD-PARTY-NOTICES.TXT",
         "lib/netstandard1.0/_._",
+        "microsoft.netcore.platforms.2.0.0.nupkg.sha512",
+        "microsoft.netcore.platforms.nuspec",
         "runtime.json",
         "useSharedDesignerContext.txt",
         "version.txt"
@@ -5089,35 +5133,28 @@
     ".NETCoreApp,Version=v2.0": [
       "Expecto >= 5.1.2",
       "Expecto.FsCheck >= 5.1.2",
-      "FSharp.Core >= 4.2.*",
       "Microsoft.NETCore.App >= 2.0.0"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Thomas\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackagesFallback\\": {},
+    "C:\\Users\\Sze Tyng\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
-    "restoreSettings": {
-      "hideWarningsAndErrors": true
-    },
     "restore": {
-      "projectUniqueName": "C:\\src17\\VisualTesting\\VisualTest\\VisualTest.fsproj",
+      "projectUniqueName": "C:\\Users\\Sze Tyng\\AppData\\Roaming\\Code\\User\\HLP5\\VisualTesting\\VisualTest\\VisualTest.fsproj",
       "projectName": "VisualTest",
-      "projectPath": "C:\\src17\\VisualTesting\\VisualTest\\VisualTest.fsproj",
-      "packagesPath": "C:\\Users\\Thomas\\.nuget\\packages\\",
-      "outputPath": "C:\\src17\\VisualTesting\\VisualTest\\obj\\",
+      "projectPath": "C:\\Users\\Sze Tyng\\AppData\\Roaming\\Code\\User\\HLP5\\VisualTesting\\VisualTest\\VisualTest.fsproj",
+      "packagesPath": "C:\\Users\\Sze Tyng\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Sze Tyng\\AppData\\Roaming\\Code\\User\\HLP5\\VisualTesting\\VisualTest\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackagesFallback\\",
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\Thomas\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.Fallback.config"
+        "C:\\Users\\Sze Tyng\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp2.0"
@@ -5130,6 +5167,11 @@
         "netcoreapp2.0": {
           "projectReferences": {}
         }
+      },
+      "warningProperties": {
+        "noWarn": [
+          "NU1603"
+        ]
       }
     },
     "frameworks": {
@@ -5142,10 +5184,6 @@
           "Expecto.FsCheck": {
             "target": "Package",
             "version": "[5.1.2, )"
-          },
-          "FSharp.Core": {
-            "target": "Package",
-            "version": "[4.2.*, )"
           },
           "Microsoft.NETCore.App": {
             "target": "Package",
