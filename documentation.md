@@ -2,16 +2,26 @@
 Parsing and executing `LDR{B}` and `STR{B}` instructions.
 
 ## Specifications 
+Note: Exteremely repetitive, for own use when writing code to avoid confusion. 
+
+### Summary
+|Code                               |Offset type        |Notes     |
+|-----------------------------------|-------------------|----------|
+|`LDR RDest, [RSrc]`                |None               |Get address stored in `RSrc`, get value from that address, load value into `RDest` |
+|`LDR RDest, [RSrc, #4]`            |Normal             |Get effective address by adding offset to address in `RSrc`    |
+|`LDR RDest, [Rsrc, ROffset]!`      |Pre-indexed        |Get effective address by adding offset to address in `RSrc`, and also update `RSrc` to this new effective address  |
+|`LDR RDest, [Rsrc], ROffset!`      |Post-indexed       |Update address in `RSrc` by adding offset value to it, after loading value from original `RSrc` address    |
+
 ### LDR
 #### No offset
-`LDR RDest, [RSrc]`
+`LDR RDest, [RSrc]`  
 e.g. `LDR R0, [R1]`
 1. Get address stored in R1
 2. Get value stored in that address -- _must be divisible by 4_
 3. **Load** that value into R0
 
 #### Normal offset
-`LDR RDest, [RSrc, #4]` or `LDR RDest, [Rsrc, ROffset]`
+`LDR RDest, [RSrc, #4]` or `LDR RDest, [Rsrc, ROffset]`  
 e.g. `LDR R0, [R1, #4]` or `LDR R0, [R1, R2]`
 1. Get address stored in R1
 2. Get _effective address_ by adding offset, which is either a literal or a value stored in register R2 -- _must be divisible by 4_; _this doesn't change the value in R1_
@@ -19,7 +29,7 @@ e.g. `LDR R0, [R1, #4]` or `LDR R0, [R1, R2]`
 4. **Load** that value into R0
 
 #### Pre-indexing offset
-`LDR RDest, [RSrc, #4]!` or `LDR RDest, [Rsrc, ROffset]!`
+`LDR RDest, [RSrc, #4]!` or `LDR RDest, [Rsrc, ROffset]!`  
 e.g. `LDR R0, [R1, #4]!` or `LDR R0, [R1, R2]!`
 1. Get address stored in R1
 2. Get _effective address_ by adding offset, which is either a literal or a value stored in register R2 -- _must be divisible by 4_; _this updates the value in R1 as well_
@@ -27,7 +37,7 @@ e.g. `LDR R0, [R1, #4]!` or `LDR R0, [R1, R2]!`
 4. **Load** that value into R0 -- _remember that R1 has been updated, too_
 
 #### Post-indexing offset
-`LDR RDest, [RSrc], #4` or `LDR RDest, [Rsrc], ROffset!`
+`LDR RDest, [RSrc], #4` or `LDR RDest, [Rsrc], ROffset!`  
 e.g. `LDR R0, [R1], #4` or `LDR R0, [R1], R2`
 1. Get address stored in R1
 2. Get value stored in that address -- _must be divisible by 4_
@@ -36,14 +46,14 @@ e.g. `LDR R0, [R1], #4` or `LDR R0, [R1], R2`
 
 ### LDRB
 #### No offset
-`LDRB RDest, [RSrc]`
+`LDRB RDest, [RSrc]`  
 e.g. `LDRB R0, [R1]`
 1. Get address stored in R1 -- _address does not have to be divisible by 4_
 2. Get value stored in that address
 3. Set R0 to zero, then **load** value into R0 -- because value from the address is only 1-byte/8-bits longs, the MS bits are to be set to zero
 
 #### Normal offset
-`LDRB RDest, [RSrc, #4]` or `LDRB RDest, [Rsrc, ROffset]`
+`LDRB RDest, [RSrc, #4]` or `LDRB RDest, [Rsrc, ROffset]`  
 e.g. `LDRB R0, [R1, #4]` or `LDRB R0, [R1, R2]`
 1. Get address stored in R1
 2. Get _effective address_ by adding offset, which is either a literal or a value stored in register R2 -- _this doesn't change the value in R1_
@@ -51,7 +61,7 @@ e.g. `LDRB R0, [R1, #4]` or `LDRB R0, [R1, R2]`
 4. Set R0 to zero, then **load** value into R0
 
 #### Pre-indexing offset
-`LDRB RDest, [RSrc, #4]!` or `LDRB RDest, [Rsrc, ROffset]!`
+`LDRB RDest, [RSrc, #4]!` or `LDRB RDest, [Rsrc, ROffset]!`  
 e.g. `LDRB R0, [R1, #4]!` or `LDRB R0, [R1, R2]!`
 1. Get address stored in R1
 2. Get _effective address_ by adding offset, which is either a literal or a value stored in register R2 -- _this updates the value in R1 as well_
@@ -59,7 +69,7 @@ e.g. `LDRB R0, [R1, #4]!` or `LDRB R0, [R1, R2]!`
 4. Set R0 to zero, then **load** value into R0 -- _remember that R1 has been updated, too_
 
 #### Post-indexing offset
-`LDRB RDest, [RSrc], #4` or `LDRB RDest, [Rsrc], ROffset!`
+`LDRB RDest, [RSrc], #4` or `LDRB RDest, [Rsrc], ROffset!`  
 e.g. `LDRB R0, [R1], #4` or `LDRB R0, [R1], R2`
 1. Get address stored in R1
 2. Get value stored in that address 
@@ -67,15 +77,15 @@ e.g. `LDRB R0, [R1], #4` or `LDRB R0, [R1], R2`
 4. _Update value in R1_ by adding offset, which is either a literal or a value stored in register R2
 
 ### STR
-#### No offset
-`STR RSrc, [RDest]`
+#### No offset  
+`STR RSrc, [RDest]`  
 e.g. `STR R0, [R1]`
 1. Get address stored in R1 --_must be divisible by 4_
 2. Get value stored in R0
 3. **Store** that value into the address found in step 1
 
 #### Normal offset
-`STR RSrc, [RDest, #4]` or `STR RSrc, [RDest, ROffset]`
+`STR RSrc, [RDest, #4]` or `STR RSrc, [RDest, ROffset]`  
 e.g. `STR R0, [R1, #4]` or `STR R0, [R1, R2]`
 1. Get address stored in R1
 2. Get _effective address_ by adding offset, which is either a literal or a value stored in register R2 -- _must be divisible by 4_; _this doesn't change the value in R1_
@@ -83,7 +93,7 @@ e.g. `STR R0, [R1, #4]` or `STR R0, [R1, R2]`
 4. **Store** that value into the effective address
 
 #### Pre-indexing offset
-`STR RSrc, [RDest, #4]!` or `STR RSrc, [RDest, ROffset]!`
+`STR RSrc, [RDest, #4]!` or `STR RSrc, [RDest, ROffset]!`  
 e.g. `STR R0, [R1, #4]!` or `STR R0, [R1, R2]!`
 1. Get address stored in R1
 2. Get _effective address_ by adding offset, which is either a literal or a value stored in register R2 -- _must be divisible by 4_; _this updates the value in R1 as well_
@@ -91,7 +101,7 @@ e.g. `STR R0, [R1, #4]!` or `STR R0, [R1, R2]!`
 4. **Store** that value into the effective address -- _remember that R1 has been updated, too_
 
 #### Post-indexing offset
-`STR RSrc, [RDest], #4` or `STR RSrc, [RDest], ROffset!`
+`STR RSrc, [RDest], #4` or `STR RSrc, [RDest], ROffset!`  
 e.g. `STR R0, [R1], #4` or `STR R0, [R1], R2`
 1. Get address stored in R1 -- _must be divisible by 4_
 2. Get value stored in R0
@@ -100,14 +110,14 @@ e.g. `STR R0, [R1], #4` or `STR R0, [R1], R2`
 
 ### STRB
 #### No offset
-`STRB RSrc, [RDest]`
+`STRB RSrc, [RDest]`  
 e.g. `STRB R0, [R1]`
 1. Get address stored in R1 
 2. Get only the LS 8 bits of the value stored in R0, by taking modulo 256
 3. **Store** that value into the address found in step 1
 
 #### Normal offset
-`STRB RSrc, [RDest, #4]` or `STRB RSrc, [RDest, ROffset]`
+`STRB RSrc, [RDest, #4]` or `STRB RSrc, [RDest, ROffset]`  
 e.g. `STRB R0, [R1, #4]` or `STRB R0, [R1, R2]`
 1. Get address stored in R1
 2. Get _effective address_ by adding offset, which is either a literal or a value stored in register R2 -- _this doesn't change the value in R1_
@@ -115,7 +125,7 @@ e.g. `STRB R0, [R1, #4]` or `STRB R0, [R1, R2]`
 4. **Store** that value into the effective address
 
 #### Pre-indexing offset
-`STRB RSrc, [RDest, #4]!` or `STRB RSrc, [RDest, ROffset]!`
+`STRB RSrc, [RDest, #4]!` or `STRB RSrc, [RDest, ROffset]!`  
 e.g. `STRB R0, [R1, #4]!` or `STRB R0, [R1, R2]!`
 1. Get address stored in R1
 2. Get _effective address_ by adding offset, which is either a literal or a value stored in register R2 -- _this updates the value in R1 as well_
@@ -123,7 +133,7 @@ e.g. `STRB R0, [R1, #4]!` or `STRB R0, [R1, R2]!`
 4. **Store** that value into the effective address -- _remember that R1 has been updated, too_
 
 #### Post-indexing offset
-`STRB RSrc, [RDest], #4` or `STRB RSrc, [RDest], ROffset!`
+`STRB RSrc, [RDest], #4` or `STRB RSrc, [RDest], ROffset!`  
 e.g. `STRB R0, [R1], #4` or `STRB R0, [R1], R2`
 1. Get address stored in R1 
 2. Get only the LS 8 bits of the value stored in R0, by taking modulo 256
