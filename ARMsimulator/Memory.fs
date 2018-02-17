@@ -131,17 +131,13 @@ let (|IMatch|_|)  = parse
 //**********************************************Execution************************************************************//
 let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
     let instrName = ins.Instr
+    let isByte = ins.Type
     let off = ins.Offset
     let regAdd = ins.RAdd
     let regCont = ins.RContents
     let macMem = data.MM
     let macRegs = data.Regs
 
-    // pre-indexing e.g. LDR R1, [R2, #4]! 
-    // get address stored in R2 and add the offset to it
-    // get value/DataLoc stored in that address
-    // LOAD it to R1
-    // do some offset things
     let executeLDR memLoc d = 
         let payload = 
             match macMem.[WA memLoc] with
@@ -173,25 +169,28 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
                 match vOrR with
                 | Literal v -> macRegs.Add (regAdd, memLoc + v)
                 | Reg r -> macRegs.[r] |> fun v -> macRegs.Add (regAdd, memLoc + v)
-        {d with Regs=newRegs ; MM=newMem}        
-    
-    let executeLS typeLS d = 
+        {d with Regs=newRegs ; MM=newMem}   
+
+    let executeLS typeLS isByte d = 
         // register stores address, get that address
         let add = macRegs.[regAdd]
         // address might have an offset, get the effective address
         let effecAdd = 
-            match off with
-            | None | Some (_, PostIndexed) -> add
-            | Some (vOrR, Normal) | Some (vOrR, PreIndexed) -> 
-                let va = 
+            let effecAdd' = 
+                match off with
+                | None | Some (_, PostIndexed) -> add
+                | Some (vOrR, Normal) | Some (vOrR, PreIndexed) -> 
                     match vOrR with
-                    | Literal v -> v
-                    | Reg r -> macRegs.[r]   
-                match (va % 4u = 0u) with 
-                | true -> add + va
-                | false -> failwithf "offset not divisible by 4"
-        match typeLS with
-        | LDR -> executeLDR effecAdd d
-        | STR -> executeSTR effecAdd d
+                    | Literal v -> add + v
+                    | Reg r -> add + macRegs.[r]   
+            match isByte, (effecAdd' % 4u =0u) with    
+            | None, true -> effecAdd'
+            | None, false -> failwithf "Memory address accessed must be divisible by 4"   
+            | Some B, _ -> effecAdd'                            
+        match typeLS, isByte with
+        | LDR, None -> executeLDR effecAdd d
+        | STR, None -> executeSTR effecAdd d
+        | LDR, Some B -> executeLDRB effecAdd d
+        | STR, Some B -> executeSTRB effecAdd d
 
-    executeLS instrName data
+    executeLS instrName isByte data

@@ -15,12 +15,12 @@ Note: Exteremely repetitive, for own use when writing code to avoid confusion.
 |`STR RSrc, [RDest, ROffset]`       |Normal             |Get _effective address_ by adding offset to address in `RDest`   |
 |`STR RSrc, [RDest, #4]!`           |Pre-indexed        |Get _effective address_ by adding offset to address in `RDest`, and also _update_ `RDest` to this new effective address |
 |`STR RSrc, [RDest], #4`            |Post-indexed       |_Update address_ in `RDest` by adding offset value to it, after storing value to original `RDest` address    |
-Note: All memory addresses being accessed must be divisible by 4
+  
 
 |Code                               |Offset type        |Notes     |
 |-----------------------------------|:-----------------:|----------|
 |`LDRB RDest, [RSrc{, ROffset}]`    |All                |Get address/effective address stored in `RSrc`, get value from that address. **Set `RDest` to zero**, then **load** value into `RDest`    |
-|`STRB RSrc, [RDest{, #2}]`         |All                |Get address/effective address stored in `RDest`. Get **LS 8-bits of the value stored in `RSrc`** (modul0 256), then **store** that value into the address/effective address    |
+|`STRB RSrc, [RDest{, #2}]`         |All                |Get address/effective address stored in `RDest`. Get **LS 8-bits of the value stored in `RSrc`** (modulo 256), then **store** that value into the address/effective address    |
 
 
 ### LDR
