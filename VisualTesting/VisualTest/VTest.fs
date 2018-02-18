@@ -30,7 +30,7 @@ module VTest =
             @"..\VisualWork\Cache"   // the file name of the global cache
         CacheLimit = 10               // the number of results before adding to global cache
         InitFlags = {FN=false;FZ=false; FC=false;FV=false}
-        InitRegs = [0u..10u..140u]          // initial values of registers R0..R14
+        InitRegs = [0u..10u..140u]          // initial values of registers R0..R14 
         MemReadBase = 0x1000u          // locations read from memory (currently 13 consecutive words are read)
         Postlude = ""                 // this is overwritten by code
         Prelude = ""                  // this is overwritten by code
@@ -53,6 +53,7 @@ module VTest =
                 |> List.sort
             Expecto.Expect.equal outActualNoted (outExpected |> List.sort) <|
                 sprintf "Register outputs>\n%A\n<don't match expected outputs, src=%s" outActual.Regs src
+                        
 
     let VisualFrameworkTest paras =
         testCase "Framework test failed" <| fun () ->
@@ -130,8 +131,11 @@ module VTest =
         |> List.map (fun n -> 
             let n' = 1 + (n % 254)
             vTest (sprintf "SUBS%d test" n') (sprintf "SUBS R0, R0, #%d" n') "1000" [R 0, -n'])
-
-    [<Tests>]
+            // SUBS r0, r0, # : input, will be run/executed by visual
+            // "1000" : Expected flags, NZCV
+            // R 0, -n' : expected output i.e register 0 will have -n' as its contents
+    
+    //[<Tests>]
     let many = testList "Many pointless tests" (manyTests 10)
 
     [<Tests>]
@@ -149,14 +153,14 @@ module VTest =
         testPropertyWithConfig fsConfig "Flags and registers are preserved" VisualFrameworkRun
 
 
-    [<Tests>]
-    let tests = 
-        testList "Minimal Visual Unit Tests"
-            [
-            VisualFrameworkTest defaultParas
-            vTest "SUB test" "SUB R0, R0, #1" "0000" [R 0, -1]
-            vTest "SUBS test" "SUBS R0, R0, #0" "0110" [R 0, 0]
-            // vTest "This ADDS test should fail" "ADDS R0, R0, #4" "0000" [R 0, 4; R 1, 0] 
-            // R1 should be 10 but is specified here as 0
-            ]
+    // [<Tests>]
+    // let tests = 
+    //     testList "Minimal Visual Unit Tests"
+    //         [
+    //         VisualFrameworkTest defaultParas
+    //         vTest "SUB test" "SUB R0, R0, #1" "0000" [R 0, -1]
+    //         vTest "SUBS test" "SUBS R0, R0, #0" "0110" [R 0, 0]
+    //         // vTest "This ADDS test should fail" "ADDS R0, R0, #4" "0000" [R 0, 4; R 1, 0] 
+    //         // R1 should be 10 but is specified here as 0
+    //         ]
 
