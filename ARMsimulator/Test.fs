@@ -1,6 +1,14 @@
 // To be split into several modules?
 module Test
 
+
+open VisualTest.VCommon
+open VisualTest.VData
+open VisualTest.VLog
+open VisualTest.Visual
+open VisualTest.VTest
+open VisualTest.VProgram
+
 open CommonTop
 open CommonData
 open CommonLex
@@ -79,36 +87,46 @@ let makeExecLDRTestList name listIOpairs =
     |> Expecto.Tests.testList name    
 
 
+[<Tests>]
+let t1 = 
+    //let makeParseLSTests listIOpairs = makeParseLSTestList "LDR and STR parse tests" listIOpairs 
+    makeParseLSTestList "LDR and STR parse tests"
+        [
+            "STRB R10, [R15, #5]!" , Ok {Instr=STR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 5u, PreIndexed)}
+            "LDR R4, [R8], #3", Ok {Instr=LDR ; Type=None; RContents=R4; RAdd=R8 ; Offset=Some (Literal 3u, PostIndexed)}
+            "LDRB R7, [R11, #11]", Ok {Instr=LDR ; Type=Some B; RContents=R7; RAdd=R11 ; Offset=Some (Literal 11u, Memory.Normal)} 
+            "STR R5, [R2]", Ok {Instr=STR ; Type=None; RContents=R5; RAdd=R2 ; Offset=None}
+            "LDR R10, [R15, ", Error "Incorrect formatting" //failing. Good? 
+            "LDR R10, [R15" , Error "Incorrect formatting" //ERROR, NO BRACKETS
+            "LDR R10, R15]", Error "Incorrect formatting" // ERROR, NO BRACKETS
+            "LDR R10, R15", Error "Incorrect formatting" // ERROR, NO BRACKETS
+            "LDR R10, [R15, R2!]", Error "Incorrect formatting"
+            // SHOULD PASS
+            //"ldrb r10, [r15, #4]", Ok {Instr=LDR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 4u, Memory.Normal)} //failing
+        ]    
+
 // [<Tests>]
-// let t1 = 
-//     //let makeParseLSTests listIOpairs = makeParseLSTestList "LDR and STR parse tests" listIOpairs 
-//     makeParseLSTestList "LDR and STR parse tests"
+// let t2 = 
+//     makeExecLDRTestList "LDR and STR execution tests"
 //         [
-//             "STRB R10, [R15, #5]!" , Ok {Instr=STR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 5u, PreIndexed)}
-//             "LDR R4, [R8], #3", Ok {Instr=LDR ; Type=None; RContents=R4; RAdd=R8 ; Offset=Some (Literal 3u, PostIndexed)}
-//             "LDRB R7, [R11, #11]", Ok {Instr=LDR ; Type=Some B; RContents=R7; RAdd=R11 ; Offset=Some (Literal 11u, Memory.Normal)} 
-//             "STR R5, [R2]", Ok {Instr=STR ; Type=None; RContents=R5; RAdd=R2 ; Offset=None}
-//             "LDR R10, [R15, ", Error "Incorrect formatting" //failing. Good? 
-//             "LDR R10, [R15" , Error "Incorrect formatting" //ERROR, NO BRACKETS
-//             "LDR R10, R15]", Error "Incorrect formatting" // ERROR, NO BRACKETS
-//             "LDR R10, R15", Error "Incorrect formatting" // ERROR, NO BRACKETS
-//             "LDR R10, [R15, R2!]", Error "Incorrect formatting"
-//             // SHOULD PASS
-//             //"ldrb r10, [r15, #4]", Ok {Instr=LDR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 4u, Memory.Normal)} //failing
+//             "LDR R0, [R1]", Ok dataDummy
 //         ]    
 
 [<Tests>]
-let t2 = 
-    makeExecLDRTestList "LDR and STR execution tests"
-        [
-            "LDR R0, [R1]", Ok dataDummy
-        ]    
+let tVisual = 
+    VisualUnitTest
 
 
 [<EntryPoint>]
 let main argv =
     // printfn "%A" argv
-    printfn "Testing LDR/STR parsing!"
-    Expecto.Tests.runTestsInAssembly Expecto.Tests.defaultConfig [||] |> ignore
-    Console.ReadKey() |> ignore  
-    0 // return an integer exit code
+    //printfn "Testing LDR/STR"
+    //Expecto.Tests.runTestsInAssembly Expecto.Tests.defaultConfig [||] |> ignore
+    //Console.ReadKey() |> ignore  
+    //0 // return an integer exit code
+    
+    initCaches testParas
+    let rc = runTestsInAssembly expectoConfig [||]
+    finaliseCaches testParas
+    Console.ReadKey() |> ignore
+    rc

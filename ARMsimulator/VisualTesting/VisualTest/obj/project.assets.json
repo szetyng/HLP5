@@ -5143,11 +5143,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Sze Tyng\\AppData\\Roaming\\Code\\User\\HLP5\\VisualTesting\\VisualTest\\VisualTest.fsproj",
+      "projectUniqueName": "c:\\Users\\Sze Tyng\\AppData\\Roaming\\Code\\User\\HLP5\\ARMsimulator\\VisualTesting\\VisualTest\\VisualTest.fsproj",
       "projectName": "VisualTest",
-      "projectPath": "C:\\Users\\Sze Tyng\\AppData\\Roaming\\Code\\User\\HLP5\\VisualTesting\\VisualTest\\VisualTest.fsproj",
+      "projectPath": "c:\\Users\\Sze Tyng\\AppData\\Roaming\\Code\\User\\HLP5\\ARMsimulator\\VisualTesting\\VisualTest\\VisualTest.fsproj",
       "packagesPath": "C:\\Users\\Sze Tyng\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Sze Tyng\\AppData\\Roaming\\Code\\User\\HLP5\\VisualTesting\\VisualTest\\obj\\",
+      "outputPath": "c:\\Users\\Sze Tyng\\AppData\\Roaming\\Code\\User\\HLP5\\ARMsimulator\\VisualTesting\\VisualTest\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

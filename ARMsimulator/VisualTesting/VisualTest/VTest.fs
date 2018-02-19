@@ -79,10 +79,9 @@ module VTest =
 
     let rType2List (r:rType)=
         [r.R0;r.R1;r.R2;r.R3;r.R4; r.R5;r.R6;r.R7;
-         r.R8;r.R9;r.R10;r.R11;r.R12;r.R13;r.R14]
-      
+         r.R8;r.R9;r.R10;r.R11;r.R12;r.R13;r.R14]    
 
-    let VisualFrameworkRun (regs: rType,flags:Flags) =
+    let VisualFrameworkRun (regs: rType, flags:Flags) =
         let performTest() =
             let initRegs = 
                 rType2List regs
@@ -138,7 +137,7 @@ module VTest =
     //[<Tests>]
     let many = testList "Many pointless tests" (manyTests 10)
 
-    [<Tests>]
+    //[<Tests>]
     /// implements random property-based tests of the framework
     /// tests that read/write of registers and flags is consistent for random
     /// input values
@@ -151,16 +150,17 @@ module VTest =
                     maxTest = 100       // number of random tests
                 }
         testPropertyWithConfig fsConfig "Flags and registers are preserved" VisualFrameworkRun
+        // where does VisualFrameworkRun gets its inputs?
 
 
-    // [<Tests>]
-    // let tests = 
-    //     testList "Minimal Visual Unit Tests"
-    //         [
-    //         VisualFrameworkTest defaultParas
-    //         vTest "SUB test" "SUB R0, R0, #1" "0000" [R 0, -1]
-    //         vTest "SUBS test" "SUBS R0, R0, #0" "0110" [R 0, 0]
-    //         // vTest "This ADDS test should fail" "ADDS R0, R0, #4" "0000" [R 0, 4; R 1, 0] 
-    //         // R1 should be 10 but is specified here as 0
-    //         ]
+    [<Tests>]
+    let tests = 
+        testList "Minimal Visual Unit Tests"
+            [
+            VisualFrameworkTest defaultParas
+            vTest "SUB test" "SUB R0, R0, #1" "0000" [R 0, -1] // doesn't set the flags
+            vTest "SUBS test" "SUBS R0, R0, #0" "0110" [R 0, 0]
+            vTest "This ADDS test should fail" "ADDS R0, R0, #4" "0000" [R 0, 4]//; R 1, 0] 
+            // R1 should be 10 but is specified here as 0
+            ]
 

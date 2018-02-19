@@ -19,5 +19,5 @@
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.2.3" />
   </ItemGroup>
-  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+  <Import Project="..\..\..\..\.paket\Paket.Restore.targets" />
 </Project>

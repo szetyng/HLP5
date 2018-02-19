@@ -19,7 +19,7 @@ module VProgram =
                             parallelWorkers = 6 // try increasing this if CPU use is less than 100%
                     }
 
-    [<EntryPoint>]
+    //[<EntryPoint>]
     let main _ = 
         initCaches testParas
         let rc = runTestsInAssembly expectoConfig [||]
