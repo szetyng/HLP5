@@ -25,9 +25,11 @@ module VTest =
         VisualPath =  
             @"..\visualapp\visual\"  // the directory in which the downloaded VisUAL.exe can be found
         WorkFileDir = 
-            @"..\VisualWork\"        // the directory in which both temporary files and the persistent cache file are put
+            @"C:\Users\Sze Tyng\AppData\Roaming\Code\User\HLP5\ARMsimulator\VisualTesting\visualWork\"
+            //@"..\VisualWork\"        // the directory in which both temporary files and the persistent cache file are put
         CacheFileName = 
-            @"..\VisualWork\Cache"   // the file name of the global cache
+            @"C:\Users\Sze Tyng\AppData\Roaming\Code\User\HLP5\ARMsimulator\VisualTesting\visualWork\Cache"
+            //@"..\VisualWork\Cache"   // the file name of the global cache
         CacheLimit = 10               // the number of results before adding to global cache
         InitFlags = {FN=false;FZ=false; FC=false;FV=false}
         InitRegs = [0u..10u..140u]          // initial values of registers R0..R14 
@@ -42,6 +44,7 @@ module VTest =
     ///
     let VisualUnitTest paras name src (flagsExpected:string) (outExpected: (Out * int) list) =
         testCase name <| fun () ->
+            // outActual is of type VisOutput, which should contain the memory too as a uint32 list
             let flagsActual, outActual = RunVisualWithFlagsOut paras src
             Expecto.Expect.equal flagsActual (flagsExpected |> strToFlags) "Status flags don't match"
             let outRegsNoted = 
@@ -153,7 +156,7 @@ module VTest =
         // where does VisualFrameworkRun gets its inputs?
 
 
-    [<Tests>]
+    //[<Tests>]
     let tests = 
         testList "Minimal Visual Unit Tests"
             [

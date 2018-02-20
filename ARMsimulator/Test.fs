@@ -1,7 +1,6 @@
 // To be split into several modules?
 module Test
 
-
 open VisualTest.VCommon
 open VisualTest.VData
 open VisualTest.VLog
@@ -77,17 +76,17 @@ let makeParseLSTestList name listIOpairs =
     |> List.indexed
     |> List.map (fun (i,pair) -> (makeOneTest i pair))
     |> Expecto.Tests.testList name
-let makeExecLDRTestList name listIOpairs = 
-    let makeOneTest i (inp, outp) = 
-        testCase (sprintf "%s:%d" name i) <| fun () ->
-        Expect.equal (execute inp dataDummy) outp (sprintf "Executing '%s'" inp)
-    listIOpairs
-    |> List.indexed
-    |> List.map (fun (i,pair) -> (makeOneTest i pair))
-    |> Expecto.Tests.testList name    
+// let makeExecLDRTestList name listIOpairs = 
+//     let makeOneTest i (inp, outp) = 
+//         testCase (sprintf "%s:%d" name i) <| fun () ->
+//         Expect.equal (execute inp dataDummy) outp (sprintf "Executing '%s'" inp)
+//     listIOpairs
+//     |> List.indexed
+//     |> List.map (fun (i,pair) -> (makeOneTest i pair))
+//     |> Expecto.Tests.testList name    
 
 
-[<Tests>]
+//[<Tests>]
 let t1 = 
     //let makeParseLSTests listIOpairs = makeParseLSTestList "LDR and STR parse tests" listIOpairs 
     makeParseLSTestList "LDR and STR parse tests"
@@ -112,9 +111,28 @@ let t1 =
 //             "LDR R0, [R1]", Ok dataDummy
 //         ]    
 
-[<Tests>]
-let tVisual = 
-    VisualUnitTest
+let testParas = {defaultParas with 
+                    InitRegs = [0u ; 10u ; 20u ; 30u ; 40u ; 50u ; 60u ; 70u ; 
+                                80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u] ;
+                    MemReadBase = 0x1000u}
+// [<Tests>]
+// let tVisual = 
+//     testList "Figuring VisUAL testing out"
+//         [
+//             VisualUnitTest testParas "Testing VisUAL - pass" "LDR R0, [R1]" "0000" [R 0, 0]
+//             VisualUnitTest testParas "Testing VisUAL - fail" "LDR R0, [R1]" "0000" [R 0, 20]
+//         ]
+
+let VisualMemUnitTest (actualOut: DataPath<InstrLine>) paras inpAsm = 
+    let _, expectedOut = RunVisualWithFlagsOut paras inpAsm
+    let addrList = List.map WA [paras.MemReadBase..4u..paras.MemReadBase+(12u*4u)]
+    let memLoclist = List.map DataLoc expectedOut.State.VMemData
+    let expectedMemMap = 
+        memLoclist
+        |> List.allPairs addrList
+        |> List.distinct
+        |> Map.ofList
+    Expecto.Expect.equal actualOut.MM expectedMemMap "Memory doesn't match"    
 
 
 [<EntryPoint>]

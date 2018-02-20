@@ -141,7 +141,7 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
     let executeLDR isByte memLoc d = 
         let payload =
             match macMem.[WA memLoc] with
-            | DataLoc d -> d // fix this?
+            | DataLoc da -> da // fix this?
             | Code _ -> failwithf "What? Should not access this memory location"
         // load the contents into register
         let newRegs = 
@@ -175,7 +175,12 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
                 | Literal v -> macRegs.Add (regAdd, memLoc + v)
                 | Reg r -> macRegs.[r] |> fun v -> macRegs.Add (regAdd, memLoc + v)
         {d with Regs=newRegs ; MM=newMem}   
-        
+
+    // WILL WORK ON MODULARISING THIS LATER
+    // let executeLDRB payload = macRegs.Add (regCont, 0u) |> Map.add regCont payload
+    // let executeSTRB = macRegs.[regCont] % 256u
+
+
     let executeLS typeLS isByte d = 
         // register stores address, get that address
         let add = macRegs.[regAdd]
