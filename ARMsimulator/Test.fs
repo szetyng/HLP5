@@ -125,6 +125,11 @@ let testParas = {defaultParas with
 
 let VisualMemUnitTest (actualOut: DataPath<InstrLine>) paras inpAsm = 
     let _, expectedOut = RunVisualWithFlagsOut paras inpAsm
+    // SHIT MIGHT NOT NEED TO DO ALL THIS. See VData: decodeStatefromReg 
+    // gives back the register names and their contents
+    // memory is stored there, something to do with postlude -> in the paras
+    // Regs in postlude in paras : memory
+    // Regs in VisOutput : registers
     let addrList = List.map WA [paras.MemReadBase..4u..paras.MemReadBase+(12u*4u)]
     let memLoclist = List.map DataLoc expectedOut.State.VMemData
     let expectedMemMap = 
