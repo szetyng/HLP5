@@ -113,37 +113,37 @@ let execute asmLine d =
         | Ok ({PInstr=ins} as pr) -> executeAnyInstr ins d
         | _ -> failwithf "Idk"
 
-open VisualTest.VCommon
-open VisualTest.VData
-open VisualTest.VLog
-open VisualTest.Visual
-open VisualTest.VTest
-open VisualTest.VProgram
+// open VisualTest.VCommon
+// open VisualTest.VData
+// open VisualTest.VLog
+// open VisualTest.Visual
+// open VisualTest.VTest
+// open VisualTest.VProgram
 
-let testParas = {defaultParas with 
-                    InitRegs = [0u ; 0x1004u ; 0x1000u ; 30u ; 40u ; 50u ; 60u ; 70u ; 
-                                80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u] ;
-                    MemReadBase = 0x1000u}
-let testMemValList = 
-    [
-        10u ; 20u ; 30u ; 40u ; 50u ; 60u ; 70u ; 80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u
-    ]   
-    |> List.map DataLoc    
+// let testParas = {defaultParas with 
+//                     InitRegs = [0u ; 0x1004u ; 0x1000u ; 30u ; 40u ; 50u ; 60u ; 70u ; 
+//                                 80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u] ;
+//                     MemReadBase = 0x1000u}
+// let testMemValList = 
+//     [
+//         10u ; 20u ; 30u ; 40u ; 50u ; 60u ; 70u ; 80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u
+//     ]   
+//     |> List.map DataLoc    
 
-let testCPU:DataPath<Memory.InstrLine> = {
-    Fl = {N=false ; C=false ; Z=false ; V=false};
-    Regs = Seq.zip [R0;R1;R2;R3;R4;R5;R6;R7;R8;R9;R10;R11;R12;R13;R14] testParas.InitRegs
-            |> List.ofSeq
-            |> Map.ofList
-    MM = 
-        let addrList = List.map WA [testParas.MemReadBase..4u..testParas.MemReadBase+(13u*4u)]
-        Seq.zip addrList testMemValList 
-        |> Map.ofSeq
-}                 
+// let testCPU:DataPath<Memory.InstrLine> = {
+//     Fl = {N=false ; C=false ; Z=false ; V=false};
+//     Regs = Seq.zip [R0;R1;R2;R3;R4;R5;R6;R7;R8;R9;R10;R11;R12;R13;R14] testParas.InitRegs
+//             |> List.ofSeq
+//             |> Map.ofList
+//     MM = 
+//         let addrList = List.map WA [testParas.MemReadBase..4u..testParas.MemReadBase+(13u*4u)]
+//         Seq.zip addrList testMemValList 
+//         |> Map.ofSeq
+// }                 
 
 
-let funfunc =                    
-    printfn "%A" (execute "STR R3, [R2]" testCPU) // MAGIC HERE
+// let funfunc =                    
+//     printfn "%A" (execute "STR R3, [R2]" testCPU) // MAGIC HERE
 
     // DATA IS WRONG?
 

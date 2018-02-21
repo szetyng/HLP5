@@ -111,57 +111,70 @@ let t1 =
 //             "LDR R0, [R1]", Ok dataDummy
 //         ]    
 
-// let testParas = {defaultParas with 
-//                     InitRegs = [0u ; 0x1004u ; 0x1000u ; 30u ; 40u ; 50u ; 60u ; 70u ; 
-//                                 80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u] ;
-//                     MemReadBase = 0x1000u}
-// let testMemValList = 
-//     [
-//         10u ; 20u ; 30u ; 40u ; 50u ; 60u ; 70u ; 80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u
-//     ]   
-//     |> List.map DataLoc    
+let myTestParas = {defaultParas with 
+                    InitRegs = [0u ; 0x1004u ; 0x1000u ; 30u ; 40u ; 50u ; 60u ; 70u ; 
+                                80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u] ;
+                    MemReadBase = 0x1000u}
+let testMemValList = 
+    [
+        10u ; 20u ; 30u ; 40u ; 50u ; 60u ; 70u ; 80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u
+    ]   
+    |> List.map DataLoc    
 
-// let testCPU:DataPath<Memory.InstrLine> = {
-//     Fl = {N=false ; C=false ; Z=false ; V=false};
-//     Regs = Seq.zip [R0;R1;R2;R3;R4;R5;R6;R7;R8;R9;R10;R11;R12;R13;R14] testParas.InitRegs
-//             |> List.ofSeq
-//             |> Map.ofList
-//     MM = 
-//         let addrList = List.map WA [testParas.MemReadBase..4u..testParas.MemReadBase+(13u*4u)]
-//         Seq.zip addrList testMemValList 
-//         |> Map.ofSeq
-// }                 
+let testCPU:DataPath<Memory.InstrLine> = {
+    Fl = {N=false ; C=false ; Z=false ; V=false};
+    Regs = Seq.zip [R0;R1;R2;R3;R4;R5;R6;R7;R8;R9;R10;R11;R12;R13;R14] myTestParas.InitRegs
+            |> List.ofSeq
+            |> Map.ofList
+    MM = 
+        let addrList = List.map WA [myTestParas.MemReadBase..4u..myTestParas.MemReadBase+(13u*4u)]
+        Seq.zip addrList testMemValList 
+        |> Map.ofSeq
+} 
 
-// let VisualMemUnitTest (actualOut: DataPath<InstrLine>) paras inpAsm = 
-//     let _, expectedOut = RunVisualWithFlagsOut paras inpAsm
-//     let addrList = List.map WA [paras.MemReadBase..4u..paras.MemReadBase+(12u*4u)]
-//     //let memLoclist = List.map DataLoc expectedOut.State.VMemData
-//     let expectedState = decodeStateFromRegs expectedOut.RegsAfterPostlude
-//     let memLocList = expectedState.VMemData
-//     let expectedMemMap = 
-//         memLocList
-//         |> List.map DataLoc
-//         |> Seq.zip addrList
-//         |> Map.ofSeq
-//     Expecto.Expect.equal actualOut.MM expectedMemMap "Memory doesn't match"   
+let VisualMemUnitTest (actualOut: DataPath<InstrLine>) paras inpAsm = 
+    testCase "TEST" <| fun () ->
+        let _, expectedOut = RunVisualWithFlagsOut paras inpAsm
+        let addrList = List.map WA [paras.MemReadBase..4u..paras.MemReadBase+(12u*4u)]
+        //let memLoclist = List.map DataLoc expectedOut.State.VMemData
+        let expectedState = decodeStateFromRegs expectedOut.RegsAfterPostlude
+        let memLocList = expectedState.VMemData
+        let expectedMemMap = 
+            memLocList
+            |> List.map DataLoc
+            |> Seq.zip addrList
+            |> Map.ofSeq
+        Expecto.Expect.equal actualOut.MM expectedMemMap "Memory doesn't match"   
 
-// let makeTestList listIOpairs = 
-//     let makeOneTest (inp,_) = 
-//         match execute inp testCPU with
-//         | Ok resData -> 
-//             VisualMemUnitTest resData testParas inp     
-//         | _ -> failwithf "fix this?"        
-//         //Expect.equal (transform inp) (transform outp) (sprintf "Parsing '%s'" inp)
-//     listIOpairs 
-//     |> List.indexed
-//     |> List.map (fun (_,pair) -> (makeOneTest pair))
-//     //|> Expecto.Tests.testList name
+let makeTestList inp = 
+    // let makeOneTest inp = 
+        // let _, expectedOut = RunVisualWithFlagsOut myTestParas "STR R3, [R2]"
+        // printfn "here i am %A" expectedOut
+    match execute inp testCPU with
+    | Ok resData -> 
+        VisualMemUnitTest resData myTestParas inp     
+    | _ -> failwithf "fix this?"     
+           
+        //Expect.equal (transform inp) (transform outp) (sprintf "Parsing '%s'" inp)
+    // listIOpairs 
+    // |> List.indexed
+    // |> List.map (fun (_,pair) -> (makeOneTest pair))
+    //|> Expecto.Tests.testList name
 
-// let tMem = 
-//     makeTestList 
-//         [
-//             "STR R3,[R2]", "STR R3, [R2]"
-//         ]
+[<Tests>]
+let tMem = 
+    makeTestList "STR R3, [R2]"
+        // [
+        //     "STR R3, [R2]", "STR R3, [R2]"
+        // ]
+    // let _, expectedOut = RunVisualWithFlagsOut paras "STR R3, [R2]"
+    // printfn "here i am %A" expectedOut
+
+// let myTest = 
+//     let asmLine = "STR R3, [R2]"
+//     match execute asmLine testCPU with
+//     | Ok resData -> VisualMemUnitTest resData myTestParas asmLine
+//     | _ -> failwithf "whaii"
 
 
 [<EntryPoint>]
@@ -172,15 +185,15 @@ let main argv =
     // Console.ReadKey() |> ignore  
     // 0 // return an integer exit code
     
+    initCaches myTestParas
+    let rc = runTestsInAssembly expectoConfig [||]
+    finaliseCaches myTestParas
+    Console.ReadKey() |> ignore
+    rc
+    //0
     // initCaches testParas
-    // let rc = runTestsInAssembly expectoConfig [||]
+    // CommonTop.funfunc |> ignore
     // finaliseCaches testParas
-    // Console.ReadKey() |> ignore
-    // rc
 
-    initCaches testParas
-    CommonTop.funfunc |> ignore
-    finaliseCaches testParas
-
-    0
+    // 0
 
