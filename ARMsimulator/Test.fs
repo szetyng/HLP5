@@ -78,11 +78,11 @@ let t1 =
             //"ldrb r10, [r15, #4]", Ok {Instr=LDR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 4u, Memory.Normal)} //failing
         ]    
 
-// let myTestParas = {defaultParas with 
-//                     InitRegs = [0u ; 0u ; 0x1004u ; 30u ; 40u ; 50u ; 60u ; 70u ; 
-//                                 80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u] ;
-//                    MemReadBase = 0x1000u}
-let myTestParas = defaultParas
+let myTestParas = {defaultParas with 
+                    InitRegs = [0u ; 0u ; 0x1004u ; 30u ; 40u ; 50u ; 60u ; 70u ; 
+                                80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u] 
+                    MemReadBase = 0x1000u}
+//let myTestParas = defaultParas
 let testMemValList = 
     // [
     //     10u ; 20u ; 30u ; 40u ; 50u ; 60u ; 70u ; 80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u
@@ -146,7 +146,7 @@ let tMem =
         [
             //makeExecTest "Normal STR" "LDR R3, [R2]"
             makeTest "Adding" "SUB R0, R0, #1" [R 0, -1] //R1 = 20u result
-            VisualUnitTest myTestParas "testing" "SUB R0, R0, #1" "0000" [R 0, -1]
+            //VisualUnitTest myTestParas "testing" "ADD R0, R0, #1" "0000" [R 0, 10]
             //makeExecTest "Normal LDR" "LDR R0, [R1]"
         ]
     

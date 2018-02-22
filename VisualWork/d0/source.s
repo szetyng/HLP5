@@ -2,8 +2,9 @@ MOV R0, #0
 ADDS R0, R0, R0
 MOVS R0, #1
 MOV R0, #0x0
-MOV R1, #0xa
-MOV R2, #0x14
+MOV R1, #0x0
+MOV R2, #0x4
+ADD R2, R2, #0x1000
 MOV R3, #0x1e
 MOV R4, #0x28
 MOV R5, #0x32
