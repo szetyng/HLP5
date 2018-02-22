@@ -78,16 +78,17 @@ let t1 =
             //"ldrb r10, [r15, #4]", Ok {Instr=LDR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 4u, Memory.Normal)} //failing
         ]    
 
-let myTestParas = {defaultParas with 
-                    InitRegs = [0u ; 0x1000u ; 0x1000u ; 30u ; 40u ; 50u ; 60u ; 70u ; 
-                                80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u] ;
-                    MemReadBase = 0x1000u}
+// let myTestParas = {defaultParas with 
+//                     InitRegs = [0u ; 0u ; 0x1004u ; 30u ; 40u ; 50u ; 60u ; 70u ; 
+//                                 80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u] ;
+//                     MemReadBase = 0x1000u}
+let myTestParas = defaultParas
 let testMemValList = 
     // [
     //     10u ; 20u ; 30u ; 40u ; 50u ; 60u ; 70u ; 80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u
     // ]   
     [
-        0u ; 55u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u ; 0u
+        0u ; 55u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u 
     ]
     |> List.map DataLoc    
 
@@ -97,7 +98,7 @@ let testCPU:DataPath<Memory.InstrLine> = {
             |> List.ofSeq
             |> Map.ofList
     MM = 
-        let addrList = List.map WA [myTestParas.MemReadBase..4u..myTestParas.MemReadBase+(13u*4u)]
+        let addrList = List.map WA [myTestParas.MemReadBase..4u..myTestParas.MemReadBase+(12u*4u)]
         Seq.zip addrList testMemValList 
         |> Map.ofSeq
 } 
@@ -105,34 +106,37 @@ let testCPU:DataPath<Memory.InstrLine> = {
 let VisualMemUnitTest name (actualOut: DataPath<InstrLine>) paras inpAsm = 
     testCase name <| fun () ->
         let _, expectedOut = RunVisualWithFlagsOut paras inpAsm
-        let addrList = List.map WA [paras.MemReadBase..4u..paras.MemReadBase+(13u*4u)]
-        let memLocList = List.map DataLoc expectedOut.State.VMemData //|> List.rev
-        //let expectedState = decodeStateFromRegs expectedOut.RegsAfterPostlude
-        let expectedMemMap = 
-            memLocList
-            //|> List.map DataLoc
-            |> Seq.zip addrList
-            |> Map.ofSeq
-        Expecto.Expect.equal actualOut.MM expectedMemMap "Memory doesn't match"   
+        // let addrList = List.map WA [paras.MemReadBase..4u..paras.MemReadBase+(12u*4u)]
+        // //let memLocList = List.map DataLoc expectedOut.State.VMemData //|> List.rev
+        // let expectedState = decodeStateFromRegs expectedOut.RegsAfterPostlude
+        // let memLocList = expectedState.VMemData
+        // let expectedMemMap = 
+        //     memLocList
+        //     |> List.map DataLoc
+        //     |> Seq.zip addrList
+        //     |> Map.ofSeq
+        // Expecto.Expect.equal actualOut.MM expectedMemMap "Memory doesn't match"   
 
-        // let expectedRegs = 
-        //     let regValList = expectedOut.Regs
-        //     List.map (fun r,v ->
-        //                 match r with
-        //                 | R x -> inverseRegNums x )
-        // Expecto.Expect.equal actualOut.Regs e
+        let expectedRegMap = 
+            expectedOut.Regs
+            |> List.map (fun (R nr, v) -> register nr, uint32 v)
+            |> Map.ofList                              
+        Expecto.Expect.equal actualOut.Regs expectedRegMap "Registers don't match"
 
 let makeExecTest name inp = 
     match execute inp testCPU with
     | Ok resData -> VisualMemUnitTest name resData myTestParas inp     
     | _ -> failwithf "fix this?"     
-           
+
+let makeTest name inp = VisualMemUnitTest name testCPU myTestParas inp
+
 
 [<Tests>]
 let tMem = 
     Expecto.Tests.testList "Executing LDR/STR tests" 
         [
-            makeExecTest "Normal STR" "STR R3, [R2]"
+            //makeExecTest "Normal STR" "LDR R3, [R2]"
+            makeTest "Adding" "ADD R1, R1, R1" //R1 = 20u result
             //makeExecTest "Normal LDR" "LDR R0, [R1]"
         ]
     

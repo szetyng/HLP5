@@ -47,10 +47,10 @@ module VTest =
             // outActual is of type VisOutput, which should contain the memory too as a uint32 list
             let flagsActual, outActual = RunVisualWithFlagsOut paras src
             Expecto.Expect.equal flagsActual (flagsExpected |> strToFlags) "Status flags don't match"
-            let outRegsNoted = 
+            let outRegsNoted = // Expected value, take the register name
                 outExpected 
                 |> List.map fst
-            let outActualNoted = 
+            let outActualNoted = // VisUAL output registers, take only the relevant registers
                 outActual.Regs 
                 |> List.filter (fun (r,_) -> List.contains r outRegsNoted)
                 |> List.sort

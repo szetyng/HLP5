@@ -114,6 +114,7 @@ module Visual =
     /// Returns flags , registers (before flag detection code)
     let RunVisualWithFlagsOut paras src =
         let main, post = VData.GETWRAPPER paras.InitRegs paras.InitFlags paras.MemReadBase
+        //let myMain = (STORELOC 30u 0x1004u) + main 
         let res = RunVisual {paras with Prelude=main; Postlude=post} src
         match res with
         | Error e -> failwithf "Error reading Visual Log %A" e
