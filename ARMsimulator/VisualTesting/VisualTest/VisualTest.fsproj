@@ -5,11 +5,6 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="VCommon.fs" />
-    <Compile Include="VData.fs" />
-    <Compile Include="VLog.fs" />
-    <Compile Include="Visual.fs" />
-    <Compile Include="VTest.fs" />
     <Compile Include="VProgram.fs" />
   </ItemGroup>
   <ItemGroup>

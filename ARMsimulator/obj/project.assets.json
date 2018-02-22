@@ -467,11 +467,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Sze Tyng\\AppData\\Roaming\\Code\\User\\HLP5\\ARMsimulator\\ARMsimulator.fsproj",
+      "projectUniqueName": "c:\\Users\\Sze Tyng\\AppData\\Roaming\\Code\\User\\HLP5\\ARMsimulator\\ARMsimulator.fsproj",
       "projectName": "ARMsimulator",
-      "projectPath": "C:\\Users\\Sze Tyng\\AppData\\Roaming\\Code\\User\\HLP5\\ARMsimulator\\ARMsimulator.fsproj",
+      "projectPath": "c:\\Users\\Sze Tyng\\AppData\\Roaming\\Code\\User\\HLP5\\ARMsimulator\\ARMsimulator.fsproj",
       "packagesPath": "C:\\Users\\Sze Tyng\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Sze Tyng\\AppData\\Roaming\\Code\\User\\HLP5\\ARMsimulator\\obj\\",
+      "outputPath": "c:\\Users\\Sze Tyng\\AppData\\Roaming\\Code\\User\\HLP5\\ARMsimulator\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

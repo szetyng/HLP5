@@ -151,7 +151,7 @@ let tMem =
         ]
     
 
-[<EntryPoint>]
+//[<EntryPoint>]
 let main argv =
     // printfn "%A" argv
     // printfn "Testing LDR/STR"
