@@ -6,11 +6,6 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="VisualTesting/VisualTest/VCommon.fs" />
-    <Compile Include="VisualTesting/VisualTest/VData.fs" />
-    <Compile Include="VisualTesting/VisualTest/VLog.fs" />
-    <Compile Include="VisualTesting/VisualTest/Visual.fs" />
-    <Compile Include="VisualTesting/VisualTest/VTest.fs" />
     <Compile Include="VisualTesting/VisualTest/VProgram.fs" />
     <Compile Include="CommonData.fs" />
     <Compile Include="CommonLex.fs" />

@@ -537,9 +537,11 @@ module VTest =
         VisualPath =  
             @"..\visualapp\visual\"  // the directory in which the downloaded VisUAL.exe can be found
         WorkFileDir = 
-            @"..\VisualWork\"        // the directory in which both temporary files and the persistent cache file are put
+            @"C:\Users\Sze Tyng\AppData\Roaming\Code\User\HLP5\ARMsimulator\VisualTesting\visualWork\"
+            //@"..\VisualWork\"        // the directory in which both temporary files and the persistent cache file are put
         CacheFileName = 
-            @"..\VisualWork\Cache"   // the file name of the global cache
+            @"C:\Users\Sze Tyng\AppData\Roaming\Code\User\HLP5\ARMsimulator\VisualTesting\visualWork\Cache"
+            //@"..\VisualWork\Cache"   // the file name of the global cache
         CacheLimit = 10               // the number of results before adding to global cache
         InitFlags = {FN=false;FZ=false; FC=false;FV=false}
         InitRegs = [0u..10u..140u]          // initial values of registers R0..R14
@@ -643,10 +645,10 @@ module VTest =
             let n' = 1 + (n % 254)
             vTest (sprintf "SUBS%d test" n') (sprintf "SUBS R0, R0, #%d" n') "1000" [R 0, -n'])
 
-    [<Tests>]
+    //[<Tests>]
     let many = testList "Many pointless tests" (manyTests 10)
 
-    [<Tests>]
+    //[<Tests>]
     /// implements random property-based tests of the framework
     /// tests that read/write of registers and flags is consistent for random
     /// input values
@@ -661,13 +663,14 @@ module VTest =
         testPropertyWithConfig fsConfig "Flags and registers are preserved" VisualFrameworkRun
 
 
-    [<Tests>]
+    //[<Tests>]
     let tests = 
         testList "Minimal Visual Unit Tests"
             [
             VisualFrameworkTest defaultParas
             vTest "SUB test" "SUB R0, R0, #1" "0000" [R 0, -1]
-            vTest "SUBS test" "SUBS R0, R0, #0" "0110" [R 0, 0]
+            //vTest "SUBS test" "SUBS R0, R0, #0" "0110" [R 0, 0]
+            VisualUnitTest defaultParas "testing" "SUB R0, R0, #1" "0000" [R 0, -1]
             // vTest "This ADDS test should fail" "ADDS R0, R0, #4" "0000" [R 0, 4; R 1, 0] 
             // R1 should be 10 but is specified here as 0
             ]
@@ -694,7 +697,7 @@ module VProgram =
                             parallelWorkers = 6 // try increasing this if CPU use is less than 100%
                     }
 
-    [<EntryPoint>]
+    //[<EntryPoint>]
     let main _ = 
         initCaches testParas
         let rc = runTestsInAssembly expectoConfig [||]

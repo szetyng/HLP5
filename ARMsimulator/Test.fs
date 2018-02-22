@@ -81,14 +81,14 @@ let t1 =
 // let myTestParas = {defaultParas with 
 //                     InitRegs = [0u ; 0u ; 0x1004u ; 30u ; 40u ; 50u ; 60u ; 70u ; 
 //                                 80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u] ;
-//                     MemReadBase = 0x1000u}
+//                    MemReadBase = 0x1000u}
 let myTestParas = defaultParas
 let testMemValList = 
     // [
     //     10u ; 20u ; 30u ; 40u ; 50u ; 60u ; 70u ; 80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u
     // ]   
     [
-        0u ; 55u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u 
+        0u ; 55u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u
     ]
     |> List.map DataLoc    
 
@@ -140,18 +140,18 @@ let VisualMemUnitTest name (actualOut: DataPath<InstrLine>) paras inpAsm expOutR
 let makeTest name inp outp = VisualMemUnitTest name testCPU myTestParas inp outp
 
 
-//[<Tests>]
+[<Tests>]
 let tMem = 
     Expecto.Tests.testList "Executing LDR/STR tests" 
         [
             //makeExecTest "Normal STR" "LDR R3, [R2]"
-            //makeTest "Adding" "ADD R1, R1, R1" [R 1, 20] //R1 = 20u result
-            //VisualUnitTest myTestParas "testing" "ADD R1, R1, R1" "0000" [R 1, 20]
+            makeTest "Adding" "SUB R0, R0, #1" [R 0, -1] //R1 = 20u result
+            VisualUnitTest myTestParas "testing" "SUB R0, R0, #1" "0000" [R 0, -1]
             //makeExecTest "Normal LDR" "LDR R0, [R1]"
         ]
     
 
-//[<EntryPoint>]
+[<EntryPoint>]
 let main argv =
     // printfn "%A" argv
     // printfn "Testing LDR/STR"
@@ -162,12 +162,6 @@ let main argv =
     initCaches myTestParas
     let rc = runTestsInAssembly expectoConfig [||]
     finaliseCaches myTestParas
-    Console.ReadKey() |> ignore
-    rc
-    //0
-    // initCaches testParas
-    // CommonTop.funfunc |> ignore
-    // finaliseCaches testParas
-
-    // 0
+    System.Console.ReadKey() |> ignore                
+    rc // return an integer exit code - 0 if all tests pass
 
