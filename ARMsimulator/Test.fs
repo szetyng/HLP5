@@ -103,7 +103,7 @@ let testCPU:DataPath<Memory.InstrLine> = {
         |> Map.ofSeq
 } 
 
-let VisualMemUnitTest name (actualOut: DataPath<InstrLine>) paras inpAsm = 
+let VisualMemUnitTest name (actualOut: DataPath<InstrLine>) paras inpAsm expOutRegs = 
     testCase name <| fun () ->
         let _, expectedOut = RunVisualWithFlagsOut paras inpAsm
         // let addrList = List.map WA [paras.MemReadBase..4u..paras.MemReadBase+(12u*4u)]
@@ -117,26 +117,36 @@ let VisualMemUnitTest name (actualOut: DataPath<InstrLine>) paras inpAsm =
         //     |> Map.ofSeq
         // Expecto.Expect.equal actualOut.MM expectedMemMap "Memory doesn't match"   
 
-        let expectedRegMap = 
+        // let expectedRegMap = 
+        //     expectedOut.Regs
+        //     |> List.map (fun (R nr, v) -> register nr, uint32 v)
+        //     |> Map.ofList                              
+        // Expecto.Expect.equal actualOut.Regs expectedRegMap "Registers don't match"
+
+        let regAffectedName = 
+            expOutRegs |> List.map fst
+        let visOutRegsRelevant = 
             expectedOut.Regs
-            |> List.map (fun (R nr, v) -> register nr, uint32 v)
-            |> Map.ofList                              
-        Expecto.Expect.equal actualOut.Regs expectedRegMap "Registers don't match"
+            |> List.filter (fun (r,_) -> List.contains r regAffectedName)
+            |> List.sort
+        Expecto.Expect.equal visOutRegsRelevant (expOutRegs |> List.sort) <|
+                sprintf "Register outputs>\n%A\n<don't match expected outputs, src=%s" expectedOut.Regs inpAsm        
 
-let makeExecTest name inp = 
-    match execute inp testCPU with
-    | Ok resData -> VisualMemUnitTest name resData myTestParas inp     
-    | _ -> failwithf "fix this?"     
+// let makeExecTest name inp = 
+//     match execute inp testCPU with
+//     | Ok resData -> VisualMemUnitTest name resData myTestParas inp     
+//     | _ -> failwithf "fix this?"     
 
-let makeTest name inp = VisualMemUnitTest name testCPU myTestParas inp
+let makeTest name inp outp = VisualMemUnitTest name testCPU myTestParas inp outp
 
 
-[<Tests>]
+//[<Tests>]
 let tMem = 
     Expecto.Tests.testList "Executing LDR/STR tests" 
         [
             //makeExecTest "Normal STR" "LDR R3, [R2]"
-            makeTest "Adding" "ADD R1, R1, R1" //R1 = 20u result
+            //makeTest "Adding" "ADD R1, R1, R1" [R 1, 20] //R1 = 20u result
+            //VisualUnitTest myTestParas "testing" "ADD R1, R1, R1" "0000" [R 1, 20]
             //makeExecTest "Normal LDR" "LDR R0, [R1]"
         ]
     
