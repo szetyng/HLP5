@@ -206,5 +206,5 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
         | STR, None -> Result.map (fun memLoc -> executeSTR isByte memLoc d) effecAdd
         | LDR, Some B -> Result.map (fun memLoc -> executeLDR isByte memLoc d) effecAdd
         | STR, Some B -> Result.map (fun memLoc -> executeSTR isByte memLoc d) effecAdd
-
+ 
     executeLS instrName isByte data
