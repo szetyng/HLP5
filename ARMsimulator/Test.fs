@@ -75,18 +75,16 @@ let t1 =
         ]    
 
 let myTestParas = {defaultParas with 
-                    InitRegs = [0u ; 0x1004u ; 0x1000u ; 30u ; 40u ; 50u ; 60u ; 70u ; 
-                                80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u] 
+                    InitRegs = [4u ; 0x1004u ; 0u ; 0x100Cu ; 40u ; // R0 - R4
+                                0x1000u ; 60u ; 0x1030u ; 80u ; 0x1024u ;       // R5 - R9
+                                100u ; 0x101Cu ; 120u ; 0x1014u ; 140u]   // R10 - R14
                     MemReadBase = 0x1000u}
 //let myTestParas = defaultParas
-let testMemValList = 
-    [
-        10u ; 20u ; 30u ; 40u ; 50u ; 60u ; 70u ; 80u ; 90u ; 100u ; 110u ; 120u ; 130u 
-    ]   
-    // [
-    //     0u ; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u
-    // ]
-    //|> List.map DataLoc    
+let testMemValList = [
+                        10u ; 20u ; 30u ; 40u ;             // 0x1000 - 0x100C
+                        50u ; 60u ; 70u ; 80u ;             // 0x1010 - 0x101C
+                        90u ; 100u ; 110u ; 120u ; 130u     // 0x1020 - 0x1030
+                    ]       
 
 let testCPU:DataPath<Memory.InstrLine> = {
     Fl = {N=false ; C=false ; Z=false ; V=false};
@@ -95,7 +93,7 @@ let testCPU:DataPath<Memory.InstrLine> = {
             |> Map.ofList
     MM = 
         let addrList = List.map WA [myTestParas.MemReadBase..4u..myTestParas.MemReadBase+(12u*4u)]
-        Seq.zip addrList (testMemValList |> List.map DataLoc) 
+        Seq.zip addrList (List.map DataLoc testMemValList) 
         |> Map.ofSeq
 } 
 
@@ -127,10 +125,22 @@ let VisualMemUnitTest name (actualOut: DataPath<InstrLine>) paras inpAsm = // ex
         // Expecto.Expect.equal visOutRegsRelevant (expOutRegs |> List.sort) <|
         //         sprintf "Register outputs>\n%A\n<don't match expected outputs, src=%s" expectedOut.Regs inpAsm            
 
-let makeExecTest name inpStr = //outReg outMem = 
+let VisualErrorUnitTest name errActual errExpected  = 
+    testCase name <| fun () ->
+    Expecto.Expect.equal errActual errExpected "Memory doesn't match"  
+
+
+
+let makeExecTest name inpStr ifError = //outReg outMem = 
+    printfn "parse %A" (onlyParseLine inpStr)
     match execute inpStr testCPU with
-    | Ok resData -> VisualMemUnitTest name resData myTestParas inpStr //outReg outMem
-    | Error _ -> failwithf "error"
+    | Ok resData -> 
+        printfn "resData %A" resData
+        VisualMemUnitTest name resData myTestParas inpStr //outReg outMem
+    //| Error _ -> failwithf "error"
+    | Error e -> 
+        printfn "error %A" e
+        VisualErrorUnitTest name e ifError
     // printfn "Please work %A" (execute inpStr testCPU)
     // VisualMemUnitTest name testCPU myTestParas inpStr outReg
 
@@ -139,11 +149,14 @@ let makeExecTest name inpStr = //outReg outMem =
 let tMem = 
     testList "Executing LDR/STR tests" 
         [
-            makeExecTest "Normal STR" "STR R3, [R2]" //[R 3,30 ; R 2,0x1000] []
-            // NEVER RUN SUBTRACT WITH CommonTop.execute
-            //makeExecTest "Subtract" "SUB R0, R0, #1" [R 0, -1] //[] //R1 = 20u result
-            //VisualUnitTest myTestParas "testing" "ADD R0, R0, #1" "0000" [R 0, 10]
-            //makeExecTest "Normal LDR" "LDR R0, [R1]"
+            // makeExecTest "Normal STR" "STR R0, [R1]" ""
+            // makeExecTest "Normal LDR" "LDR R2, [R3]" ""
+            // makeExecTest "Normal STRB" "STRB R4, [R5]" ""
+            // makeExecTest "Normal LDRB" "LDRB R6, [R7]" ""
+            makeExecTest "Normal offset STR" "STR R8, [R9, #5]" "Incorrect formatting"
+            // makeExecTest "Normal offset LDR" "LDR R9, [R11, R0]" ""
+            // makeExecTest "Pre-indexed offset STRB" "STRB R10, [R11, #8]!" ""
+            // makeExecTest "Post-indexed offset LDR" "LDR R11, [R3], #16" ""
         ]
     
 

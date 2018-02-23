@@ -193,11 +193,14 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
                     match vOrR with
                     | Literal v -> add + v
                     | Reg r -> add + macRegs.[r]   
-            match isByte, (effecAdd' % 4u =0u), macMem.[WA effecAdd'] with    
-            | None, true, DataLoc _ -> Ok effecAdd'
-            | None, false, _ -> Error "Memory address accessed must be divisible by 4"   
-            | Some B, _, DataLoc _ -> Ok effecAdd'   
-            | _, _, Code _ -> Error "Not allowed to access this part of memory"                         
+            match isByte, (effecAdd' % 4u = 0u) with  
+            | None, true | Some B, _ ->
+                match macMem.[WA effecAdd'] with
+                | DataLoc _ -> Ok effecAdd' 
+                | Code _ -> Error "Not allowed to access this part of memory"  
+            | None, false -> 
+                printfn "ERROR HERE I AM"
+                Error "Memory address accessed must be divisible by 4"                     
         match typeLS, isByte with
         | LDR, None -> Result.map (fun memLoc -> executeLDR isByte memLoc d) effecAdd
         | STR, None -> Result.map (fun memLoc -> executeSTR isByte memLoc d) effecAdd
