@@ -138,17 +138,9 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
     let macMem = data.MM
     let macRegs = data.Regs
 
-    let executeLDR isByte memLoc d = 
-        let payload =
-            match macMem.[WA memLoc] with
-            | DataLoc da -> da // fix this?
-            | Code _ -> failwithf "What? Should not access this memory location"
-        // load the contents into register
+    let executeLOAD payload memLoc d = 
         let newRegs = 
-            let loadedReg = 
-                match isByte with
-                | None -> macRegs.Add (regCont, payload)
-                | Some B -> macRegs.Add (regCont, 0u) |> Map.add regCont payload
+            let loadedReg = macRegs.Add (regCont, payload)
             match off with
             | None | Some (_, Normal) -> loadedReg
             | Some (vOrR, PostIndexed) ->
@@ -157,35 +149,70 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
                 | Reg r -> macRegs.[r] |> fun v -> Map.add regAdd (memLoc + v) loadedReg             
             | Some (_, PreIndexed) -> Map.add regAdd memLoc loadedReg        
         {d with Regs=newRegs}   
-    
-    let executeSTR isByte memLoc d =
-        // add: address where we want to store contents to
-        let payload = 
-            match isByte with
-            | None -> macRegs.[regCont]
-            | Some B -> macRegs.[regCont] % 256u
-        // updating memory (i.e. storing the payload to the memory location)
+
+    let executeSTORE payload memLoc offsAdd d = 
         let newMem = macMem.Add ((WA memLoc) , (DataLoc payload))
         let newRegs = 
             match off with 
             | None | Some (_, Normal) -> macRegs
-            | Some(_, PreIndexed) -> macRegs.Add (regAdd, memLoc)
+            | Some(_, PreIndexed) -> macRegs.Add (regAdd, memLoc+offsAdd)
             | Some(vOrR, PostIndexed) -> 
                 match vOrR with
                 | Literal v -> macRegs.Add (regAdd, memLoc + v)
                 | Reg r -> macRegs.[r] |> fun v -> macRegs.Add (regAdd, memLoc + v)
-        {d with Regs=newRegs ; MM=newMem}   
+        {d with Regs=newRegs ; MM=newMem}  
 
-    // WILL WORK ON MODULARISING THIS LATER
-    // let executeLDRB payload = macRegs.Add (regCont, 0u) |> Map.add regCont payload
-    // let executeSTRB = macRegs.[regCont] % 256u
+    let getPayload memLoc = 
+        match memLoc with
+        | Some add ->
+            match macMem.[WA add] with
+            | DataLoc da -> da
+            | Code _ -> failwithf "What? Should not access this memory location"
+        | None -> macRegs.[regCont]
+
+           
+    let executeLDR memLoc d = 
+        let payload = getPayload (Some memLoc)
+        executeLOAD payload memLoc d        
+    
+    let executeSTR memLoc d =
+        // add: address where we want to store contents to
+        let payload = getPayload None
+        executeSTORE payload memLoc 0u d        
+
+    let executeLDRB baseAdd offsAdd d = // return smolPayload and baseAdd, then it's normal LDR?
+        let prepReg = Map.add regCont 0u macRegs
+        let payload = getPayload (Some baseAdd)
+        let smolPayload = 
+            match offsAdd with
+            | 0u -> payload
+            | 1u -> payload >>> 8
+            | 2u -> payload >>> 16
+            | 3u -> payload >>> 24
+            | _ -> failwithf "Impossible. Modulo 4" 
+        executeLOAD smolPayload baseAdd ({d with Regs=prepReg})          
+
+    let executeSTRB baseAdd offsAdd d = // return shiftedPayload and baseAdd, then it's normal STR
+        let payload = (getPayload None) % 256u
+        let restOfWord = 
+            match macMem.[WA baseAdd] with
+            | DataLoc p -> p
+            | Code _ -> failwithf "Not allowed to access this part of memory"
+        let shiftedPayload =     
+            match offsAdd with
+            | 0u -> payload ||| (restOfWord &&& 0xFFFFFF00u) 
+            | 1u -> (payload <<< 8) ||| (restOfWord &&& 0xFFFF00FFu) 
+            | 2u -> (payload <<< 16) ||| (restOfWord &&& 0xFF00FFFFu) 
+            | 3u -> (payload <<< 24) ||| (restOfWord &&& 0x00FFFFFFu) 
+            | _ -> failwithf "Impossible. Modulo 4"
+        executeSTORE shiftedPayload baseAdd offsAdd d             
 
 
     let executeLS typeLS isByte d = 
         // register stores address, get that address
         let add = macRegs.[regAdd]
         // address might have an offset, get the effective address
-        let effecAdd = 
+        let effecAdd, offsAddForB = 
             let effecAdd' = 
                 match off with
                 | None | Some (_, PostIndexed) -> add
@@ -193,18 +220,22 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
                     match vOrR with
                     | Literal v -> add + v
                     | Reg r -> add + macRegs.[r]   
-            match isByte, (effecAdd' % 4u = 0u) with  
-            | None, true | Some B, _ ->
-                match macMem.[WA effecAdd'] with
-                | DataLoc _ -> Ok effecAdd' 
-                | Code _ -> Error "Not allowed to access this part of memory"  
-            | None, false -> 
-                printfn "ERROR HERE I AM"
-                Error "Memory address accessed must be divisible by 4"                     
-        match typeLS, isByte with
-        | LDR, None -> Result.map (fun memLoc -> executeLDR isByte memLoc d) effecAdd
-        | STR, None -> Result.map (fun memLoc -> executeSTR isByte memLoc d) effecAdd
-        | LDR, Some B -> Result.map (fun memLoc -> executeLDR isByte memLoc d) effecAdd
-        | STR, Some B -> Result.map (fun memLoc -> executeSTR isByte memLoc d) effecAdd
+            match isByte, effecAdd' % 4u with  
+            | None, 0u ->
+                match macMem.[WA effecAdd'] with 
+                | DataLoc _ -> Ok effecAdd', None 
+                | Code _ -> Error "Not allowed to access this part of memory", None  
+            | Some B, offs -> 
+                let wordAddr = effecAdd' - offs
+                match macMem.[WA wordAddr] with
+                | DataLoc _ -> Ok wordAddr, Some offs                     
+                | Code _ -> Error "Not allowed to access this part of the memory", None                            
+            | None, _ -> Error "Memory address accessed must be divisible by 4", None                     
+        match typeLS, isByte, offsAddForB with
+        | LDR, None, _ -> Result.map (fun memLoc -> executeLDR memLoc d) effecAdd
+        | STR, None, _ -> Result.map (fun memLoc -> executeSTR memLoc d) effecAdd
+        | LDR, Some B, Some o -> Result.map (fun memLoc -> executeLDRB memLoc o d) effecAdd
+        | STR, Some B, Some o -> Result.map (fun memLoc -> executeSTRB memLoc o d) effecAdd
+        | _ -> failwithf "Impossible"
  
     executeLS instrName isByte data

@@ -132,14 +132,14 @@ let VisualErrorUnitTest name errActual errExpected  =
 
 
 let makeExecTest name inpStr ifError = //outReg outMem = 
-    printfn "parse %A" (onlyParseLine inpStr)
+    //printfn "parse %A" (onlyParseLine inpStr)
     match execute inpStr testCPU with
     | Ok resData -> 
-        printfn "resData %A" resData
+        //printfn "resData %A" resData
         VisualMemUnitTest name resData myTestParas inpStr //outReg outMem
     //| Error _ -> failwithf "error"
     | Error e -> 
-        printfn "error %A" e
+        //printfn "error %A" e
         VisualErrorUnitTest name e ifError
     // printfn "Please work %A" (execute inpStr testCPU)
     // VisualMemUnitTest name testCPU myTestParas inpStr outReg
@@ -153,11 +153,13 @@ let tMem =
             // makeExecTest "Normal LDR" "LDR R2, [R3]" ""
             // makeExecTest "Normal STRB" "STRB R4, [R5]" ""
             // makeExecTest "Normal LDRB" "LDRB R6, [R7]" ""
-            makeExecTest "Normal offset STR" "STR R8, [R9, #5]" "Incorrect formatting"
+            // makeExecTest "Normal offset STR" "STR R8, [R9, #4]" ""
             // makeExecTest "Normal offset LDR" "LDR R9, [R11, R0]" ""
-            // makeExecTest "Pre-indexed offset STRB" "STRB R10, [R11, #8]!" ""
+            makeExecTest "Pre-indexed offset STRB" "STRB R10, [R11, #7]!" ""
             // makeExecTest "Post-indexed offset LDR" "LDR R11, [R3], #16" ""
+            // makeExecTest "Normal offset STR" "STR R8, [R9, #5]" "Memory address accessed must be divisible by 4"
         ]
+
     
 
 [<EntryPoint>]

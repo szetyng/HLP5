@@ -1501,7 +1501,7 @@
         <cycles>1</cycles>
     </line>
     <line id="78">
-        <code>STR R8, [R9, #4]</code>
+        <code>STRB R10, [R11, #7]!</code>
         <register name="R0">0x4</register>
         <register name="R1">0x1004</register>
         <register name="R2">0x0</register>
@@ -1513,7 +1513,7 @@
         <register name="R8">0x50</register>
         <register name="R9">0x1024</register>
         <register name="R10">0x64</register>
-        <register name="R11">0x101C</register>
+        <register name="R11">0x1023</register>
         <register name="R12">0x78</register>
         <register name="R13">0x1014</register>
         <register name="R14">0x8C</register>
@@ -1533,7 +1533,7 @@
         <register name="R8">0x50</register>
         <register name="R9">0x1024</register>
         <register name="R10">0x64</register>
-        <register name="R11">0x101C</register>
+        <register name="R11">0x1023</register>
         <register name="R12">0x78</register>
         <register name="R13">0x1000</register>
         <register name="R14">0x8C</register>
@@ -1550,9 +1550,9 @@
         <register name="R5">0x3C</register>
         <register name="R6">0x46</register>
         <register name="R7">0x50</register>
-        <register name="R8">0x5A</register>
+        <register name="R8">0x6400005A</register>
         <register name="R9">0x64</register>
-        <register name="R10">0x50</register>
+        <register name="R10">0x6E</register>
         <register name="R11">0x78</register>
         <register name="R12">0x82</register>
         <register name="R13">0x1000</register>
