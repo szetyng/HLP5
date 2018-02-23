@@ -56,7 +56,7 @@ let makeParseLSTestList name listIOpairs =
     |> List.map (fun (i,pair) -> (makeOneTest i pair))
     |> Expecto.Tests.testList name
 
-//[<Tests>]
+[<Tests>]
 let t1 = 
     //let makeParseLSTests listIOpairs = makeParseLSTestList "LDR and STR parse tests" listIOpairs 
     makeParseLSTestList "LDR and STR parse tests"
@@ -70,8 +70,6 @@ let t1 =
             "LDR R10, R15]", Error "Incorrect formatting" // ERROR, NO BRACKETS
             "LDR R10, R15", Error "Incorrect formatting" // ERROR, NO BRACKETS
             "LDR R10, [R15, R2!]", Error "Incorrect formatting"
-            // SHOULD PASS
-            //"ldrb r10, [r15, #4]", Ok {Instr=LDR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 4u, Memory.Normal)} //failing
         ]    
 
 let myTestParas = {defaultParas with 
@@ -106,7 +104,8 @@ let VisualMemUnitTest name (actualOut: DataPath<InstrLine>) paras inpAsm = // ex
             memLocList
             |> Seq.zip addrList
             |> Map.ofSeq 
-        Expecto.Expect.equal actualOut.MM expectedMemMap "Memory doesn't match"   
+        Expecto.Expect.equal actualOut.MM expectedMemMap <|
+            sprintf "Memory doesn't match for assembler line: %s" inpAsm  
 
         let expectedRegMap = 
             expectedOut.Regs
@@ -114,50 +113,42 @@ let VisualMemUnitTest name (actualOut: DataPath<InstrLine>) paras inpAsm = // ex
             |> List.sort
             |> List.take 15 // to remove R15
             |> Map.ofList                                      
-        Expecto.Expect.equal actualOut.Regs expectedRegMap "Registers don't match"
+        Expecto.Expect.equal actualOut.Regs expectedRegMap <|
+            sprintf "Registers don't match for assembler line: %s" inpAsm         
 
-        // let regAffectedName = 
-        //     expOutRegs |> List.map fst
-        // let visOutRegsRelevant = 
-        //     expectedOut.Regs
-        //     |> List.filter (fun (r,_) -> List.contains r regAffectedName)
-        //     |> List.sort
-        // Expecto.Expect.equal visOutRegsRelevant (expOutRegs |> List.sort) <|
-        //         sprintf "Register outputs>\n%A\n<don't match expected outputs, src=%s" expectedOut.Regs inpAsm            
-
-let VisualErrorUnitTest name errActual errExpected  = 
+let VisualErrorUnitTest name errActual errExpected inpAsm = 
     testCase name <| fun () ->
-    Expecto.Expect.equal errActual errExpected "Memory doesn't match"  
+    Expecto.Expect.equal errActual errExpected <|
+        sprintf "Error executing line: %s" inpAsm
 
-
-
-let makeExecTest name inpStr ifError = //outReg outMem = 
-    //printfn "parse %A" (onlyParseLine inpStr)
-    match execute inpStr testCPU with
-    | Ok resData -> 
-        //printfn "resData %A" resData
-        VisualMemUnitTest name resData myTestParas inpStr //outReg outMem
-    //| Error _ -> failwithf "error"
-    | Error e -> 
-        //printfn "error %A" e
-        VisualErrorUnitTest name e ifError
-    // printfn "Please work %A" (execute inpStr testCPU)
-    // VisualMemUnitTest name testCPU myTestParas inpStr outReg
+let makeExecTestList execName listNameInpErr = 
+    let makeOneTest name inp err = 
+        match execute inp testCPU with
+        | Ok resData -> VisualMemUnitTest name resData myTestParas inp
+        | Error e -> VisualErrorUnitTest name e err inp        
+    listNameInpErr
+    |> List.map (fun (name, inpStr, ifErr) -> makeOneTest name inpStr ifErr)
+    |> Expecto.Tests.testList execName
 
 
 [<Tests>]
 let tMem = 
-    testList "Executing LDR/STR tests" 
+    // testList "Executing LDR/STR tests"
+    makeExecTestList "Executing LDR/STR tests"
         [
-            // makeExecTest "Normal STR" "STR R0, [R1]" ""
-            // makeExecTest "Normal LDR" "LDR R2, [R3]" ""
-            // makeExecTest "Normal STRB" "STRB R4, [R5]" ""
-            // makeExecTest "Normal LDRB" "LDRB R6, [R7]" ""
-            // makeExecTest "Normal offset STR" "STR R8, [R9, #4]" ""
-            // makeExecTest "Normal offset LDR" "LDR R9, [R11, R0]" ""
-            makeExecTest "Pre-indexed offset STRB" "STRB R10, [R11, #7]!" ""
-            // makeExecTest "Post-indexed offset LDR" "LDR R11, [R3], #16" ""
-            // makeExecTest "Normal offset STR" "STR R8, [R9, #5]" "Memory address accessed must be divisible by 4"
+            // "Normal STR" , "STR R0, [R1]" , "" 
+            // "Normal LDR" , "LDR R2, [R3]" , ""
+            // "Normal STR" , "STR R0, [R1]" , ""
+            // "Normal LDR" , "LDR R2, [R3]" , ""
+            // "Normal STRB" , "STRB R4, [R5]" , ""
+            // "Normal LDRB" , "LDRB R6, [R7]" , ""
+            // "Normal offset STR" , "STR R8, [R9, #4]" , ""
+            // "Normal offset LDR" , "LDR R9, [R11, R0]" , ""
+            // "Pre-indexed offset STRB" , "STRB R10, [R11, #7]!" , ""
+            // "Pre-indexed offset LDRB" , "LDRB R10, [R11, #7]!" , ""
+            // "Post-indexed offset LDRB" , "LDRB R10, [R11], R0" , ""
+            // "Post-indexed offset LDR" , "LDR R11, [R3], #16" , ""
+            // "Memory access error" , "STR R8, [R9, #5]" , "Memory address accessed must be divisible by 4"
         ]
 
     

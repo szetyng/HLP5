@@ -138,16 +138,16 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
     let macMem = data.MM
     let macRegs = data.Regs
 
-    let executeLOAD payload memLoc d = 
+    let executeLOAD payload memLoc offsAdd d = 
         let newRegs = 
             let loadedReg = macRegs.Add (regCont, payload)
             match off with
             | None | Some (_, Normal) -> loadedReg
             | Some (vOrR, PostIndexed) ->
                 match vOrR with
-                | Literal v -> Map.add regAdd (memLoc + v) loadedReg
-                | Reg r -> macRegs.[r] |> fun v -> Map.add regAdd (memLoc + v) loadedReg             
-            | Some (_, PreIndexed) -> Map.add regAdd memLoc loadedReg        
+                | Literal v -> Map.add regAdd (memLoc + v + offsAdd) loadedReg
+                | Reg r -> macRegs.[r] |> fun v -> Map.add regAdd (memLoc + v + offsAdd) loadedReg             
+            | Some (_, PreIndexed) -> Map.add regAdd (memLoc+offsAdd) loadedReg        
         {d with Regs=newRegs}   
 
     let executeSTORE payload memLoc offsAdd d = 
@@ -156,10 +156,10 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
             match off with 
             | None | Some (_, Normal) -> macRegs
             | Some(_, PreIndexed) -> macRegs.Add (regAdd, memLoc+offsAdd)
-            | Some(vOrR, PostIndexed) -> 
+            | Some(vOrR, PostIndexed) -> // shit, STRB
                 match vOrR with
-                | Literal v -> macRegs.Add (regAdd, memLoc + v)
-                | Reg r -> macRegs.[r] |> fun v -> macRegs.Add (regAdd, memLoc + v)
+                | Literal v -> macRegs.Add (regAdd, memLoc + v + offsAdd)
+                | Reg r -> macRegs.[r] |> fun v -> macRegs.Add (regAdd, memLoc + v + offsAdd)
         {d with Regs=newRegs ; MM=newMem}  
 
     let getPayload memLoc = 
@@ -173,7 +173,7 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
            
     let executeLDR memLoc d = 
         let payload = getPayload (Some memLoc)
-        executeLOAD payload memLoc d        
+        executeLOAD payload memLoc 0u d        
     
     let executeSTR memLoc d =
         // add: address where we want to store contents to
@@ -190,7 +190,7 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
             | 2u -> payload >>> 16
             | 3u -> payload >>> 24
             | _ -> failwithf "Impossible. Modulo 4" 
-        executeLOAD smolPayload baseAdd ({d with Regs=prepReg})          
+        executeLOAD smolPayload baseAdd offsAdd ({d with Regs=prepReg})          
 
     let executeSTRB baseAdd offsAdd d = // return shiftedPayload and baseAdd, then it's normal STR
         let payload = (getPayload None) % 256u
