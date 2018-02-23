@@ -1541,19 +1541,19 @@
         <cycles>1</cycles>
     </line>
     <line id="80">
-        <code>LDRB R10, [R11, #7]!</code>
+        <code>LDR R11, [R3], #16</code>
         <register name="R0">0x4</register>
         <register name="R1">0x1004</register>
         <register name="R2">0x0</register>
-        <register name="R3">0x100C</register>
+        <register name="R3">0x101C</register>
         <register name="R4">0x28</register>
         <register name="R5">0x1000</register>
         <register name="R6">0x3C</register>
         <register name="R7">0x1030</register>
         <register name="R8">0x50</register>
         <register name="R9">0x1024</register>
-        <register name="R10">0x44</register>
-        <register name="R11">0x1023</register>
+        <register name="R10">0x64</register>
+        <register name="R11">0x28</register>
         <register name="R12">0x78</register>
         <register name="R13">0x1020</register>
         <register name="R14">0x44400000</register>
@@ -1565,15 +1565,15 @@
         <register name="R0">0x4</register>
         <register name="R1">0x1004</register>
         <register name="R2">0x0</register>
-        <register name="R3">0x100C</register>
+        <register name="R3">0x101C</register>
         <register name="R4">0x28</register>
         <register name="R5">0x1000</register>
         <register name="R6">0x3C</register>
         <register name="R7">0x1030</register>
         <register name="R8">0x50</register>
         <register name="R9">0x1024</register>
-        <register name="R10">0x44</register>
-        <register name="R11">0x1023</register>
+        <register name="R10">0x64</register>
+        <register name="R11">0x28</register>
         <register name="R12">0x78</register>
         <register name="R13">0x1000</register>
         <register name="R14">0x44400000</register>

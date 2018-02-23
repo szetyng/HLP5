@@ -6,6 +6,8 @@ module Memory
 open CommonLex
 open CommonData
 open System.Xml
+open VisualTest
+open System
 
 type InstrName = LDR | STR
 type MemType = B
@@ -35,7 +37,7 @@ let memSpec = {
 let opCodes = opCodeExpand memSpec
     
 // makeLS needs to return Result<InstrLine,string>
-let makeLS root ls suffix = 
+let makeLS (root:string) ls suffix = 
     let typeLS =
         match root with
         | "LDR" -> LDR
@@ -170,6 +172,13 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
             | Code _ -> failwithf "What? Should not access this memory location"
         | None -> macRegs.[regCont]
 
+    let getEffecPayload payload offsAdd shift = 
+        match offsAdd with
+        | 0u -> payload, 0xFFFFFF00u
+        | 1u -> shift payload 8, 0xFFFF00FFu
+        | 2u -> shift payload 16, 0xFF00FFFFu
+        | 3u -> shift payload 24, 0x00FFFFFFu
+        | _ -> failwithf "Impossible. Modulo 4"
            
     let executeLDR memLoc d = 
         let payload = getPayload (Some memLoc)
@@ -184,12 +193,8 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
         let prepReg = Map.add regCont 0u macRegs
         let payload = getPayload (Some baseAdd)
         let smolPayload = 
-            match offsAdd with
-            | 0u -> payload
-            | 1u -> payload >>> 8
-            | 2u -> payload >>> 16
-            | 3u -> payload >>> 24
-            | _ -> failwithf "Impossible. Modulo 4" 
+            getEffecPayload payload offsAdd (>>>)
+            |> fun (p, _) -> p &&& 0xFFu 
         executeLOAD smolPayload baseAdd offsAdd ({d with Regs=prepReg})          
 
     let executeSTRB baseAdd offsAdd d = // return shiftedPayload and baseAdd, then it's normal STR
@@ -198,13 +203,9 @@ let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
             match macMem.[WA baseAdd] with
             | DataLoc p -> p
             | Code _ -> failwithf "Not allowed to access this part of memory"
-        let shiftedPayload =     
-            match offsAdd with
-            | 0u -> payload ||| (restOfWord &&& 0xFFFFFF00u) 
-            | 1u -> (payload <<< 8) ||| (restOfWord &&& 0xFFFF00FFu) 
-            | 2u -> (payload <<< 16) ||| (restOfWord &&& 0xFF00FFFFu) 
-            | 3u -> (payload <<< 24) ||| (restOfWord &&& 0x00FFFFFFu) 
-            | _ -> failwithf "Impossible. Modulo 4"
+        let shiftedPayload = 
+            getEffecPayload payload offsAdd (<<<)
+            |> fun (p, mask) -> p ||| (restOfWord &&& mask)
         executeSTORE shiftedPayload baseAdd offsAdd d             
 
 
