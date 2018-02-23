@@ -8,19 +8,15 @@ open VisualTest.Visual
 open VisualTest.VTest
 open VisualTest.VProgram
 
-open CommonTop
 open CommonData
 open CommonLex
 open Memory
 open DP
+open CommonTop
 
 open Expecto
 open FsCheck
 open System
-/// test the initProjectLexer code
-//let test = parseLine None (WA 0u)
-
-//let test = parseLine None (WA 0u) "STR R10, [R15]"
 
 let onlyParseLine (asmLine:string) = 
     let makeLineData opcode operands = {
@@ -79,16 +75,16 @@ let t1 =
         ]    
 
 let myTestParas = {defaultParas with 
-                    InitRegs = [0u ; 0u ; 0x1004u ; 30u ; 40u ; 50u ; 60u ; 70u ; 
+                    InitRegs = [0u ; 0x1004u ; 0x1000u ; 30u ; 40u ; 50u ; 60u ; 70u ; 
                                 80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u] 
                     MemReadBase = 0x1000u}
 //let myTestParas = defaultParas
 let testMemValList = 
     // [
-    //     10u ; 20u ; 30u ; 40u ; 50u ; 60u ; 70u ; 80u ; 90u ; 100u ; 110u ; 120u ; 130u ; 140u
+    //     10u ; 20u ; 30u ; 40u ; 50u ; 60u ; 70u ; 80u ; 90u ; 100u ; 110u ; 120u ; 130u 
     // ]   
     [
-        0u ; 55u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u
+        0u ; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u
     ]
     |> List.map DataLoc    
 
@@ -103,49 +99,60 @@ let testCPU:DataPath<Memory.InstrLine> = {
         |> Map.ofSeq
 } 
 
-let VisualMemUnitTest name (actualOut: DataPath<InstrLine>) paras inpAsm expOutRegs = 
+let VisualMemUnitTest name (actualOut: DataPath<InstrLine>) paras inpAsm expOutRegs expOutMem = 
     testCase name <| fun () ->
-        let _, expectedOut = RunVisualWithFlagsOut paras inpAsm
-        // let addrList = List.map WA [paras.MemReadBase..4u..paras.MemReadBase+(12u*4u)]
-        // //let memLocList = List.map DataLoc expectedOut.State.VMemData //|> List.rev
-        // let expectedState = decodeStateFromRegs expectedOut.RegsAfterPostlude
-        // let memLocList = expectedState.VMemData
-        // let expectedMemMap = 
-        //     memLocList
-        //     |> List.map DataLoc
-        //     |> Seq.zip addrList
-        //     |> Map.ofSeq
-        // Expecto.Expect.equal actualOut.MM expectedMemMap "Memory doesn't match"   
+        let expectedOut = RunVisualWithFlagsOut paras inpAsm
+        let addrList = List.map WA [paras.MemReadBase..4u..paras.MemReadBase+(12u*4u)]
+        let memLocList = List.map DataLoc expectedOut.State.VMemData |> List.rev
+        //let expectedState = decodeStateFromRegs expectedOut.RegsAfterPostlude
+        //let memLocList = expectedState.VMemData
+        let expectedMemMap = 
+            memLocList
+            //|> List.map DataLoc
+            |> Seq.zip addrList
+            |> Map.ofSeq
+        // let actLen = actualOut.MM |> Map.toList |> List.length      
+        // let visLen = expectedMemMap |> Map.toList |> List.length
+        // Expecto.Expect.equal actLen visLen "Memory"  
+        Expecto.Expect.equal actualOut.MM expectedMemMap "Memory doesn't match"   
 
-        // let expectedRegMap = 
-        //     expectedOut.Regs
-        //     |> List.map (fun (R nr, v) -> register nr, uint32 v)
-        //     |> Map.ofList                              
-        // Expecto.Expect.equal actualOut.Regs expectedRegMap "Registers don't match"
-
-        let regAffectedName = 
-            expOutRegs |> List.map fst
-        let visOutRegsRelevant = 
+        let expectedRegMap = 
             expectedOut.Regs
-            |> List.filter (fun (r,_) -> List.contains r regAffectedName)
+            |> List.map (fun (R nr, v) -> register nr, uint32 v)
             |> List.sort
-        Expecto.Expect.equal visOutRegsRelevant (expOutRegs |> List.sort) <|
-                sprintf "Register outputs>\n%A\n<don't match expected outputs, src=%s" expectedOut.Regs inpAsm        
+            |> List.take 15
+            |> Map.ofList                                      
+        Expecto.Expect.equal actualOut.Regs expectedRegMap "Registers don't match"
+
+        // let regAffectedName = 
+        //     expOutRegs |> List.map fst
+        // let visOutRegsRelevant = 
+        //     expectedOut.Regs
+        //     |> List.filter (fun (r,_) -> List.contains r regAffectedName)
+        //     |> List.sort
+        // Expecto.Expect.equal visOutRegsRelevant (expOutRegs |> List.sort) <|
+        //         sprintf "Register outputs>\n%A\n<don't match expected outputs, src=%s" expectedOut.Regs inpAsm        
 
 // let makeExecTest name inp = 
 //     match execute inp testCPU with
 //     | Ok resData -> VisualMemUnitTest name resData myTestParas inp     
 //     | _ -> failwithf "fix this?"     
 
-let makeTest name inp outp = VisualMemUnitTest name testCPU myTestParas inp outp
+let makeExecTest name inpStr outReg outMem = 
+    match execute inpStr testCPU with
+    | Ok resData -> VisualMemUnitTest name resData myTestParas inpStr outReg outMem
+    | Error _ -> failwithf "error"
+    // printfn "Please work %A" (execute inpStr testCPU)
+    // VisualMemUnitTest name testCPU myTestParas inpStr outReg
 
 
 [<Tests>]
 let tMem = 
-    Expecto.Tests.testList "Executing LDR/STR tests" 
+    testList "Executing LDR/STR tests" 
         [
-            //makeExecTest "Normal STR" "LDR R3, [R2]"
-            makeTest "Adding" "SUB R0, R0, #1" [R 0, -1] //R1 = 20u result
+            makeExecTest "Normal STR" "STR R3, [R2]" [R 3,30 ; R 2,0x1000] []
+            // NEVER RUN SUBTRACT WITH CommonTop.execute
+            //makeExecTest "Subtract" "SUB R0, R0, #1" [R 0, -1] //[] //R1 = 20u result
             //VisualUnitTest myTestParas "testing" "ADD R0, R0, #1" "0000" [R 0, 10]
             //makeExecTest "Normal LDR" "LDR R0, [R1]"
         ]

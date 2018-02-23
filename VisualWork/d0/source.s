@@ -2,9 +2,9 @@ MOV R0, #0
 ADDS R0, R0, R0
 MOVS R0, #1
 MOV R0, #0x0
-MOV R1, #0x0
-MOV R2, #0x4
-ADD R2, R2, #0x1000
+MOV R1, #0x4
+ADD R1, R1, #0x1000
+MOV R2, #0x1000
 MOV R3, #0x1e
 MOV R4, #0x28
 MOV R5, #0x32
@@ -19,11 +19,6 @@ MOV R13, #0x82
 MOV R14, #0x8c
 
 
-SUB R0, R0, #1
+STR R3, [R2]
 MOV R13, #0x1000
 LDMIA R13, {R0-R12}
-MOV R0, #0
-              ADDMI R0, R0, #8
-              ADDEQ R0, R0, #4
-              ADDCS R0, R0, #2
-              ADDVS R0, R0, #1

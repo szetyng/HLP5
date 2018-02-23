@@ -48,7 +48,7 @@ module VCommon =
 
     /// additional info extracted from Visual outputs by postlude.
     type VisState = {
-        VFlags: Flags
+        //VFlags: Flags
         VMemData: uint32 list
         }
 
@@ -158,7 +158,7 @@ module VData =
     /// Construct postlude assembly code
     /// memBase: base addr of memory locs read by postlude
     let POSTLUDE memBase =
-        READMEMORY memBase + READFLAGSINTOR0
+        READMEMORY memBase //+ READFLAGSINTOR0
 
 
     /// Construct wrapper code for simulation
@@ -180,20 +180,23 @@ module VData =
     /// as determined by postlude. E.g. flags from the standard postlude
     let decodeStateFromRegs outsAfter =
         /// Rn (n > 0) represents mem locations
+        //printfn "outsAfter %A" outsAfter
         let memLocs = 
             outsAfter
             |> List.filter (fun (R n,_) -> n >= 0 && n < 13)
             |> List.map (fun (R _, v) -> uint32 v)
-        let flagsInt = List.find (function | (R 0, _) -> true | _ -> false) outsAfter |> snd
-        let flagBool n = (flagsInt &&& (1 <<< n)) > 0
-        let flags =
-            { 
-                FN = flagBool 3
-                FZ = flagBool 2
-                FC = flagBool 1
-                FV = flagBool 0
-            }
-        { VFlags = flags ; VMemData = memLocs}
+        //printfn "memLocs %A" memLocs        
+        // let flagsInt = List.find (function | (R 0, _) -> true | _ -> false) outsAfter |> snd
+        // let flagBool n = (flagsInt &&& (1 <<< n)) > 0
+        // let flags =
+        //     { 
+        //         FN = flagBool 3
+        //         FZ = flagBool 2
+        //         FC = flagBool 1
+        //         FV = flagBool 0
+        //     }
+        //{ VFlags = flags ; VMemData = memLocs}
+        {VMemData = memLocs}
 
 /// Code to read/write structured data from Visual log file (XML) and Cache files
 /// This does not use existing F# serialisers or type providers (that would do this nicely)
@@ -478,7 +481,8 @@ module Visual =
         let res = RunVisual {paras with Prelude=main; Postlude=post} src
         match res with
         | Error e -> failwithf "Error reading Visual Log %A" e
-        | Ok ({ Regs=_; State={VFlags=fl}} as vso) -> fl, vso
+        //| Ok ({ Regs=_; State={VFlags=fl}} as vso) -> fl, vso
+        | Ok vso -> vso
  
     /// convenience function, convert 4 char string to NZCV status flag record
     let strToFlags s =
@@ -560,8 +564,9 @@ module VTest =
     ///
     let VisualUnitTest paras name src (flagsExpected:string) (outExpected: (Out * int) list) =
         testCase name <| fun () ->
-            let flagsActual, outActual = RunVisualWithFlagsOut paras src
-            Expecto.Expect.equal flagsActual (flagsExpected |> strToFlags) "Status flags don't match"
+            //let flagsActual, outActual = RunVisualWithFlagsOut paras src
+            let outActual = RunVisualWithFlagsOut paras src
+            //Expecto.Expect.equal flagsActual (flagsExpected |> strToFlags) "Status flags don't match"
             let outRegsNoted = 
                 outExpected 
                 |> List.map fst
@@ -572,21 +577,21 @@ module VTest =
             Expecto.Expect.equal outActualNoted (outExpected |> List.sort) <|
                 sprintf "Register outputs>\n%A\n<don't match expected outputs, src=%s" outActual.Regs src
 
-    let VisualFrameworkTest paras =
-        testCase "Framework test failed" <| fun () ->
-            let parasExpected = 
-                paras.InitRegs
-                |> List.indexed
-                |> List.map (fun (n,v) -> R n, int v)
+    // let VisualFrameworkTest paras =
+    //     testCase "Framework test failed" <| fun () ->
+    //         let parasExpected = 
+    //             paras.InitRegs
+    //             |> List.indexed
+    //             |> List.map (fun (n,v) -> R n, int v)
 
-            let flagsActual, outActual = RunVisualWithFlagsOut paras ""
-            let outSorted = 
-                outActual.Regs
-                |> List.sort
-                |> List.take 15
-            Expecto.Expect.equal flagsActual  paras.InitFlags "Status flags don't match"
-            Expecto.Expect.equal outSorted parasExpected <|
-                sprintf "Register outputs>\n%A\n<don't match expected outputs" outActual.Regs
+    //         let flagsActual, outActual = RunVisualWithFlagsOut paras ""
+    //         let outSorted = 
+    //             outActual.Regs
+    //             |> List.sort
+    //             |> List.take 15
+    //         Expecto.Expect.equal flagsActual  paras.InitFlags "Status flags don't match"
+    //         Expecto.Expect.equal outSorted parasExpected <|
+    //             sprintf "Register outputs>\n%A\n<don't match expected outputs" outActual.Regs
 
 
     type rType = {
@@ -599,39 +604,39 @@ module VTest =
          r.R8;r.R9;r.R10;r.R11;r.R12;r.R13;r.R14]
       
 
-    let VisualFrameworkRun (regs: rType,flags:Flags) =
-        let performTest() =
-            let initRegs = 
-                rType2List regs
-                |> List.map uint32
+    // let VisualFrameworkRun (regs: rType,flags:Flags) =
+    //     let performTest() =
+    //         let initRegs = 
+    //             rType2List regs
+    //             |> List.map uint32
         
-            let expectedRegs =
-                initRegs
-                |> List.indexed
-                |> List.map (fun (n,v) -> R n, int v)
+    //         let expectedRegs =
+    //             initRegs
+    //             |> List.indexed
+    //             |> List.map (fun (n,v) -> R n, int v)
 
-            let flagsActual, outActual = 
-                    RunVisualWithFlagsOut { 
-                        defaultParas with 
-                            InitFlags=flags;
-                            InitRegs=initRegs
-                        } ""
-            let actualRegs = 
-                outActual.Regs
-                |> List.sort
-                |> List.take 15
-            let flagsOK = flagsActual = flags
-            let regsOK = actualRegs = expectedRegs 
-            if not flagsOK then 
-                printfn "Framework error: Bad flags: %A" flagsActual
-                System.Console.ReadKey() |> ignore
-            if not regsOK then 
-                printfn "Framework error: Bad registers %A" actualRegs
-                System.Console.ReadKey() |> ignore
-            flagsOK && regsOK
-        match flags with
-        | {FN=true;FZ=true} -> true // prevent test with imposisble input
-        | _ -> performTest()
+    //         let flagsActual, outActual = 
+    //                 RunVisualWithFlagsOut { 
+    //                     defaultParas with 
+    //                         InitFlags=flags;
+    //                         InitRegs=initRegs
+    //                     } ""
+    //         let actualRegs = 
+    //             outActual.Regs
+    //             |> List.sort
+    //             |> List.take 15
+    //         let flagsOK = flagsActual = flags
+    //         let regsOK = actualRegs = expectedRegs 
+    //         if not flagsOK then 
+    //             printfn "Framework error: Bad flags: %A" flagsActual
+    //             System.Console.ReadKey() |> ignore
+    //         if not regsOK then 
+    //             printfn "Framework error: Bad registers %A" actualRegs
+    //             System.Console.ReadKey() |> ignore
+    //         flagsOK && regsOK
+    //     match flags with
+    //     | {FN=true;FZ=true} -> true // prevent test with imposisble input
+    //     | _ -> performTest()
             
     let testParas = defaultParas
  
@@ -656,22 +661,22 @@ module VTest =
     /// implements random property-based tests of the framework
     /// tests that read/write of registers and flags is consistent for random
     /// input values
-    let frametests =        
-        let fsConfig = {
-                FsCheckConfig.defaultConfig with
-                    replay = Some (0,0) // seed for RNG. Means that the same tests are done each run
-                                        // replace by None for a random time-based seed and therefore
-                                        // new tests each time that will not cache
-                    maxTest = 100       // number of random tests
-                }
-        testPropertyWithConfig fsConfig "Flags and registers are preserved" VisualFrameworkRun
+    // let frametests =        
+    //     let fsConfig = {
+    //             FsCheckConfig.defaultConfig with
+    //                 replay = Some (0,0) // seed for RNG. Means that the same tests are done each run
+    //                                     // replace by None for a random time-based seed and therefore
+    //                                     // new tests each time that will not cache
+    //                 maxTest = 100       // number of random tests
+    //             }
+    //     testPropertyWithConfig fsConfig "Flags and registers are preserved" VisualFrameworkRun
 
 
     //[<Tests>]
     let tests = 
         testList "Minimal Visual Unit Tests"
             [
-            VisualFrameworkTest defaultParas
+            //VisualFrameworkTest defaultParas
             vTest "SUB test" "SUB R0, R0, #1" "0000" [R 0, -1]
             //vTest "SUBS test" "SUBS R0, R0, #0" "0110" [R 0, 0]
             VisualUnitTest defaultParas "testing" "SUB R0, R0, #1" "0000" [R 0, -1]
