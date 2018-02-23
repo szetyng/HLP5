@@ -80,13 +80,13 @@ let myTestParas = {defaultParas with
                     MemReadBase = 0x1000u}
 //let myTestParas = defaultParas
 let testMemValList = 
-    // [
-    //     10u ; 20u ; 30u ; 40u ; 50u ; 60u ; 70u ; 80u ; 90u ; 100u ; 110u ; 120u ; 130u 
-    // ]   
     [
-        0u ; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u
-    ]
-    |> List.map DataLoc    
+        10u ; 20u ; 30u ; 40u ; 50u ; 60u ; 70u ; 80u ; 90u ; 100u ; 110u ; 120u ; 130u 
+    ]   
+    // [
+    //     0u ; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u; 0u
+    // ]
+    //|> List.map DataLoc    
 
 let testCPU:DataPath<Memory.InstrLine> = {
     Fl = {N=false ; C=false ; Z=false ; V=false};
@@ -95,32 +95,26 @@ let testCPU:DataPath<Memory.InstrLine> = {
             |> Map.ofList
     MM = 
         let addrList = List.map WA [myTestParas.MemReadBase..4u..myTestParas.MemReadBase+(12u*4u)]
-        Seq.zip addrList testMemValList 
+        Seq.zip addrList (testMemValList |> List.map DataLoc) 
         |> Map.ofSeq
 } 
 
-let VisualMemUnitTest name (actualOut: DataPath<InstrLine>) paras inpAsm expOutRegs expOutMem = 
+let VisualMemUnitTest name (actualOut: DataPath<InstrLine>) paras inpAsm = // expOutRegs expOutMem = 
     testCase name <| fun () ->
-        let expectedOut = RunVisualWithFlagsOut paras inpAsm
+        let expectedOut = RunVisualWithFlagsOut paras inpAsm testMemValList
         let addrList = List.map WA [paras.MemReadBase..4u..paras.MemReadBase+(12u*4u)]
         let memLocList = List.map DataLoc expectedOut.State.VMemData |> List.rev
-        //let expectedState = decodeStateFromRegs expectedOut.RegsAfterPostlude
-        //let memLocList = expectedState.VMemData
         let expectedMemMap = 
             memLocList
-            //|> List.map DataLoc
             |> Seq.zip addrList
-            |> Map.ofSeq
-        // let actLen = actualOut.MM |> Map.toList |> List.length      
-        // let visLen = expectedMemMap |> Map.toList |> List.length
-        // Expecto.Expect.equal actLen visLen "Memory"  
+            |> Map.ofSeq 
         Expecto.Expect.equal actualOut.MM expectedMemMap "Memory doesn't match"   
 
         let expectedRegMap = 
             expectedOut.Regs
             |> List.map (fun (R nr, v) -> register nr, uint32 v)
             |> List.sort
-            |> List.take 15
+            |> List.take 15 // to remove R15
             |> Map.ofList                                      
         Expecto.Expect.equal actualOut.Regs expectedRegMap "Registers don't match"
 
@@ -131,16 +125,11 @@ let VisualMemUnitTest name (actualOut: DataPath<InstrLine>) paras inpAsm expOutR
         //     |> List.filter (fun (r,_) -> List.contains r regAffectedName)
         //     |> List.sort
         // Expecto.Expect.equal visOutRegsRelevant (expOutRegs |> List.sort) <|
-        //         sprintf "Register outputs>\n%A\n<don't match expected outputs, src=%s" expectedOut.Regs inpAsm        
+        //         sprintf "Register outputs>\n%A\n<don't match expected outputs, src=%s" expectedOut.Regs inpAsm            
 
-// let makeExecTest name inp = 
-//     match execute inp testCPU with
-//     | Ok resData -> VisualMemUnitTest name resData myTestParas inp     
-//     | _ -> failwithf "fix this?"     
-
-let makeExecTest name inpStr outReg outMem = 
+let makeExecTest name inpStr = //outReg outMem = 
     match execute inpStr testCPU with
-    | Ok resData -> VisualMemUnitTest name resData myTestParas inpStr outReg outMem
+    | Ok resData -> VisualMemUnitTest name resData myTestParas inpStr //outReg outMem
     | Error _ -> failwithf "error"
     // printfn "Please work %A" (execute inpStr testCPU)
     // VisualMemUnitTest name testCPU myTestParas inpStr outReg
@@ -150,7 +139,7 @@ let makeExecTest name inpStr outReg outMem =
 let tMem = 
     testList "Executing LDR/STR tests" 
         [
-            makeExecTest "Normal STR" "STR R3, [R2]" [R 3,30 ; R 2,0x1000] []
+            makeExecTest "Normal STR" "STR R3, [R2]" //[R 3,30 ; R 2,0x1000] []
             // NEVER RUN SUBTRACT WITH CommonTop.execute
             //makeExecTest "Subtract" "SUB R0, R0, #1" [R 0, -1] //[] //R1 = 20u result
             //VisualUnitTest myTestParas "testing" "ADD R0, R0, #1" "0000" [R 0, 10]

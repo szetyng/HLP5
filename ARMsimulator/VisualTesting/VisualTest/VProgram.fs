@@ -128,6 +128,13 @@ module VData =
         SETREG 0 mDat +
         SETREG 2 mAddr +
         "STR R0, [R2]\r\n"
+
+    let STOREALLMEM (memVals: uint32 list) (memBase: uint32) = 
+        let addrList = [memBase..4u..memBase+(uint32 (memVals.Length*4))]
+        Seq.zip addrList memVals
+        |> List.ofSeq
+        |> List.map (fun (addr, v) -> STORELOC v addr)
+        |> String.concat ""
     
     /// Generates assembler which Sets registers R0-R14
     /// from the supplied list of values
@@ -168,8 +175,9 @@ module VData =
     /// asm: assembly code to test
     /// returns (n, maincode, postlude)
     /// n is length of postlude
-    let GETWRAPPER regs flags memBase =
+    let GETWRAPPER regs flags memBase writeMem =
         let main =
+            STOREALLMEM writeMem memBase +
             SETFLAGS flags +
             SETALLREGS regs +
             "\r\n"
@@ -476,8 +484,8 @@ module Visual =
            
     /// Adds postlude to assembly code to detect flags values.
     /// Returns flags , registers (before flag detection code)
-    let RunVisualWithFlagsOut paras src =
-        let main, post = VData.GETWRAPPER paras.InitRegs paras.InitFlags paras.MemReadBase
+    let RunVisualWithFlagsOut paras src writeMem =
+        let main, post = VData.GETWRAPPER paras.InitRegs paras.InitFlags paras.MemReadBase writeMem
         let res = RunVisual {paras with Prelude=main; Postlude=post} src
         match res with
         | Error e -> failwithf "Error reading Visual Log %A" e
@@ -562,20 +570,20 @@ module VTest =
     /// run an expecto test of VisUAL
     /// name - name of test
     ///
-    let VisualUnitTest paras name src (flagsExpected:string) (outExpected: (Out * int) list) =
-        testCase name <| fun () ->
-            //let flagsActual, outActual = RunVisualWithFlagsOut paras src
-            let outActual = RunVisualWithFlagsOut paras src
-            //Expecto.Expect.equal flagsActual (flagsExpected |> strToFlags) "Status flags don't match"
-            let outRegsNoted = 
-                outExpected 
-                |> List.map fst
-            let outActualNoted = 
-                outActual.Regs 
-                |> List.filter (fun (r,_) -> List.contains r outRegsNoted)
-                |> List.sort
-            Expecto.Expect.equal outActualNoted (outExpected |> List.sort) <|
-                sprintf "Register outputs>\n%A\n<don't match expected outputs, src=%s" outActual.Regs src
+    // let VisualUnitTest paras name src (flagsExpected:string) (outExpected: (Out * int) list) =
+    //     testCase name <| fun () ->
+    //         //let flagsActual, outActual = RunVisualWithFlagsOut paras src
+    //         let outActual = RunVisualWithFlagsOut paras src
+    //         //Expecto.Expect.equal flagsActual (flagsExpected |> strToFlags) "Status flags don't match"
+    //         let outRegsNoted = 
+    //             outExpected 
+    //             |> List.map fst
+    //         let outActualNoted = 
+    //             outActual.Regs 
+    //             |> List.filter (fun (r,_) -> List.contains r outRegsNoted)
+    //             |> List.sort
+    //         Expecto.Expect.equal outActualNoted (outExpected |> List.sort) <|
+    //             sprintf "Register outputs>\n%A\n<don't match expected outputs, src=%s" outActual.Regs src
 
     // let VisualFrameworkTest paras =
     //     testCase "Framework test failed" <| fun () ->
@@ -641,21 +649,21 @@ module VTest =
     let testParas = defaultParas
  
 
-    let vTest = VisualUnitTest testParas
+    // let vTest = VisualUnitTest testParas
 
 
 
     /// to test the testbench, create many tests with assembler
     /// this is enough for each test to need being run separately
     
-    let manyTests n = 
-        [0..n] 
-        |> List.map (fun n -> 
-            let n' = 1 + (n % 254)
-            vTest (sprintf "SUBS%d test" n') (sprintf "SUBS R0, R0, #%d" n') "1000" [R 0, -n'])
+    // let manyTests n = 
+    //     [0..n] 
+    //     |> List.map (fun n -> 
+    //         let n' = 1 + (n % 254)
+    //         vTest (sprintf "SUBS%d test" n') (sprintf "SUBS R0, R0, #%d" n') "1000" [R 0, -n'])
 
     //[<Tests>]
-    let many = testList "Many pointless tests" (manyTests 10)
+    // let many = testList "Many pointless tests" (manyTests 10)
 
     //[<Tests>]
     /// implements random property-based tests of the framework
@@ -673,16 +681,16 @@ module VTest =
 
 
     //[<Tests>]
-    let tests = 
-        testList "Minimal Visual Unit Tests"
-            [
-            //VisualFrameworkTest defaultParas
-            vTest "SUB test" "SUB R0, R0, #1" "0000" [R 0, -1]
-            //vTest "SUBS test" "SUBS R0, R0, #0" "0110" [R 0, 0]
-            VisualUnitTest defaultParas "testing" "SUB R0, R0, #1" "0000" [R 0, -1]
-            // vTest "This ADDS test should fail" "ADDS R0, R0, #4" "0000" [R 0, 4; R 1, 0] 
-            // R1 should be 10 but is specified here as 0
-            ]
+    // let tests = 
+    //     testList "Minimal Visual Unit Tests"
+    //         [
+    //         //VisualFrameworkTest defaultParas
+    //         vTest "SUB test" "SUB R0, R0, #1" "0000" [R 0, -1]
+    //         //vTest "SUBS test" "SUBS R0, R0, #0" "0110" [R 0, 0]
+    //         VisualUnitTest defaultParas "testing" "SUB R0, R0, #1" "0000" [R 0, -1]
+    //         // vTest "This ADDS test should fail" "ADDS R0, R0, #4" "0000" [R 0, 4; R 1, 0] 
+    //         // R1 should be 10 but is specified here as 0
+    //         ]
     
 
 
