@@ -1,17 +1,13 @@
 # Todo
 - Document STR/LDR executions properly
 - Fix executeAnyInstr in CommonTop 
-- Create unit tests for LDR/STR executions
-- Write proper error codes for LDR/STR executions
-- Start understanding VisualTesting
+- Try negative offsets
 
 ## Delayed todo
 - Write specification for parsing and simulation codee
 
 ## Error when:  
 1. Absence of `#` in front of offset values (rmb to add functionality for hex and bin)
-2. Missing brackets
-3. Currently not accepting lower case instructions
 
 ## Memory locations:
 - Can only be accessed by LDR and STR instructions
