@@ -31,6 +31,26 @@ _Table 2: Description of the instructions_
   
 _Table 3: Description of the different types of offsets_
   
-`OFFSET` can be stated as a positive literal (in decimal) or stored in a register.  
+`OFFSET` can be stated as a positive literal (in decimal) or stored in a register. 
 
+## Implementation
+### Parsing
+
+
+### Execution
+
+## Testing
+### Parsing
+### Execution
+
+## Differences from VisUAL
+In testing, can only test for 13 memory locations.
+Case-sensitive, only accepts assembler lines in all uppercase. Plan 
+
+## Changes in top-level code / VisUAL test framework
+Executing from CommonTop
+Getting rid of flags
+
+## Usage
+How to call from CommonTop. Integration with the rest of the group.
   
