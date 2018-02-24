@@ -14,9 +14,9 @@ type MemType = B
 type OffsetVal = Literal of uint32 | Reg of RName
 type OffsetType = Normal | PreIndexed | PostIndexed
 
-type InstrLine = 
+type Instr = 
     {
-        Instr: InstrName;
+        InstrN: InstrName;
         Type: MemType option;
         RContents: RName;   // register holding the contents to be loaded/stored to/from (LDR/STR respectively)
         RAdd: RName;        // register holding the address
@@ -52,11 +52,14 @@ let makeLS (root:string) ls suffix =
 
     // no more failwithf's, very possible for errors here
     let operandLst = (ls.Operands).Split(',') |> Array.toList    
+    /// converts string to RName
     let getRName (regStr:string) = 
         let regNameStr = regStr.Trim [|'[' ; ']'|]
         match Map.containsKey regNameStr regNames with
         | true -> regNames.[regNameStr] |> Ok
         | false -> Error "Invalid register name"
+    /// converts string to OffsetVal 
+    /// can be literal or stored in register   
     let getOffsetVal (valStr:string) = 
         match valStr with
         | dec when dec.Contains("#") -> 
@@ -66,29 +69,33 @@ let makeLS (root:string) ls suffix =
             match reg.Trim [|']' ; '!'|] |> getRName with 
             | Ok r -> Ok (Reg r)
             | Error e -> Error e
-        | _ -> failwithf "Incorrect offset value" // will never happen?
+        | _ -> Error "Incorrect offset format" //ie forgetting '#'
+    /// converts string to RName, to get RAdd
     let getRn ((reg:string),offset) = 
         match reg.StartsWith("["), reg.EndsWith("]"), offset, getRName reg with
         | true, true, None, Ok r  -> Ok r
         | true, false, Some PreIndexed, Ok r | true, false, Some Normal, Ok r -> Ok r
         | true, true, Some PostIndexed, Ok r-> Ok r
         | _, _, _, Error e -> Error e
-        | _ -> Error "Incorrect formatting of offset" 
+        | _ -> Error "Incorrect offset format" 
 
     let rContents = Result.bind getRName (Ok operandLst.[0])
+    // RAdd
     let rnVal = 
         let rn = operandLst.[1]
         match operandLst.Length with
+        // two operands represent no offset
         | 2 ->     
             Ok (rn,None) |> Result.bind getRn
+        // three operands represent some kind of offset        
         | 3 -> 
-            let op2 = operandLst.[2]
+            let op2 = operandLst.[2] // represents the offset itself
             match op2.EndsWith("]!"), op2.EndsWith("]"), op2.Contains("!"), op2.Contains("[") with
             | true, false, true, false -> Ok (rn,(Some PreIndexed)) |> Result.bind getRn
             | false, false, false, false -> Ok (rn,(Some PostIndexed)) |> Result.bind getRn
             | false, true, false, false -> Ok (rn,(Some Normal)) |> Result.bind getRn
-            | _ -> Error "rnVal error" //"Incorrect way of setting offset"                  
-        | _ -> Error "rnVal error"        
+            | _ -> Error "Incorrect rnVal format" //"Incorrect way of setting offset"                  
+        | _ -> Error "Incorrect formatting"        
     let offsetVal = 
         match operandLst.Length with
         | 2 -> Ok None
@@ -104,35 +111,35 @@ let makeLS (root:string) ls suffix =
         | _ -> Error "Too many operands" 
 
     let instrDummy = {
-        Instr=typeLS; Type=resSuffix ; RContents=R1 ; 
-        RAdd=R1 ; Offset=None }       // RAdd is dummy 
+        InstrN=typeLS; Type=resSuffix ; RContents=R1 ; 
+        RAdd=R1 ; Offset=None }      
 
     match rContents, rnVal, offsetVal with
     | Ok rc, Ok ra, Ok offsetVal -> Ok {instrDummy with RContents=rc ; RAdd=ra ; Offset=offsetVal}
     | _ -> Error "Incorrect formatting"
-    //| Error _,_,_ | _,Error _,_ | _,_,Error _ -> Error "Incorrect formatting"
+
         
 /// main function to parse a line of assembler
 /// ls contains the line input
 /// and other state needed to generate output
 /// the result is None if the opcode does not match
 /// otherwise it is Ok Parse or Error (parse error string)
-let parse (ls: LineData) : Result<Parse<InstrLine>,string> option =
+let parse (ls: LineData) : Result<Parse<Instr>,string> option =
     let parse' (instrC, (root,suffix,pCond)) =
         match instrC with
         | MEM ->
             match makeLS root ls suffix with
             | Ok parsedInstr -> Ok { PInstr= parsedInstr ; PLabel = None ; PSize = 4u; PCond = pCond }
             | Error e -> Error e
-        | _ -> Error "Wrong instruction class passed to the Memory module"        
+        | _ -> failwithf "Wrong instruction class passed to the Memory module"        // or error?
     Map.tryFind ls.OpCode opCodes
     |> Option.map parse'
 
 /// Parse Active Pattern used by top-level code
 let (|IMatch|_|)  = parse
 //**********************************************Execution************************************************************//
-let executeMemInstr (ins:InstrLine) (data: DataPath<InstrLine>) =
-    let instrName = ins.Instr
+let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
+    let instrName = ins.InstrN
     let isByte = ins.Type
     let off = ins.Offset
     let regAdd = ins.RAdd

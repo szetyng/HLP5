@@ -34,7 +34,7 @@ let testMemValList = [
                     ]       
 
 // dummy CPUdata
-let testCPU:DataPath<Memory.InstrLine> = {
+let testCPU:DataPath<Memory.Instr> = {
     Fl = {N=false ; C=false ; Z=false ; V=false};
     Regs = Seq.zip [R0;R1;R2;R3;R4;R5;R6;R7;R8;R9;R10;R11;R12;R13;R14] myTestParas.InitRegs
             |> List.ofSeq
@@ -83,7 +83,7 @@ let makeParseLSTestList name listIOpairs =
     |> List.map (fun (i,pair) -> (makeOneTest i pair))
     |> Expecto.Tests.testList name
 
-let VisualMemUnitTest name (actualOut: DataPath<InstrLine>) paras inpAsm = // expOutRegs expOutMem = 
+let VisualMemUnitTest name (actualOut: DataPath<Memory.Instr>) paras inpAsm = // expOutRegs expOutMem = 
     testCase name <| fun () ->
         let expectedOut = RunVisualWithFlagsOut paras inpAsm testMemValList
         let addrList = List.map WA [paras.MemReadBase..4u..paras.MemReadBase+(12u*4u)]
@@ -123,10 +123,10 @@ let parseUnitTest =
     //let makeParseLSTests listIOpairs = makeParseLSTestList "LDR and STR parse tests" listIOpairs 
     makeParseLSTestList "LDR and STR parse tests"
         [
-            "STRB R10, [R15, #5]!" , Ok {Instr=STR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 5u, PreIndexed)}
-            "LDR R4, [R8], #3", Ok {Instr=LDR ; Type=None; RContents=R4; RAdd=R8 ; Offset=Some (Literal 3u, PostIndexed)}
-            "LDRB R7, [R11, #11]", Ok {Instr=LDR ; Type=Some B; RContents=R7; RAdd=R11 ; Offset=Some (Literal 11u, Memory.Normal)} 
-            "STR R5, [R2]", Ok {Instr=STR ; Type=None; RContents=R5; RAdd=R2 ; Offset=None}
+            "STRB R10, [R15, #5]!" , Ok {InstrN=STR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 5u, PreIndexed)}
+            "LDR R4, [R8], #3", Ok {InstrN=LDR ; Type=None; RContents=R4; RAdd=R8 ; Offset=Some (Literal 3u, PostIndexed)}
+            "LDRB R7, [R11, #11]", Ok {InstrN=LDR ; Type=Some B; RContents=R7; RAdd=R11 ; Offset=Some (Literal 11u, Memory.Normal)} 
+            "STR R5, [R2]", Ok {InstrN=STR ; Type=None; RContents=R5; RAdd=R2 ; Offset=None}
             "LDR R10, [R15, ", Error "Incorrect formatting" //failing. Good? 
             "LDR R10, [R15" , Error "Incorrect formatting" //ERROR, NO BRACKETS
             "LDR R10, R15]", Error "Incorrect formatting" // ERROR, NO BRACKETS
