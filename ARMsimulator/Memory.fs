@@ -186,15 +186,18 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
         | 2u -> shift payload 16, 0xFF00FFFFu
         | 3u -> shift payload 24, 0x00FFFFFFu
         | _ -> failwithf "Impossible. Modulo 4"
+
+    let executeLSWord src execType memLoc d = 
+        getPayload src
+        |> fun p -> execType p memLoc 0u d     
            
-    let executeLDR memLoc d = 
-        let payload = getPayload (Some memLoc)
-        executeLOAD payload memLoc 0u d        
+    // let executeLDR memLoc d = 
+    //     getPayload (Some memLoc)
+    //     |> fun p -> executeLOAD p memLoc 0u d    
     
-    let executeSTR memLoc d =
-        // add: address where we want to store contents to
-        let payload = getPayload None
-        executeSTORE payload memLoc 0u d        
+    //let executeSTR memLoc d = 
+        // getPayload None
+        // |> fun p -> executeSTORE p memLoc 0u d       
 
     let executeLDRB baseAdd offsAdd d = // return smolPayload and baseAdd, then it's normal LDR?
         let prepReg = Map.add regCont 0u macRegs
@@ -240,8 +243,10 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
                 | Code _ -> Error "Not allowed to access this part of the memory", None                            
             | None, _ -> Error "Memory address accessed must be divisible by 4", None                     
         match typeLS, isByte, offsAddForB with
-        | LDR, None, _ -> Result.map (fun memLoc -> executeLDR memLoc d) effecAdd
-        | STR, None, _ -> Result.map (fun memLoc -> executeSTR memLoc d) effecAdd
+        | LDR, None, _ -> Result.map (fun memLoc -> executeLSWord (Some memLoc) executeLOAD memLoc d) effecAdd
+        //| LDR, None, _ -> Result.map (fun memLoc -> executeLDR memLoc d) effecAdd
+        | STR, None, _ -> Result.map (fun memLoc -> executeLSWord None executeSTORE memLoc d) effecAdd
+        //| STR, None, _ -> Result.map (fun memLoc -> executeSTR memLoc d) effecAdd
         | LDR, Some B, Some o -> Result.map (fun memLoc -> executeLDRB memLoc o d) effecAdd
         | STR, Some B, Some o -> Result.map (fun memLoc -> executeSTRB memLoc o d) effecAdd
         | _ -> failwithf "Impossible"
