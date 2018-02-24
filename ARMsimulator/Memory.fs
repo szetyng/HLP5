@@ -195,17 +195,23 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
     //     getPayload (Some memLoc)
     //     |> fun p -> executeLOAD p memLoc 0u d    
     
-    //let executeSTR memLoc d = 
-        // getPayload None
-        // |> fun p -> executeSTORE p memLoc 0u d       
+    // let executeSTR memLoc d = 
+    //     getPayload None
+    //     |> fun p -> executeSTORE p memLoc 0u d       
 
     let executeLDRB baseAdd offsAdd d = // return smolPayload and baseAdd, then it's normal LDR?
         let prepReg = Map.add regCont 0u macRegs
-        let payload = getPayload (Some baseAdd)
-        let smolPayload = 
-            getEffecPayload payload offsAdd (>>>)
-            |> fun (p, _) -> p &&& 0xFFu 
-        executeLOAD smolPayload baseAdd offsAdd ({d with Regs=prepReg})          
+        
+        getPayload (Some baseAdd)
+        |> fun p -> getEffecPayload p offsAdd (>>>)
+        |> fun (shiftedP, _) -> shiftedP &&& 0xFFu
+        |> fun effecP -> executeLOAD effecP baseAdd offsAdd ({d with Regs=prepReg})
+
+        // let payload = getPayload (Some baseAdd)
+        // let smolPayload = 
+        //     getEffecPayload payload offsAdd (>>>)
+        //     |> fun (p, _) -> p &&& 0xFFu 
+        // executeLOAD smolPayload baseAdd offsAdd ({d with Regs=prepReg})          
 
     let executeSTRB baseAdd offsAdd d = // return shiftedPayload and baseAdd, then it's normal STR
         let payload = (getPayload None) % 256u

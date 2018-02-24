@@ -59,22 +59,22 @@ Any error encountered is propagated through and caught at the final pattern matc
 ```
 executeMemInstr
 |> executeLS
-|> executeLDR
+|> executeLSWord
 |> executeLOAD
 ```
 `executeLS`: Checks that the effective address is divisible by four
-`executeLDR`: Obtains the payload - which is the word stored in `RSrc`/`RContents` - from memory
+`executeLSWord`: Obtains the payload - which is the word stored in `RSrc`/`RContents` - from memory
 `executeLOAD`: Updates the register map field of `DataPath` to represent the payload being loaded to a register from memory, and pre- or post-indexing of `RSrc` as required.
 
 #### STR
 ```
 executeMemInstr
 |> executeLS
-|> executeSTR
+|> executeLSWord
 |> executeSTORE
 ```
 `executeLS`: Checks that the effective address is divisible by four
-`executeSTR`: Obtains the payload - which is the word stored in `RSrc`/`RContents` - from the register map
+`executeLSWord`: Obtains the payload - which is the word stored in `RSrc`/`RContents` - from the register map
 `executeSTORE`: Updates the memory map field of `DataPath` to represent the payload being stored to memory from a register. Also updates the register map if required by pre- or post-indexing.
 
 #### LDRB
