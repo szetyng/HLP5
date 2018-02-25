@@ -17,10 +17,20 @@ type OffsetType = Normal | PreIndexed | PostIndexed
 
 type Instr = 
     {
+        /// to represent either LDR or STR
         InstrN: InstrName;
+        /// to represent the suffix B, if present
         Type: MemType option;
+        /// to represent the data-sotring register
+        /// RDest in LDR{B}
+        /// RSrc in STR{B}
         RContents: RName;   // register holding the contents to be loaded/stored to/from (LDR/STR respectively)
+        /// to represent the address-storing register
+        /// RSrc in LDR{B}
+        /// RDest in STR{B}
         RAdd: RName;        // register holding the address
+        /// to represent the type of offset and its value, if present
+        /// offset value can be a literal or stored in a register
         Offset: (OffsetVal * OffsetType) option
     }
 
@@ -45,7 +55,7 @@ let memSpec = {
 /// map of all possible opcodes recognised
 let opCodes = opCodeExpand memSpec
     
-// makeLS needs to return Result<InstrLine,string>
+// real parsing done here    
 let makeLS (root:string) ls suffix = 
     let typeLS =
         match root with
@@ -142,11 +152,13 @@ let makeLS (root:string) ls suffix =
             | true, false, true, false -> Ok (rn,(Some PreIndexed)) |> Result.bind getRn
             | false, false, false, false -> Ok (rn,(Some PostIndexed)) |> Result.bind getRn
             | false, true, false, false -> Ok (rn,(Some Normal)) |> Result.bind getRn
-            | _ -> Error "Incorrect rnVal format" //"Incorrect way of setting offset"                  
+            | _ -> Error "Incorrect rnVal format"                 
         | _ -> Error "Incorrect formatting"        
     let offsetVal = 
         match operandLst.Length with
+        // two operands represent no offset
         | 2 -> Ok None
+        // three operands represent some kind of offset
         | 3 ->
             let op2 = operandLst.[2]
             let value = Ok op2 |> Result.bind getOffsetVal 
