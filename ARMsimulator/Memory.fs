@@ -147,34 +147,38 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
     let macMem = data.MM
     let macRegs = data.Regs
 
-    let executeLOAD memLoc offsAdd d payload = 
+    /// Updates the register map to load wordy payload into a register 
+    /// Also updates register RAdd if required by pre- or post-indexing 
+    let executeLOAD (memLoc:WAddr) (offsAdd:uint32) (d:DataPath<Instr>) (payload:uint32) = 
         let newRegs = 
             let loadedReg = macRegs.Add (regCont, payload)
-            match off with
-            | None | Some (_, Normal) -> loadedReg
-            | Some (vOrR, PostIndexed) ->
+            match off, memLoc with
+            | None, _ | Some (_, Normal), _ -> loadedReg
+            | Some (vOrR, PostIndexed), WA addr ->
                 match vOrR with
-                | Literal v -> Map.add regAdd (memLoc + v + offsAdd) loadedReg
-                | Reg r -> macRegs.[r] |> fun v -> Map.add regAdd (memLoc + v + offsAdd) loadedReg             
-            | Some (_, PreIndexed) -> Map.add regAdd (memLoc+offsAdd) loadedReg        
+                | Literal v -> Map.add regAdd (addr + v + offsAdd) loadedReg
+                | Reg r -> macRegs.[r] |> fun v -> Map.add regAdd (addr + v + offsAdd) loadedReg             
+            | Some (_, PreIndexed), WA addr -> Map.add regAdd (addr + offsAdd) loadedReg        
         {d with Regs=newRegs}   
 
-    let executeSTORE memLoc offsAdd d payload = 
-        let newMem = macMem.Add ((WA memLoc) , (DataLoc payload))
+    /// Updates the memory map to store wordy payload into memory
+    /// Also updates register RAdd if required by pre- or post-indexing
+    let executeSTORE (memLoc:WAddr) (offsAdd:uint32) (d:DataPath<Instr>) (payload:uint32) = 
+        let newMem = macMem.Add ((memLoc) , (DataLoc payload))
         let newRegs = 
-            match off with 
-            | None | Some (_, Normal) -> macRegs
-            | Some(_, PreIndexed) -> macRegs.Add (regAdd, memLoc+offsAdd)
-            | Some(vOrR, PostIndexed) -> // shit, STRB
+            match off, memLoc with 
+            | None, _ | Some (_, Normal), _ -> macRegs
+            | Some(_, PreIndexed), WA addr -> macRegs.Add (regAdd, addr+offsAdd)
+            | Some(vOrR, PostIndexed), WA addr -> // shit, STRB
                 match vOrR with
-                | Literal v -> macRegs.Add (regAdd, memLoc + v + offsAdd)
-                | Reg r -> macRegs.[r] |> fun v -> macRegs.Add (regAdd, memLoc + v + offsAdd)
+                | Literal v -> macRegs.Add (regAdd, addr + v + offsAdd)
+                | Reg r -> macRegs.[r] |> fun v -> macRegs.Add (regAdd, addr + v + offsAdd)
         {d with Regs=newRegs ; MM=newMem}  
 
     let getPayload memLoc = 
         match memLoc with
         | Some add ->
-            match macMem.[WA add] with
+            match macMem.[add] with
             | DataLoc da -> da
             | Code _ -> failwithf "What? Should not access this memory location"
         | None -> macRegs.[regCont]
@@ -187,45 +191,48 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
         | 3u -> shift payload 24, 0x00FFFFFFu
         | _ -> failwithf "Impossible. Modulo 4"
 
-    let executeLSWord src execType memLoc d = 
+    /// Get payload from memory or from register, based on type of LS instruction
+    /// Some src: address where payload is located for LDR instruction
+    /// None: payload is stored in register, for STR instruction  
+    let executeLSWord src execType (memLoc:WAddr) (d:DataPath<Instr>) : DataPath<Instr> = 
         getPayload src
         |> fun p -> execType memLoc 0u d p     
-           
-    // let executeLDR memLoc d = 
-    //     getPayload (Some memLoc)
-    //     |> fun p -> executeLOAD p memLoc 0u d    
-    
-    // let executeSTR memLoc d = 
-    //     getPayload None
-    //     |> fun p -> executeSTORE p memLoc 0u d       
-
-    let executeLDRB baseAdd offsAdd d = // return smolPayload and baseAdd, then it's normal LDR?
+             
+    /// Processes 32-bit word found in word-alligned base address 
+    /// by locating the relevant byte and converting into small 8-bit long payload
+    /// and clears register RDest preemptively. 
+    /// Normal LDR with the small payload. 
+    /// Passes base address and offset for correct pre-/post-indexing
+    let executeLDRB (baseAdd: WAddr) (offsAdd: uint32) (d:DataPath<Instr>) : DataPath<Instr> =
         let prepReg = Map.add regCont 0u macRegs
-        
-        // get all 4 bytes from word-alligned base address in memory
-        // shift and AND with 0xFFu to only get relevant byte -> payload
-        getPayload (Some baseAdd)
+       
+        getPayload (Some baseAdd) // get all 4 bytes from word-alligned base address in memory
         |> getShiftedPayload offsAdd (>>>)
-        |> fun (shiftedP, _) -> shiftedP &&& 0xFFu
+        |> fun (shiftedP, _) -> shiftedP &&& 0xFFu // only get relevant byte
         |> executeLOAD baseAdd offsAdd ({d with Regs=prepReg})     
 
-    let executeSTRB baseAdd offsAdd d = // return shiftedPayload and baseAdd, then it's normal STR
+    /// Processes 32-bit word found in register RSrc 
+    /// into its least significant 8-bit byte-y version.
+    /// Shifts byte into correct position of the rest of the 32-bit word in the base address.
+    /// Normal STR with this tacked on payload.
+    /// Passes base address and offset for correct pre-/post-indexing
+    let executeSTRB (baseAdd: WAddr) offsAdd (d:DataPath<Instr>) : DataPath<Instr> = 
+        // will be ANDed with relevant mask to clear the byte-address (base addr + offset addr)
         let restOfWord = 
-            match macMem.[WA baseAdd] with
+            match macMem.[baseAdd] with
             | DataLoc p -> p
             | Code _ -> failwithf "Not allowed to access this part of memory"
                 
         getPayload None
         |> fun p -> p % 256u // get LS 8bits of value in register RSrc -> byte
         |> getShiftedPayload offsAdd (<<<) // shift the byte-y payload into correct position
-        |> fun (shiftedP, mask) -> shiftedP ||| (restOfWord &&& mask) // AND restOfWord with relevant mask to clear the byte-address (bass addr + offset addr)
-        // OR it with shifted payload to get correct word in word-alligned base address -> effective payload
+        |> fun (shiftedP, mask) -> shiftedP ||| (restOfWord &&& mask) // get correct word in word-alligned base address
         |> executeSTORE baseAdd offsAdd d   
                   
     let executeLS typeLS isByte d = 
         // register stores address, get that address
         let add = macRegs.[regAdd]
-        // address might have an offset, get the effective address
+        // address might have a normal/pre-indexed offset, get the effective address
         let effecAdd, offsAddForB = 
             let effecAdd' = 
                 match off with
@@ -237,12 +244,13 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
             match isByte, effecAdd' % 4u with  
             | None, 0u ->
                 match macMem.[WA effecAdd'] with 
-                | DataLoc _ -> Ok effecAdd', None 
+                | DataLoc _ -> Ok (WA effecAdd'), None 
                 | Code _ -> Error "Not allowed to access this part of memory", None  
+            // LDRB/STRB: break down byte address into word-alligned base address and its offset            
             | Some B, offs -> 
                 let wordAddr = effecAdd' - offs
                 match macMem.[WA wordAddr] with
-                | DataLoc _ -> Ok wordAddr, Some offs                     
+                | DataLoc _ -> Ok (WA wordAddr), Some offs                     
                 | Code _ -> Error "Not allowed to access this part of the memory", None                            
             | None, _ -> Error "Memory address accessed must be divisible by 4", None                     
         match typeLS, isByte, offsAddForB with

@@ -42,7 +42,7 @@ In the `Memory` module, an `Instr` record type has been introduced to represent 
 - `Type`: to represent the suffix B, if it exists
 - `RContents`: to represent the data-storing register; `RDest` in LDR{B}, `RSrc` in STR{B}
 - `RAdd`: to represent the address-storing register; `RSrc` in LDR{B}, `RDest` in STR{B}
-- `Offset`: to represent the type of offset and its value, if it exists, as the offset can be a literal or stored in a register.
+- `Offset`: to represent the type of offset and its value, if it exists, as the offset can be a literal or stored in a register  
 
 `makeLS` first converts the `root` and the `suffix` to their respective `Instr.InstrN` and `Instr.Type`. It then splits the string of operands and converts them into a list. `Instr.RContents` is obtained from the first operand using a function `getRName`.
 
@@ -53,7 +53,9 @@ If there are three operands, the instruction involves offset addressing. `getrnV
 Any error encountered is propagated through and caught at the final pattern matching; `makeLS` returns said error to inform the top-level module that the assembler line has been incorrectly formatted. If there has been no errors, `makeLS` constructs and returns a proper `Instr` record to the top-level module.
 
 ### Execution
-`executeMemInstr` is called from `CommonTop` and takes a `Memory.Instr` record and a `DataPath` type as inputs. It then calls the nested `executeLS` function, whose purpose is to identify the correct opcode (out of LDR, STR, LDRB and STRB) and processes the effective address to be accessed. An error is thrown here if the instruction is trying to access memory locations used for storing code. The flow of data for the different opcodes are detailed in the following sections.
+`executeMemInstr` is called from `CommonTop` and takes a `Memory.Instr` record and a `DataPath` type as inputs. It then calls the nested `executeLS` function, whose purpose is to identify the correct opcode (out of LDR, STR, LDRB and STRB) and processes the effective address to be accessed. An error is thrown here if the instruction is trying to access memory locations used for storing code.   
+
+`executeMemInstr` either returns `DataPath` as acted accordingly upon by the assembler line instruction, or an error with the appropriate error message if the instruction is invalid. The flow of data for the different opcodes are detailed in the following sections.   
 
 #### LDR
 ```
@@ -85,8 +87,8 @@ executeMemInstr
 |> executeLOAD
 ```
 `executeLS`: Obtains the base address and offset required for the instruction's byte-addressing (vs word-addressing in regular LDR). Required due to specifying WAddr only as multiples of four  
-`executeLDRB`: Sets the register `RDest` to zero as a way to preemptively set its most significant 24 bits to zero. Obtains the payload - which is the word stored in the base address - from memory  
-
+`executeLDRB`: Sets the register `RDest` to zero as a way to preemptively set its most significant 24 bits to zero. Obtains the payload - which is the word stored in the base address - from memory. Processes the word payload to get the effective payload - the 8 bits stored in the byte-alligned effective address    
+`executeLOAD`: Updates the register map field of `DataPath` to represent the payload being loaded to a register from memory, and pre- or post-indexing of `RSrc` as required
 
 
 #### STRB
@@ -96,9 +98,9 @@ executeMemInstr
 |> executeSTRB
 |> executeSTORE
 ```
-
-
-
+`executeLS`: Obtains the base address and offset required for the instruction's byte-addressing (vs word-addressing in regular STR). Required due to specifying WAddr only as multiples of four   
+`executeSTRB`: Obtains the payload - which is the word stored in `RSrc` - from the register map. Processes the word payload to get the effective payload - the least significant 8 bits in said word located in the relevant byte position, with the rest of the word in the base address unchanged   
+`executeSTORE`: Updates the memory map field of `DataPath` to represent the payload being stored to memory from a register. Also updates the register map if required by pre- or post-indexing   
 
 
 ## Testing
@@ -113,7 +115,7 @@ Btw, **should implement more tests**. Make sure that all the instructions have b
 ## Differences from VisUAL
 In testing, can only test for 13 memory locations.  
 Curently case-sensitive, only accepts assembler lines in all uppercase. Plan to implement in group stage, toUpper all assembler lines. More efficient than doing it at a module level.  
-VisUAL allows `OFFSET` to be a register, literals or shifted register. **I allow register and decimals, will fix soon.**  
+VisUAL allows `OFFSET` to be a register, numerical expressions (eg: `#4+4`) or shifted register. **I allow register and decimals, will fix soon.**  
 VisUAL allows **negative literals**, do mine?  
 DataLoc -> specify what is meant here  
   
