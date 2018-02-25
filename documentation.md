@@ -62,9 +62,9 @@ executeMemInstr
 |> executeLSWord
 |> executeLOAD
 ```
-`executeLS`: Checks that the effective address is divisible by four
-`executeLSWord`: Obtains the payload - which is the word stored in `RSrc`/`RContents` - from memory
-`executeLOAD`: Updates the register map field of `DataPath` to represent the payload being loaded to a register from memory, and pre- or post-indexing of `RSrc` as required.
+`executeLS`: Checks that the effective address is divisible by four  
+`executeLSWord`: Obtains the payload - which is the word stored in `RSrc`/`RContents` - from memory  
+`executeLOAD`: Updates the register map field of `DataPath` to represent the payload being loaded to a register from memory, and pre- or post-indexing of `RSrc` as required  
 
 #### STR
 ```
@@ -73,9 +73,9 @@ executeMemInstr
 |> executeLSWord
 |> executeSTORE
 ```
-`executeLS`: Checks that the effective address is divisible by four
-`executeLSWord`: Obtains the payload - which is the word stored in `RSrc`/`RContents` - from the register map
-`executeSTORE`: Updates the memory map field of `DataPath` to represent the payload being stored to memory from a register. Also updates the register map if required by pre- or post-indexing.
+`executeLS`: Checks that the effective address is divisible by four  
+`executeLSWord`: Obtains the payload - which is the word stored in `RSrc`/`RContents` - from the register map  
+`executeSTORE`: Updates the memory map field of `DataPath` to represent the payload being stored to memory from a register. Also updates the register map if required by pre- or post-indexing  
 
 #### LDRB
 ```
@@ -84,8 +84,18 @@ executeMemInstr
 |> executeLDRB
 |> executeLOAD
 ```
-`executeLS`: Obtains the base address and offset required for the instruction's byte-addressing (vs word-addressing in regular LDR). Required due to specifying WAddr only as multiples of four. 
-`executeLDRB`: Sets the register `RDest` to zero as a way to preemptively set its most significant 24 bits to zero. Obtains the payload - which is the word stored in the base address - from memory. 
+`executeLS`: Obtains the base address and offset required for the instruction's byte-addressing (vs word-addressing in regular LDR). Required due to specifying WAddr only as multiples of four  
+`executeLDRB`: Sets the register `RDest` to zero as a way to preemptively set its most significant 24 bits to zero. Obtains the payload - which is the word stored in the base address - from memory  
+
+
+
+#### STRB
+```
+executeMemInstr
+|> executeLS
+|> executeSTRB
+|> executeSTORE
+```
 
 
 
@@ -93,20 +103,25 @@ executeMemInstr
 
 ## Testing
 ### Parsing
+Explanation of tests for parsing. All are unit tests, what and how are they tested? Walkthrough of the flow.
+
 ### Execution
+Explanation of tests for execution. Explanation of using VisUAL test framework. All are unit tests, what and how are they tested? Walkthrough of the flow. Mention testing for errors/incorrect assembler lines. 
+
+Btw, **should implement more tests**. Make sure that all the instructions have been tested. Similarly for parsing or no? If not implementing random tests, mention why (?) - left for last.
 
 ## Differences from VisUAL
-In testing, can only test for 13 memory locations.
-Curently case-sensitive, only accepts assembler lines in all uppercase. Plan to implement in group stage, toUpper all assembler lines. More efficient than doing it at a module level.
-VisUAL allows `OFFSET` to be a register, literals or shifted register. I allow register and decimals, will fix soon.
-VisUAL allows negative literals, do mine?
-DataLoc
-
+In testing, can only test for 13 memory locations.  
+Curently case-sensitive, only accepts assembler lines in all uppercase. Plan to implement in group stage, toUpper all assembler lines. More efficient than doing it at a module level.  
+VisUAL allows `OFFSET` to be a register, literals or shifted register. **I allow register and decimals, will fix soon.**  
+VisUAL allows **negative literals**, do mine?  
+DataLoc -> specify what is meant here  
+  
 
 ## Changes in top-level code / VisUAL test framework
-Executing from CommonTop
-Getting rid of flags
+Executing from CommonTop  
+Getting rid of flags  
 
 ## Usage
-How to call from CommonTop. Integration with the rest of the group.
+How to call from CommonTop. Integration with the rest of the group.  
   

@@ -221,7 +221,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
             | Code _ -> failwithf "Not allowed to access this part of memory"
         let shiftedPayload = 
             getEffecPayload payload offsAdd (<<<)
-            |> fun (p, mask) -> p ||| (restOfWord &&& mask)
+            |> fun (p, mask) -> p ||| (restOfWord &&& mask) // doesn't feel right to me?
         executeSTORE shiftedPayload baseAdd offsAdd d             
 
 
