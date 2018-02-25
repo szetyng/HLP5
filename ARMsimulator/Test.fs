@@ -143,7 +143,7 @@ let execUnitTest =
             "Normal LDR" , "LDR R2, [R3]" , ""
             "Normal STRB" , "STRB R4, [R5]" , ""
             "Normal LDRB" , "LDRB R6, [R7]" , ""
-            "Normal offset STR" , "STR R8, [R9, #-8]" , ""
+            "Normal offset STR" , "STR R8, [R9, #0xC]" , ""
             "Normal offset LDR" , "LDR R9, [R11, R0]" , ""
             "Pre-indexed offset STRB" , "STRB R10, [R11, #7]!" , ""
             "Pre-indexed offset LDRB" , "LDRB R10, [R11, #7]!" , ""

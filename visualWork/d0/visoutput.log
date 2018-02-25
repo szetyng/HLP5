@@ -1541,7 +1541,7 @@
         <cycles>1</cycles>
     </line>
     <line id="80">
-        <code>STR R8, [R9, #-8]</code>
+        <code>STR R8, [R9, #0xC]</code>
         <register name="R0">0x4</register>
         <register name="R1">0x1004</register>
         <register name="R2">0x0</register>
@@ -1594,7 +1594,7 @@
         <register name="R9">0x64</register>
         <register name="R10">0x6E</register>
         <register name="R11">0x78</register>
-        <register name="R12">0x8C</register>
+        <register name="R12">0x50</register>
         <register name="R13">0x1000</register>
         <register name="R14">0x44400000</register>
         <register name="R15">0x144</register>

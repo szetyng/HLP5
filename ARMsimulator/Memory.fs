@@ -79,20 +79,29 @@ let makeLS (root:string) ls suffix =
         | 16 -> List.map (fun n -> hexa.[n]) en
         | 2 -> List.map (fun n -> bina.[n]) en
         | _ -> failwithf "Wrong base"
+        // any errors in incorrect formatting of hex/bin will come from map error
     
     let baseBtoUint (nrStr:string) (ba:int) =
-        let nrDigits = nrStr.Length
         let charArr = [for c in nrStr -> c]
+        let charLst = 
+            match charArr.[0] with
+            | '-' -> List.filter ((<>)'-') charArr 
+            | _ -> charArr
+        let nrDigits = charLst.Length
         let revActValArr = 
-            convCharToIntWithMap charArr ba
+            convCharToIntWithMap charLst ba
             |> List.rev  
         let timey n x =
             match n with
             | 0 ->1
             | n' -> List.reduce (*) [for i in 1..n' -> ba]
         let state = [for i in 0..nrDigits-1 -> timey i ba]
-        List.map2 (*) revActValArr state
-        |> List.reduce (+)                  
+        let nr = 
+            List.map2 (*) revActValArr state
+            |> List.reduce (+)  
+        match charArr.[0] with
+        | '-' -> 0 - nr
+        | _ -> nr                        
     
   
     /// converts string to OffsetVal 
@@ -272,9 +281,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
         |> fun p -> p % 256u // get LS 8bits of value in register RSrc -> byte
         |> getShiftedPayloadMask offsAdd (<<<) // shift the byte-y payload into correct position
         |> fun (shiftedP, mask) -> shiftedP ||| (restOfWord &&& mask) // get correct word in word-alligned base address
-        |> executeSTORE baseAdd offsAdd d   
-    let x = -4
-    uint32 x              
+        |> executeSTORE baseAdd offsAdd d               
 
     let executeLS typeLS isByte d = 
         // register stores address, get that address

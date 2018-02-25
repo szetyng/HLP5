@@ -115,7 +115,7 @@ Btw, **should implement more tests**. Make sure that all the instructions have b
 ## Differences from VisUAL
 In testing, can only test for 13 memory locations.  
 Curently case-sensitive, only accepts assembler lines in all uppercase. Plan to implement in group stage, toUpper all assembler lines. More efficient than doing it at a module level.  
-VisUAL allows `OFFSET` to be a register, numerical expressions (eg: `#4+4`) or shifted register. **I allow register and decimals, will fix soon.**  
+VisUAL allows `OFFSET` to be a register, numerical expressions (eg: `#4+4`) or shifted register. **I allow register and decimals, will fix soon.** Numerical expression: will integrate with arithmetic modules in the group phase.
 VisUAL allows **negative literals**, do mine?  
 DataLoc -> specify what is meant here  
   
