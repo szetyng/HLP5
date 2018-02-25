@@ -122,10 +122,17 @@ The robustness of the module's ability to execute or reject assembly lines is te
 In Load/Store memory instructions, it is important for the ARM simulator to not mess with memory addresses that are not being specifically allocated for data usage. VisUAL also does not allow access to memory locations that are not word-aligned (not applicable to LDRB/STRB), a practice followed by this ARM simulator . Thus, `execErrorUnitTest` is used to check for such cases. Btw does it check for poor formats?
 
 ## Differences from VisUAL
+|VisUAL     |`Memory.fs`    |Reasons        |
+|-----------|---------------|---------------|
+|Inputs are case-insensitive    |Only accepts inputs in all uppercase   |The whole programme can easily be changed to accept assembler lines in a case-insensitive manner by forcing all inputs to uppercase. It is more efficient to implement this functionality in the top-level during the group phase of the project than to do the same conversion in each invididual module. |
+|`OFFSET` can be a register, a numerical expression or a shifted register   |`OFFSET` can be a register or a literal    |Numerical expressions and shifted registers will be implemented in the group phase by integrating with the arithmetic instructions module and shift instructions module respectively.  |
+|Allows access to memory locations from address ... onwards | Allows access to memory locations corresponding to `DataLoc` tag in `MemLoc` D.U.     |When building the map in top-level, can specify which memory locations are allowed to be accessed more clearly.    |
+
+
 1. The `Memory` module only accepts assembler line inputs that are in all uppercase, while VisUAL is case-insensitive to inputs.   
 The whole programme can easily be changed to accept assembler lines in a case-insensitive manner by forcing all inputs to uppercase. It is more efficient to implement this functionality in the top-level during the group phase of the project than to do the same conversion in each invididual module.
 
-2. ViSUAL allows `OFFSET` to be a register, a numerical expression or a shifted register. The `Memory` module allows `OFFSET` to be a register or a literal.  
+2. VisUAL allows `OFFSET` to be a register, a numerical expression or a shifted register. The `Memory` module allows `OFFSET` to be a register or a literal.  
 Numerical expressions and shifted registers will be implemented in the group phase by integrating with the arithmetic instructions module and shift instructions module respectively.
 
 3. VisUAL allows access to memory locations from address ... onwards. `Memory` module allows access whenever the `MachineMemory` map in `DataPath` corresponds to `DataLoc`, not `Code`.  
