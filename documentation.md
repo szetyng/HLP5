@@ -31,7 +31,7 @@ _Table 2: Description of the instructions_
   
 _Table 3: Description of the different types of offsets_
   
-`OFFSET` can be stated as a positive literal (in decimal) or stored in a register. 
+`OFFSET` can be stated as a literal or stored in a register. 
 
 ## Implementation
 ### Parsing
@@ -115,8 +115,7 @@ Btw, **should implement more tests**. Make sure that all the instructions have b
 ## Differences from VisUAL
 In testing, can only test for 13 memory locations.  
 Curently case-sensitive, only accepts assembler lines in all uppercase. Plan to implement in group stage, toUpper all assembler lines. More efficient than doing it at a module level.  
-VisUAL allows `OFFSET` to be a register, numerical expressions (eg: `#4+4`) or shifted register. **I allow register and decimals, will fix soon.** Numerical expression: will integrate with arithmetic modules in the group phase.
-VisUAL allows **negative literals**, do mine?  
+VisUAL allows `OFFSET` to be a register, numerical expressions (eg: `#4+4`) or shifted register. **I allow register and literals, will fix soon.** Numerical expression: will integrate with arithmetic modules in the group phase. Shifted registers: will integrate with shift modules in the group phase.
 DataLoc -> specify what is meant here  
   
 

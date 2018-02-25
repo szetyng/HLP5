@@ -27,17 +27,12 @@ type Instr =
 /// parse error (dummy, but will do)
 type ErrInstr = string
 
-//type Hexa = One | Two | Three | Four | Five | Six | Seven | Eight | Nine | A | B | C | D | E | F
-let hexa = 
-    let hexx = [0..15]
-    let kee = ['0'..'9'] @ ['A'..'F']
-    Seq.zip kee hexx
-    |> Map.ofSeq 
+let Hexa = 
+    Seq.zip (['0'..'9'] @ ['A'..'F']) [0..15]
+    |> Map.ofSeq
 
-let bina = 
-    let binn = [0 ; 1]
-    let kee = ['0' ; '1']
-    Seq.zip kee binn
+let Bina = 
+    Seq.zip ['0' ; '1'] [0 ; 1] 
     |> Map.ofSeq
 
 let memSpec = {
@@ -74,39 +69,39 @@ let makeLS (root:string) ls suffix =
         | false -> Error "Invalid register name"
     
 
-    let convCharToIntWithMap en ba = 
-        match ba with
-        | 16 -> List.map (fun n -> hexa.[n]) en
-        | 2 -> List.map (fun n -> bina.[n]) en
-        | _ -> failwithf "Wrong base"
-        // any errors in incorrect formatting of hex/bin will come from map error
-    
-    let baseBtoUint (nrStr:string) (ba:int) =
-        let charArr = [for c in nrStr -> c]
-        let charLst = 
-            match charArr.[0] with
-            | '-' -> List.filter ((<>)'-') charArr 
-            | _ -> charArr
-        let nrDigits = charLst.Length
-        let revActValArr = 
-            convCharToIntWithMap charLst ba
-            |> List.rev  
-        let timey n x =
-            match n with
-            | 0 ->1
-            | n' -> List.reduce (*) [for i in 1..n' -> ba]
-        let state = [for i in 0..nrDigits-1 -> timey i ba]
-        let nr = 
-            List.map2 (*) revActValArr state
-            |> List.reduce (+)  
-        match charArr.[0] with
-        | '-' -> 0 - nr
-        | _ -> nr                        
-    
-  
     /// converts string to OffsetVal 
     /// can be literal or stored in register   
     let getOffsetVal (valStr:string) = 
+        /// converts a hexadecimal or binary number stored as a string
+        /// into its correct int value
+        /// Eg usage for hex: baseToInt "2A" 16
+        /// Eg usage for bin: baseToInt "10010" 2
+        let baseToInt (nrStr:string) (ba:int) =
+            /// get list of integer values from its char representation
+            let getListInt listChar = 
+                match ba with
+                | 16 -> List.map (fun n -> Hexa.[n]) listChar
+                | 2 -> List.map (fun n -> Bina.[n]) listChar
+                | _ -> failwithf "Wrong base" // any errors in incorrect formatting of hex/bin will come from map error
+            /// when ba=16 and n is 0,1,2,... represents 16^0, 16^1, 16^2 and so on
+            let timey n =
+                match n with
+                | 0 -> 1
+                | n' -> List.reduce (*) [for _ in 1..n' -> ba]
+            // convert string to list of chars
+            let charLst, neg = 
+                let l = [for c in nrStr -> c]
+                match l.[0] with
+                | '-' -> List.filter ((<>)'-') l, true
+                | _ -> l, false 
+            let nr = 
+                getListInt charLst
+                |> List.rev
+                |> List.map2 (*) [for i in 0..(charLst.Length)-1 -> timey i] // calculates value of each digit
+                |> List.reduce (+) // adds them together to get decimal value
+            match neg with
+            | true -> 0 - nr
+            | false -> nr
         let (|GetLit|_|) (nrBase:string) (valStr:string) =
             if valStr.StartsWith(nrBase) then
                 let x = valStr.Substring(nrBase.Length) 
@@ -115,8 +110,8 @@ let makeLS (root:string) ls suffix =
                 None
 
         match valStr with
-        | GetLit "#0x" hex -> baseBtoUint hex 16 |> Literal |> Ok
-        | GetLit "#0b" bin -> baseBtoUint bin 2 |> Literal |> Ok
+        | GetLit "#0x" hex -> baseToInt hex 16 |> Literal |> Ok
+        | GetLit "#0b" bin -> baseToInt bin 2 |> Literal |> Ok
         | GetLit "#" dec -> dec |> int |> Literal |> Ok
         | reg -> 
             match reg.Trim [|']' ; '!'|] |> getRName with 
