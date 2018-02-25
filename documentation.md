@@ -5,10 +5,10 @@ This zip file contains code that accepts as input an assembler line with instruc
 
 |Opcode     |Name                                                                                 |Instructions implemented        |
 |-----------|-------------------------------------------------------------------------------------|--------------------------------|
-|LDR        |No offset<br>Offset addressing<br>Pre-indexed addressing<br>Post-indexed addressing  |`LDR{cond} RDest, [RSrc]`<br>`LDR{cond} RDest, [RSrc, OFFSET]`<br>`LDR{cond} RDest, [RSrc, OFFSET]!`<br>`LDR{cond} RDest, [RSrc], OFFSET`            |
-|STR        |No offset<br>Offset addressing<br>Pre-indexed addressing<br>Post-indexed addressing  |`STR{cond} RSrc, [RDest]`<br>`STR{cond} RSrc, [RDest, OFFSET]`<br>`STR{cond} RSrc, [RDest, OFFSET]!`<br>`STR{cond} RSrc, [RDest], OFFSET`            |
-|LDRB       |No offset<br>Offset addressing<br>Pre-indexed addressing<br>Post-indexed addressing  |`LDRB{cond} RDest, [RSrc]`<br>`LDRB{cond} RDest, [RSrc, OFFSET]`<br>`LDRB{cond} RDest, [RSrc, OFFSET]!`<br>`LDRB{cond} RDest, [RSrc], OFFSET`    |
-|STRB       |No offset<br>Offset addressing<br>Pre-indexed addressing<br>Post-indexed addressing  |`STRB{cond} RSrc, [RDest]`<br>`STRB{cond} RSrc, [RDest, OFFSET]`<br>`STRB{cond} RSrc, [RDest, OFFSET]!`<br>`STRB{cond} RSrc, [RDest], OFFSET`    |
+|LDR        |No offset<br>Offset addressing<br>Pre-indexed addressing<br>Post-indexed addressing  |`LDR RDest, [RSrc]`<br>`LDR RDest, [RSrc, OFFSET]`<br>`LDR RDest, [RSrc, OFFSET]!`<br>`LDR RDest, [RSrc], OFFSET`            |
+|STR        |No offset<br>Offset addressing<br>Pre-indexed addressing<br>Post-indexed addressing  |`STR RSrc, [RDest]`<br>`STR RSrc, [RDest, OFFSET]`<br>`STR RSrc, [RDest, OFFSET]!`<br>`STR RSrc, [RDest], OFFSET`            |
+|LDRB       |No offset<br>Offset addressing<br>Pre-indexed addressing<br>Post-indexed addressing  |`LDRB RDest, [RSrc]`<br>`LDRB RDest, [RSrc, OFFSET]`<br>`LDRB RDest, [RSrc, OFFSET]!`<br>`LDRB RDest, [RSrc], OFFSET`    |
+|STRB       |No offset<br>Offset addressing<br>Pre-indexed addressing<br>Post-indexed addressing  |`STRB RSrc, [RDest]`<br>`STRB RSrc, [RDest, OFFSET]`<br>`STRB RSrc, [RDest, OFFSET]!`<br>`STRB RSrc, [RDest], OFFSET`    |
   
 _Table 1: List of instructions implemented_
   
@@ -35,7 +35,7 @@ _Table 3: Description of the different types of offsets_
 
 ## Implementation
 ### Parsing
-The function `parse` is used in an active pattern matching by the `CommonTop` module, and is only called for instructions belonging to the MEM instruction class. `parse` accepts as input a `LineData` record, which is a semi-parsed version of the assembler line. The `root` and `suffix` of the opcode are identified and passed together with `LineData` to the `makeLS` function. This function returns either `Parse<Instr>` or an error if the assembler line was formatted incorrectly.
+The function `parse` is used in an active pattern matching by the `CommonTop` module, and is called for instructions belonging to the MEM instruction class. `parse` accepts as input a `LineData` record, which is a semi-parsed version of the assembler line. The `root` and `suffix` of the opcode are identified and passed together with `LineData` to the `makeLS` function. This function returns either `Parse<Instr>` or an error if the assembler line was formatted incorrectly.
 
 In the `Memory` module, an `Instr` record type has been introduced to represent the parsed assembler line's relevant information. It contains the following fields:
 - `InstrN`: to represent either LDR or STR
@@ -117,7 +117,7 @@ The parsing implementation has been tested with a thorough list of unit tests in
 
 <!-- Btw, **should implement more tests**. Make sure that all the instructions have been tested. Similarly for parsing or no? If not implementing random tests, mention why (?) - left for last. -->
 
-The robustness of the module's ability to execute or reject assembly lines are tested with a list of unit tests in `execUnitTest`. The execution is being tested against VisUAL, which is run using the [framework] provided by Dr Tom Clarke and called in `VisualMemUnitTest`. Several changes have been made to this framework, detailed below. The `VisOutput` from running VisUAL is processed and packaged into `DataPath` fields so that they can be tested with `Expecto`.
+The robustness of the module's ability to execute or reject assembly lines is tested with a list of unit tests in `execUnitTest`. The execution is being tested against VisUAL, which is run using the [framework] provided by Dr Tom Clarke and called in `VisualMemUnitTest`. Several changes have been made to this framework, detailed below. The `VisOutput` from running VisUAL is processed and packaged into appropriate `DataPath` fields so that they can be tested with the output from the `Memory` module using `Expecto`.
 
 In Load/Store memory instructions, it is important for the ARM simulator to not mess with memory addresses that are not being specifically allocated for data usage. VisUAL also does not allow access to memory locations that are not word-aligned (not applicable to LDRB/STRB), a practice followed by this ARM simulator . Thus, `execErrorUnitTest` is used to check for such cases. Btw does it check for poor formats?
 
@@ -133,11 +133,24 @@ When building the map in top-level, can specify which memory locations are allow
 
 
 ## Changes in top-level code / VisUAL test framework
-Executing from CommonTop  
 Getting rid of flags  
 In testing, can only test for 13 memory locations.  
 
 
 ## Usage
-How to call from CommonTop. Integration with the rest of the group.  
+There are two interfaces to the `Memory` module: 
+- `parse` takes a `LineData` input and will return `Result<Parse<Memory.Instr>,string> option`.   
+- `executeMemInstr` takes inputs of types `Memory.Instr` and `DataPath<Memory.Instr>`.
+
+The `CommonTop` module has several functions that allow us to input an assembly line and receive an output of the CPUdata that has been acted upon accordingly. I have included a function called `execute` to do so, which parses the line if it belongs to the `Memory` module (other instruction types have not yet been implemented) and processes the output so that it can be used in `executeMemInstr`.
+
+Ensure that the CPUdata being used is of type `DataPath<Memory.Instr>`. Better top-level execution integration will be needed when other modules are added in the group phase, but is currently not needed.
+
+
+
+
+
+
+
+
   

@@ -15,7 +15,7 @@ type Instr =
 
 /// allows different modules to return different error info
 /// by default all return string so this is not needed
-type ErrInstr =
+type ErrInstr = 
     | ERRIMEM of Memory.ErrInstr
     | ERRIDP of DP.ErrInstr
     | ERRTOPLEVEL of string
@@ -82,36 +82,22 @@ let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
     |> matchLine
 
 
-
-// let memDummyList = 
-//     [WA 0x100u, DataLoc 0x2000u ; WA 0x104u, DataLoc 0x202u]
-
-// let seepeeyouData = {
-//     Fl = {N=false ; C=false ; Z=false ; V=false} ;
-//     Regs = Map.ofList [ 
-//             R0,0u ; R1,3u ; R2,0x412u ; R3,0u ; R4,0u ; R5,0u ; R6,0u ; R7,0u;
-//             R8,0u ; R9,0u ; R10,0u ; R11,0u ; R12,0u ; R13,0u ; R14,0u ; R15,0u
-//         ] ;
-//     MM = Map.ofList memDummyList
-// }
-
-//let asmLine = "STR R10, [R5]"
-//let parsed = parseLine None (WA 0u) asmLine 
-
-let executeAnyInstr (instr:Instr) (d:DataPath<Memory.Instr>) = //lazy way out
-    let execute d =
-        match instr with
-        | IMEM ins -> Memory.executeMemInstr ins d
-        | IDP _ -> failwithf "not yet implemented"
-    execute d  
-
 // extract Instr from Result<Parse<Instr>,errortype>
-let execute asmLine d = 
-    parseLine None (WA 0u) asmLine
-    |> fun p ->
-        match p with
-        | Ok ({PInstr=ins} as pr) -> executeAnyInstr ins d
-        | _ -> failwithf "Idk"
+let execute (asmLine:string) (d:DataPath<Memory.Instr>) = 
+    let executeAnyInstr (instr:Instr) (d:DataPath<Memory.Instr>) = 
+        let exec d =
+            match instr with
+            | IMEM ins -> Memory.executeMemInstr ins d 
+            | IDP _ -> Error "Not yet implemented"
+        exec d  
+    match parseLine None (WA 0u) asmLine with
+    | Ok pr -> executeAnyInstr pr.PInstr d // parsed correctly
+    | Error e ->  
+        match e with
+        | ERRIMEM e' | ERRIDP e' | ERRTOPLEVEL e' -> Error e'
+        
+
+        
 
 
           

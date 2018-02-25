@@ -180,13 +180,16 @@ let parse (ls: LineData) : Result<Parse<Instr>,string> option =
             match makeLS root ls suffix with
             | Ok parsedInstr -> Ok { PInstr= parsedInstr ; PLabel = None ; PSize = 4u; PCond = pCond }
             | Error e -> Error e
-        | _ -> failwithf "Wrong instruction class passed to the Memory module"        // or error?
+        | _ -> failwithf "Wrong instruction class passed to the Memory module" // not error bc of opCodes map
     Map.tryFind ls.OpCode opCodes
     |> Option.map parse'
 
 /// Parse Active Pattern used by top-level code
 let (|IMatch|_|)  = parse
 //**********************************************Execution************************************************************//
+
+/// Called from CommonTop to execute ins on data
+/// ins and data corresponds to Instr type of Memory module
 let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
     let instrName = ins.InstrN
     let isByte = ins.Type
