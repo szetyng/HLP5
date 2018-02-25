@@ -12,7 +12,7 @@ open System
 
 type InstrName = LDR | STR
 type MemType = B
-type OffsetVal = Literal of uint32 | Reg of RName
+type OffsetVal = Literal of int | Reg of RName
 type OffsetType = Normal | PreIndexed | PostIndexed
 
 type Instr = 
@@ -106,9 +106,9 @@ let makeLS (root:string) ls suffix =
                 None
 
         match valStr with
-        | GetLit "#0x" hex -> baseBtoUint hex 16 |> uint32 |> Literal |> Ok
-        | GetLit "#0b" bin -> baseBtoUint bin 2 |> uint32 |> Literal |> Ok
-        | GetLit "#" dec -> dec |> uint32 |> Literal |> Ok
+        | GetLit "#0x" hex -> baseBtoUint hex 16 |> Literal |> Ok
+        | GetLit "#0b" bin -> baseBtoUint bin 2 |> Literal |> Ok
+        | GetLit "#" dec -> dec |> int |> Literal |> Ok
         | reg -> 
             match reg.Trim [|']' ; '!'|] |> getRName with 
             | Ok r -> Ok (Reg r)
@@ -201,8 +201,8 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
             | None, _ | Some (_, Normal), _ -> loadedReg
             | Some (vOrR, PostIndexed), WA addr ->
                 match vOrR with
-                | Literal v -> Map.add regAdd (addr + v + offsAdd) loadedReg
-                | Reg r -> macRegs.[r] |> fun v -> Map.add regAdd (addr + v + offsAdd) loadedReg             
+                | Literal v -> Map.add regAdd (addr + (uint32 v) + offsAdd) loadedReg
+                | Reg r -> macRegs.[r] |> fun v -> Map.add regAdd (addr + (uint32 v) + offsAdd) loadedReg             
             | Some (_, PreIndexed), WA addr -> Map.add regAdd (addr + offsAdd) loadedReg        
         {d with Regs=newRegs}   
 
@@ -216,8 +216,8 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
             | Some(_, PreIndexed), WA addr -> macRegs.Add (regAdd, addr+offsAdd)
             | Some(vOrR, PostIndexed), WA addr -> // shit, STRB
                 match vOrR with
-                | Literal v -> macRegs.Add (regAdd, addr + v + offsAdd)
-                | Reg r -> macRegs.[r] |> fun v -> macRegs.Add (regAdd, addr + v + offsAdd)
+                | Literal v -> macRegs.Add (regAdd, addr + (uint32 v) + offsAdd)
+                | Reg r -> macRegs.[r] |> fun v -> macRegs.Add (regAdd, addr + (uint32 v) + offsAdd)
         {d with Regs=newRegs ; MM=newMem}  
 
     let getPayload memLoc = 
@@ -273,7 +273,9 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
         |> getShiftedPayloadMask offsAdd (<<<) // shift the byte-y payload into correct position
         |> fun (shiftedP, mask) -> shiftedP ||| (restOfWord &&& mask) // get correct word in word-alligned base address
         |> executeSTORE baseAdd offsAdd d   
-                  
+    let x = -4
+    uint32 x              
+
     let executeLS typeLS isByte d = 
         // register stores address, get that address
         let add = macRegs.[regAdd]
@@ -284,7 +286,10 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
                 | None | Some (_, PostIndexed) -> add
                 | Some (vOrR, Normal) | Some (vOrR, PreIndexed) -> 
                     match vOrR with
-                    | Literal v -> add + v
+                    | Literal v -> add + (uint32 v)
+                        // match v>=0 with 
+                        // | true -> add + (uint32 v)
+                        // | false -> add - (uint32 v)
                     | Reg r -> add + macRegs.[r]   
             match isByte, effecAdd' % 4u with  
             | None, 0u ->

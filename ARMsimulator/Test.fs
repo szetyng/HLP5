@@ -123,9 +123,9 @@ let parseUnitTest =
     //let makeParseLSTests listIOpairs = makeParseLSTestList "LDR and STR parse tests" listIOpairs 
     makeParseLSTestList "LDR and STR parse tests"
         [
-            "STRB R10, [R15, #5]!" , Ok {InstrN=STR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 5u, PreIndexed)}
-            "LDR R4, [R8], #3", Ok {InstrN=LDR ; Type=None; RContents=R4; RAdd=R8 ; Offset=Some (Literal 3u, PostIndexed)}
-            "LDRB R7, [R11, #11]", Ok {InstrN=LDR ; Type=Some B; RContents=R7; RAdd=R11 ; Offset=Some (Literal 11u, Memory.Normal)} 
+            "STRB R10, [R15, #5]!" , Ok {InstrN=STR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 5, PreIndexed)}
+            "LDR R4, [R8], #3", Ok {InstrN=LDR ; Type=None; RContents=R4; RAdd=R8 ; Offset=Some (Literal 3, PostIndexed)}
+            "LDRB R7, [R11, #11]", Ok {InstrN=LDR ; Type=Some B; RContents=R7; RAdd=R11 ; Offset=Some (Literal 11, Memory.Normal)} 
             "STR R5, [R2]", Ok {InstrN=STR ; Type=None; RContents=R5; RAdd=R2 ; Offset=None}
             "LDR R10, [R15, ", Error "Incorrect formatting" //failing. Good? 
             "LDR R10, [R15" , Error "Incorrect formatting" //ERROR, NO BRACKETS
@@ -143,7 +143,7 @@ let execUnitTest =
             "Normal LDR" , "LDR R2, [R3]" , ""
             "Normal STRB" , "STRB R4, [R5]" , ""
             "Normal LDRB" , "LDRB R6, [R7]" , ""
-            "Normal offset STR" , "STR R8, [R9, #0b100]" , ""
+            "Normal offset STR" , "STR R8, [R9, #-8]" , ""
             "Normal offset LDR" , "LDR R9, [R11, R0]" , ""
             "Pre-indexed offset STRB" , "STRB R10, [R11, #7]!" , ""
             "Pre-indexed offset LDRB" , "LDRB R10, [R11, #7]!" , ""

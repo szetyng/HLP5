@@ -1541,7 +1541,7 @@
         <cycles>1</cycles>
     </line>
     <line id="80">
-        <code>STRB R14, [R1, #0xA]</code>
+        <code>STR R8, [R9, #-8]</code>
         <register name="R0">0x4</register>
         <register name="R1">0x1004</register>
         <register name="R2">0x0</register>
