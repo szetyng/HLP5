@@ -1541,14 +1541,14 @@
         <cycles>1</cycles>
     </line>
     <line id="80">
-        <code>LDRB R6, [R7]</code>
+        <code>STRB R14, [R1, #0xA]</code>
         <register name="R0">0x4</register>
         <register name="R1">0x1004</register>
         <register name="R2">0x0</register>
         <register name="R3">0x100C</register>
         <register name="R4">0x28</register>
         <register name="R5">0x1000</register>
-        <register name="R6">0x8C</register>
+        <register name="R6">0x3C</register>
         <register name="R7">0x1030</register>
         <register name="R8">0x50</register>
         <register name="R9">0x1024</register>
@@ -1568,7 +1568,7 @@
         <register name="R3">0x100C</register>
         <register name="R4">0x28</register>
         <register name="R5">0x1000</register>
-        <register name="R6">0x8C</register>
+        <register name="R6">0x3C</register>
         <register name="R7">0x1030</register>
         <register name="R8">0x50</register>
         <register name="R9">0x1024</register>

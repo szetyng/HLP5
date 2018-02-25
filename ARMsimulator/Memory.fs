@@ -8,6 +8,7 @@ open CommonData
 open System.Xml
 open VisualTest
 open System
+open System
 
 type InstrName = LDR | STR
 type MemType = B
@@ -25,6 +26,19 @@ type Instr =
 
 /// parse error (dummy, but will do)
 type ErrInstr = string
+
+//type Hexa = One | Two | Three | Four | Five | Six | Seven | Eight | Nine | A | B | C | D | E | F
+let hexa = 
+    let hexx = [0..15]
+    let kee = ['0'..'9'] @ ['A'..'F']
+    Seq.zip kee hexx
+    |> Map.ofSeq 
+
+let bina = 
+    let binn = [0 ; 1]
+    let kee = ['0' ; '1']
+    Seq.zip kee binn
+    |> Map.ofSeq
 
 let memSpec = {
     InstrC = MEM
@@ -58,18 +72,49 @@ let makeLS (root:string) ls suffix =
         match Map.containsKey regNameStr regNames with
         | true -> regNames.[regNameStr] |> Ok
         | false -> Error "Invalid register name"
+    
+
+    let convCharToIntWithMap en ba = 
+        match ba with
+        | 16 -> List.map (fun n -> hexa.[n]) en
+        | 2 -> List.map (fun n -> bina.[n]) en
+        | _ -> failwithf "Wrong base"
+    
+    let baseBtoUint (nrStr:string) (ba:int) =
+        let nrDigits = nrStr.Length
+        let charArr = [for c in nrStr -> c]
+        let revActValArr = 
+            convCharToIntWithMap charArr ba
+            |> List.rev  
+        let timey n x =
+            match n with
+            | 0 ->1
+            | n' -> List.reduce (*) [for i in 1..n' -> ba]
+        let state = [for i in 0..nrDigits-1 -> timey i ba]
+        List.map2 (*) revActValArr state
+        |> List.reduce (+)                  
+    
+  
     /// converts string to OffsetVal 
     /// can be literal or stored in register   
     let getOffsetVal (valStr:string) = 
+        let (|GetLit|_|) (nrBase:string) (valStr:string) =
+            if valStr.StartsWith(nrBase) then
+                let x = valStr.Substring(nrBase.Length) 
+                Some (x.Trim [|']' ; '!'|])
+            else
+                None
+
         match valStr with
-        | dec when dec.Contains("#") -> 
-            dec.Trim [|'#' ; ']' ; '!' |] 
-            |> uint32 |> Literal |> Ok //todo: other number bases
+        | GetLit "#0x" hex -> baseBtoUint hex 16 |> uint32 |> Literal |> Ok
+        | GetLit "#0b" bin -> baseBtoUint bin 2 |> uint32 |> Literal |> Ok
+        | GetLit "#" dec -> dec |> uint32 |> Literal |> Ok
         | reg -> 
             match reg.Trim [|']' ; '!'|] |> getRName with 
             | Ok r -> Ok (Reg r)
             | Error e -> Error e
-        | _ -> Error "Incorrect offset format" //ie forgetting '#'
+        | _ -> Error "Incorrect offset format" //ie forgetting '#'         
+
     /// converts string to RName, to get RAdd
     let getRn ((reg:string),offset) = 
         match reg.StartsWith("["), reg.EndsWith("]"), offset, getRName reg with
@@ -183,7 +228,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
             | Code _ -> failwithf "What? Should not access this memory location"
         | None -> macRegs.[regCont]
 
-    let getShiftedPayload offsAdd shift payload = 
+    let getShiftedPayloadMask offsAdd shift payload = 
         match offsAdd with
         | 0u -> payload, 0xFFFFFF00u
         | 1u -> shift payload 8, 0xFFFF00FFu
@@ -207,7 +252,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
         let prepReg = Map.add regCont 0u macRegs
        
         getPayload (Some baseAdd) // get all 4 bytes from word-alligned base address in memory
-        |> getShiftedPayload offsAdd (>>>)
+        |> getShiftedPayloadMask offsAdd (>>>)
         |> fun (shiftedP, _) -> shiftedP &&& 0xFFu // only get relevant byte
         |> executeLOAD baseAdd offsAdd ({d with Regs=prepReg})     
 
@@ -216,7 +261,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
     /// Shifts byte into correct position of the rest of the 32-bit word in the base address.
     /// Normal STR with this tacked on payload.
     /// Passes base address and offset for correct pre-/post-indexing
-    let executeSTRB (baseAdd: WAddr) offsAdd (d:DataPath<Instr>) : DataPath<Instr> = 
+    let executeSTRB (baseAdd: WAddr) (offsAdd: uint32) (d:DataPath<Instr>) : DataPath<Instr> = 
         // will be ANDed with relevant mask to clear the byte-address (base addr + offset addr)
         let restOfWord = 
             match macMem.[baseAdd] with
@@ -225,7 +270,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
                 
         getPayload None
         |> fun p -> p % 256u // get LS 8bits of value in register RSrc -> byte
-        |> getShiftedPayload offsAdd (<<<) // shift the byte-y payload into correct position
+        |> getShiftedPayloadMask offsAdd (<<<) // shift the byte-y payload into correct position
         |> fun (shiftedP, mask) -> shiftedP ||| (restOfWord &&& mask) // get correct word in word-alligned base address
         |> executeSTORE baseAdd offsAdd d   
                   

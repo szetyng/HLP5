@@ -143,14 +143,14 @@ let execUnitTest =
             "Normal LDR" , "LDR R2, [R3]" , ""
             "Normal STRB" , "STRB R4, [R5]" , ""
             "Normal LDRB" , "LDRB R6, [R7]" , ""
-            "Normal offset STR" , "STR R8, [R9, #4]" , ""
+            "Normal offset STR" , "STR R8, [R9, #0b100]" , ""
             "Normal offset LDR" , "LDR R9, [R11, R0]" , ""
             "Pre-indexed offset STRB" , "STRB R10, [R11, #7]!" , ""
             "Pre-indexed offset LDRB" , "LDRB R10, [R11, #7]!" , ""
             "Post-indexed offset LDRB" , "LDRB R10, [R11], R0" , ""
             "Post-indexed offset LDR" , "LDR R11, [R3], #16" , ""
             "Memory access error" , "STR R8, [R9, #5]" , "Memory address accessed must be divisible by 4"
-            "Moar STRB" , "STRB R14, [R1]" , ""
+            "Moar STRB" , "STRB R14, [R1, #0xA]" , ""
             "Moar LDRB" , "LDRB R1, [R5, #34]!" , ""
         ]
 
