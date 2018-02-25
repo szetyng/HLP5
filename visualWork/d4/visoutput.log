@@ -2561,7 +2561,7 @@
         <cycles>1</cycles>
     </line>
     <line id="131">
-        <code>LDRB R10, [R7], R3</code>
+        <code>STRB R4, [R9, #-0x10]!</code>
         <register name="R0">0x1</register>
         <register name="R1">0x4</register>
         <register name="R2">0x8</register>
@@ -2569,10 +2569,10 @@
         <register name="R4">0x9104080</register>
         <register name="R5">0x1000</register>
         <register name="R6">0xAB165482</register>
-        <register name="R7">0x2013</register>
+        <register name="R7">0x1010</register>
         <register name="R8">0x458DE9B</register>
-        <register name="R9">0x1020</register>
-        <register name="R10">0x80</register>
+        <register name="R9">0x1010</register>
+        <register name="R10">0x541CEEAB</register>
         <register name="R11">0x1024</register>
         <register name="R12">0xD751CB1F</register>
         <register name="R13">0x102C</register>
@@ -2589,10 +2589,10 @@
         <register name="R4">0x9104080</register>
         <register name="R5">0x1000</register>
         <register name="R6">0xAB165482</register>
-        <register name="R7">0x2013</register>
+        <register name="R7">0x1010</register>
         <register name="R8">0x458DE9B</register>
-        <register name="R9">0x1020</register>
-        <register name="R10">0x80</register>
+        <register name="R9">0x1010</register>
+        <register name="R10">0x541CEEAB</register>
         <register name="R11">0x1024</register>
         <register name="R12">0xD751CB1F</register>
         <register name="R13">0x1000</register>

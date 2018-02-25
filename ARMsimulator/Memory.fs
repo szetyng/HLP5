@@ -124,8 +124,7 @@ let makeLS (root:string) ls suffix =
         match reg.StartsWith("["), reg.EndsWith("]"), offset, getRName reg with
         | true, true, None, Ok r  -> Ok r
         | true, false, Some PreIndexed, Ok r | true, false, Some Normal, Ok r -> Ok r
-        | true, true, Some PostIndexed, Ok r-> Ok r
-        | _, _, _, Error e -> Error e
+        | true, true, Some PostIndexed, Ok r -> Ok r
         | _ -> Error "Incorrect offset format" 
 
     let rContents = Result.bind getRName (Ok operandLst.[0])

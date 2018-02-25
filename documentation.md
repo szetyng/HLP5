@@ -1,6 +1,22 @@
 # Documentation
 This zip file contains code that accepts as input an assembler line with instructions for LDR, STR, LDRB and STRB, then parses and executes it in a similar manner that [VisUAL] does. Any differences from VisUAL will be documented here.
 
+- [Documentation](#documentation)
+    - [Specifications](#specifications)
+    - [Implementation](#implementation)
+        - [Parsing](#parsing)
+        - [Execution](#execution)
+            - [LDR](#ldr)
+            - [STR](#str)
+            - [LDRB](#ldrb)
+            - [STRB](#strb)
+    - [Testing](#testing)
+        - [Parsing](#parsing)
+        - [Execution](#execution)
+    - [Differences from VisUAL](#differences-from-visual)
+    - [Changes in top-level code / VisUAL test framework](#changes-in-top-level-code-visual-test-framework)
+    - [Usage](#usage)
+
 ## Specifications
 
 |Opcode     |Name                                                                                 |Instructions implemented        |
@@ -10,7 +26,8 @@ This zip file contains code that accepts as input an assembler line with instruc
 |LDRB       |No offset<br>Offset addressing<br>Pre-indexed addressing<br>Post-indexed addressing  |`LDRB RDest, [RSrc]`<br>`LDRB RDest, [RSrc, OFFSET]`<br>`LDRB RDest, [RSrc, OFFSET]!`<br>`LDRB RDest, [RSrc], OFFSET`    |
 |STRB       |No offset<br>Offset addressing<br>Pre-indexed addressing<br>Post-indexed addressing  |`STRB RSrc, [RDest]`<br>`STRB RSrc, [RDest, OFFSET]`<br>`STRB RSrc, [RDest, OFFSET]!`<br>`STRB RSrc, [RDest], OFFSET`    |
   
-_Table 1: List of instructions implemented_
+_Table 1: List of instructions implemented_  
+`OFFSET` can be stated as a literal or stored in a register.
   
 
 |Opcode     |Effective address  |Description            |
@@ -31,7 +48,7 @@ _Table 2: Description of the instructions_
   
 _Table 3: Description of the different types of offsets_
   
-`OFFSET` can be stated as a literal or stored in a register. 
+ 
 
 ## Implementation
 ### Parsing
@@ -53,9 +70,11 @@ If there are three operands, the instruction involves offset addressing. `getrnV
 Any error encountered is propagated through and caught at the final pattern matching; `makeLS` returns said error to inform the top-level module that the assembler line has been incorrectly formatted. If there has been no errors, `makeLS` constructs and returns a proper `Instr` record to the top-level module.
 
 ### Execution
-`executeMemInstr` is called from `CommonTop` and takes a `Memory.Instr` record and a `DataPath` type as inputs. It then calls the nested `executeLS` function, whose purpose is to identify the correct opcode (out of LDR, STR, LDRB and STRB) and processes the effective address to be accessed. An error is thrown here if the instruction is trying to access memory locations used for storing code.   
+`executeMemInstr` is called from `CommonTop` and takes a `Memory.Instr` record and a `DataPath` type as inputs.   
 
-`executeMemInstr` either returns `DataPath` as acted accordingly upon by the assembler line instruction, or an error with the appropriate error message if the instruction is invalid. The flow of data for the different opcodes are detailed in the following sections.   
+It then calls the nested `executeLS` function, whose purpose is to identify the correct opcode (out of LDR, STR, LDRB and STRB) and processes the effective address to be accessed. An error is thrown here if the instruction is trying to access memory locations used for storing code. For `LDR`/`STR`, it also checks that the effective address is divisible by four (i.e. it is word-aligned). For `LDRB`/`STRB`, it obtains the base address and offset required for the instruction's byte-addressing -  necessary due to specifying WAddr only as multiples of four. Any changes to the type of WAddr alignment during the group stage needs to be reflected here.     
+
+`executeMemInstr` either returns `DataPath` as acted accordingly upon by the assembler line instruction, or an error with the appropriate error message if the instruction is invalid. The flow of data for the different opcodes are shown below. Further details of the inner nested functions are available in the code documentation. 
 
 #### LDR
 ```
@@ -64,10 +83,6 @@ executeMemInstr
 |> executeLSWord
 |> executeLOAD
 ```
-`executeLS`: Checks that the effective address is divisible by four  
-`executeLSWord`: Obtains the payload - which is the word stored in `RSrc`/`RContents` - from memory  
-`executeLOAD`: Updates the register map field of `DataPath` to represent the payload being loaded to a register from memory, and pre- or post-indexing of `RSrc` as required  
-
 #### STR
 ```
 executeMemInstr
@@ -75,9 +90,6 @@ executeMemInstr
 |> executeLSWord
 |> executeSTORE
 ```
-`executeLS`: Checks that the effective address is divisible by four  
-`executeLSWord`: Obtains the payload - which is the word stored in `RSrc`/`RContents` - from the register map  
-`executeSTORE`: Updates the memory map field of `DataPath` to represent the payload being stored to memory from a register. Also updates the register map if required by pre- or post-indexing  
 
 #### LDRB
 ```
@@ -86,10 +98,6 @@ executeMemInstr
 |> executeLDRB
 |> executeLOAD
 ```
-`executeLS`: Obtains the base address and offset required for the instruction's byte-addressing (vs word-addressing in regular LDR). Required due to specifying WAddr only as multiples of four  
-`executeLDRB`: Sets the register `RDest` to zero as a way to preemptively set its most significant 24 bits to zero. Obtains the payload - which is the word stored in the base address - from memory. Processes the word payload to get the effective payload - the 8 bits stored in the byte-aligned effective address    
-`executeLOAD`: Updates the register map field of `DataPath` to represent the payload being loaded to a register from memory, and pre- or post-indexing of `RSrc` as required
-
 
 #### STRB
 ```
@@ -98,19 +106,15 @@ executeMemInstr
 |> executeSTRB
 |> executeSTORE
 ```
-`executeLS`: Obtains the base address and offset required for the instruction's byte-addressing (vs word-addressing in regular STR). Required due to specifying WAddr only as multiples of four   
-`executeSTRB`: Obtains the payload - which is the word stored in `RSrc` - from the register map. Processes the word payload to get the effective payload - the least significant 8 bits in said word located in the relevant byte position, with the rest of the word in the base address unchanged   
-`executeSTORE`: Updates the memory map field of `DataPath` to represent the payload being stored to memory from a register. Also updates the register map if required by pre- or post-indexing   
-
 
 ## Testing
-Used `Expecto` and `Exepcto.FsCheck` packages in testing. All tests are labelled with the `[<Tests>]` attribute so that they can be called with `runTestsInAssembly`.
+Used `Expecto` and `Expecto.FsCheck` packages in testing. All tests are labelled with the `[<Tests>]` attribute so that they can be called with `runTestsInAssembly`.
 
 ### Parsing
 <!-- Explanation of tests for parsing. All are unit tests, what and how are they tested? Walkthrough of the flow.   -->
 Parsing is tested by calling the `onlyParseLine` function, which returns an output of type `Result<Instr, string>`. The output of `onlyParseLine` allows us to easily check if the assembly line has been parsed correctly into its `Memory.Instr` type. It also helps in checking if the module correctly rejects poorly formatted inputs.
 
-The parsing implementation has been tested with a thorough list of unit tests in `parseUnitTest`, including their error messages when appropriate.
+The parsing implementation has been tested with a thorough list of unit tests in `parseUnitTest`, including their error messages when appropriate. 
 
 ### Execution
 <!-- Explanation of tests for execution. Explanation of using VisUAL test framework. All are unit tests, what and how are they tested? Walkthrough of the flow. Mention testing for errors/incorrect assembler lines.  -->
@@ -128,17 +132,6 @@ In Load/Store memory instructions, it is important for the ARM simulator to not 
 |`OFFSET` can be a register, a numerical expression or a shifted register   |`OFFSET` can be a register or a literal    |Numerical expressions and shifted registers will be implemented in the group phase by integrating with the arithmetic instructions module and shift instructions module respectively.  |
 |Allows access to memory locations from address ... onwards | Allows access to memory locations corresponding to `DataLoc` tag in `MemLoc` D.U.     |When building the map in top-level, can specify which memory locations are allowed to be accessed more clearly.    |
 
-
-1. The `Memory` module only accepts assembler line inputs that are in all uppercase, while VisUAL is case-insensitive to inputs.   
-The whole programme can easily be changed to accept assembler lines in a case-insensitive manner by forcing all inputs to uppercase. It is more efficient to implement this functionality in the top-level during the group phase of the project than to do the same conversion in each invididual module.
-
-2. VisUAL allows `OFFSET` to be a register, a numerical expression or a shifted register. The `Memory` module allows `OFFSET` to be a register or a literal.  
-Numerical expressions and shifted registers will be implemented in the group phase by integrating with the arithmetic instructions module and shift instructions module respectively.
-
-3. VisUAL allows access to memory locations from address ... onwards. `Memory` module allows access whenever the `MachineMemory` map in `DataPath` corresponds to `DataLoc`, not `Code`.  
-When building the map in top-level, can specify which memory locations are allowed to be accessed more clearly.
-
-
 ## Changes in top-level code / VisUAL test framework
 Getting rid of flags  
 In testing, can only test for 13 memory locations.  
@@ -149,9 +142,9 @@ There are two interfaces to the `Memory` module:
 - `parse` takes a `LineData` input and will return `Result<Parse<Memory.Instr>,string> option`.   
 - `executeMemInstr` takes inputs of types `Memory.Instr` and `DataPath<Memory.Instr>`.
 
-The `CommonTop` module has several functions that allow us to input an assembly line and receive an output of the CPUdata that has been acted upon accordingly. I have included a function called `execute` to do so, which parses the line if it belongs to the `Memory` module (other instruction types have not yet been implemented) and processes the output so that it can be used in `executeMemInstr`.
+The `CommonTop` module has several functions that allow us to input an assembly line and receive an output of the CPUdata that has been acted upon accordingly. I have included a function called `execute` to do so, which parses the line if it belongs to the `Memory` module (other instruction types have not yet been implemented) and processes the output so that it can be used in `executeMemInstr`. In summary, `CommonTop` calls `parse`, whose output is processed by `CommonTop` and passed back to `executeMemInstr`.
 
-Ensure that the CPUdata being used is of type `DataPath<Memory.Instr>`. Better top-level execution integration will be needed when other modules are added in the group phase, but is currently not needed.
+Ensure that the CPUdata being used is of type `DataPath<Memory.Instr>`. Better top-level execution integration will be needed when other modules are added in the group phase, but is currently not necessary.
 
 
 

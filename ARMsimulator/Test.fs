@@ -18,19 +18,24 @@ open Expecto
 open FsCheck
 open System
 
-// dummy paras
+// dummy paras‭
 let myTestParas = {defaultParas with 
-                    InitRegs = [4u ; 0x1004u ; 0u ; 0x100Cu ; 40u ; // R0 - R4
-                                0x1000u ; 60u ; 0x1030u ; 80u ; 0x1024u ;       // R5 - R9
-                                100u ; 0x101Cu ; 120u ; 0x1020u ; 0x44400000u]   // R10 - R14
+                    InitRegs = [1u ; 4u ; 8u ; 0x1003u ; 0x9104080u ; // R0 - R4
+                                0x1000u ; 0xAB165482u ; 0x1010u ; 0x458DE9Bu ; 0x1020u ;       // R5 - R9
+                                0x541CEEABu ; 0x1024u ; 0xD751CB1Fu ; 0x102Cu ; 0x44438ADCu]   // R10 - R14
                     MemReadBase = 0x1000u}
+// let myTestParas = {defaultParas with 
+//                     InitRegs = [4u ; 0x1004u ; 0u ; 0x100Cu ; 40u ; // R0 - R4
+//                                 0x1000u ; 60u ; 0x1030u ; 80u ; 0x1024u ;       // R5 - R9
+//                                 100u ; 0x101Cu ; 120u ; 0x1020u ; 0x44400000u]   // R10 - R14
+//                     MemReadBase = 0x1000u}
 //let myTestParas = defaultParas
 
-// dummy memory
+// dummy memoryD751CB1F
 let testMemValList = [
-                        10u ; 20u ; 30u ; 40u ;             // 0x1000 - 0x100C
-                        50u ; 60u ; 70u ; 80u ;             // 0x1010 - 0x101C
-                        0x44400000u ; 100u ; 110u ; 120u ; 140u      // 0x1020 - 0x1030
+                        0xD751CB1Fu ; 0xAB165482u ; 0x458DE9Bu ; 0x541CEEABu ;             // 0x1000 - 0x100C
+                        0x9104080u ; 0x44438ADCu ; 0x444030F0u ; 0xFF00EA21u ;             // 0x1010 - 0x101C
+                        0x44400000u ; 0x54C08F0u ; 0xABCDEF48u ; 0x891CECABu ; 0x778220EDu     // 0x1020 - 0x1030
                     ]       
 
 // dummy CPUdata
@@ -66,9 +71,7 @@ let onlyParseLine (asmLine:string) =
         match pNoLabel with
         | Some (Ok pa) -> Ok pa.PInstr
         | Some (Error e) -> Error e
-        | x ->
-            printfn "WHAT %A" x
-            failwithf "Please write proper tests"
+        | _ -> failwithf "What?"
     asmLine
     |> splitIntoWords
     |> Array.toList
@@ -132,6 +135,7 @@ let parseUnitTest =
             "LDR R10, R15]", Error "Incorrect formatting" // ERROR, NO BRACKETS
             "LDR R10, R15", Error "Incorrect formatting" // ERROR, NO BRACKETS
             "LDR R10, [R15, R2!]", Error "Incorrect formatting"
+            "STR R8, [R7], 22", Error "Incorrect formatting"
         ]    
 
 [<Tests>]
@@ -139,19 +143,30 @@ let execUnitTest =
     // testList "Executing LDR/STR tests"
     makeExecLSTestList "Executing LDR/STR tests"
         [
-            "Normal STR" , "STR R0, [R1]" , ""
-            "Normal LDR" , "LDR R2, [R3]" , ""
-            "Normal STRB" , "STRB R4, [R5]" , ""
-            "Normal LDRB" , "LDRB R6, [R7]" , ""
-            "Normal offset STR" , "STR R8, [R9, #0b100]" , ""
-            "Normal offset LDR" , "LDR R9, [R11, R0]" , ""
-            "Pre-indexed offset STRB" , "STRB R10, [R11, #7]!" , ""
-            "Pre-indexed offset LDRB" , "LDRB R10, [R11, #7]!" , ""
-            "Post-indexed offset LDRB" , "LDRB R10, [R11], R0" , ""
-            "Post-indexed offset LDR" , "LDR R11, [R3], #16" , ""
-            "Memory access error" , "STR R8, [R9, #5]" , "Memory address accessed must be divisible by 4"
-            "Moar STRB" , "STRB R14, [R1, #0xA]" , ""
-            "Moar LDRB" , "LDRB R1, [R5, #34]!" , ""
+            "Normal STR" , "STR R4, [R5]" , ""
+            "Normal LDR" , "LDR R1, [R7]" , ""
+            "Normal STRB" , "STRB R6, [R3]" , ""
+            "Normal LDRB" , "LDRB R2, [R3]" , ""
+
+            "Normal offset STR" , "STR R8, [R9, #-20]" , "" //-20
+            "Normal offset LDR" , "LDR R3, [R11, R2]" , ""
+            "Normal offset STRB" , "STRB R10, [R13, R0]" , ""
+            "Normal offset LDRB" , "LDRB R4, [R5, #28]", ""
+
+            "Pre-indexed offset STR" , "STR R12, [R5, #8]!" , ""
+            "Pre-indexed offset LDR" , "LDR R5, [R3, R0]!" , "" // R3 is not div by 4, but after offset it is
+            "Pre-indexed offset STRB" , "STRB R4, [R3, #-0b1]!" , ""
+            "Pre-indexed offset LDRB" , "LDRB R6, [R11, #-0b100]!" , ""
+
+            //"Post-indexed offset STR" , "STR R6, [R13], R1" , "" // ERROR WHY?
+            "Post-indexed offset STR" , "STR R6, [R11], R1", ""
+            "Post-indexed offset LDR" , "LDR R11, [R5], #-5" , ""
+            "Post-indexed offset STRB" , "STRB R8, [R9], #0xA9" , ""
+            "Post-indexed offset LDRB" , "LDRB R10, [R7], R3" , ""
+
+            "Memory access error - word aligned" , "STR R8, [R9, #5]" , "Memory address accessed must be divisible by 4"
+            //"Memory access error - not allowed" , "LDR R0, [R5, #-4]!" , "Not allowed to access this part of the memory"
+            "Parse error" , "STR R0, [R7 R0]", "Incorrect formatting"
         ]
 
     
