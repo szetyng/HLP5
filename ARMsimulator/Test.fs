@@ -109,7 +109,7 @@ let execErrorUnitTest name errActual errExpected inpAsm =
     Expecto.Expect.equal errActual errExpected <|
         sprintf "Error executing line: %s" inpAsm
 
-let makeExecTestList execName listNameInpErr = 
+let makeExecLSTestList execName listNameInpErr = 
     let makeOneTest name inp err = 
         match execute inp testCPU with
         | Ok resData -> VisualMemUnitTest name resData myTestParas inp
@@ -137,7 +137,7 @@ let parseUnitTest =
 [<Tests>]
 let execUnitTest = 
     // testList "Executing LDR/STR tests"
-    makeExecTestList "Executing LDR/STR tests"
+    makeExecLSTestList "Executing LDR/STR tests"
         [
             "Normal STR" , "STR R0, [R1]" , ""
             "Normal LDR" , "LDR R2, [R3]" , ""

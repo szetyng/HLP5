@@ -247,7 +247,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
         getPayload src
         |> fun p -> execType memLoc 0u d p     
              
-    /// Processes 32-bit word found in word-alligned base address 
+    /// Processes 32-bit word found in word-aligned base address 
     /// by locating the relevant byte and converting into small 8-bit long payload
     /// and clears register RDest preemptively. 
     /// Normal LDR with the small payload. 

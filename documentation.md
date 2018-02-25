@@ -87,7 +87,7 @@ executeMemInstr
 |> executeLOAD
 ```
 `executeLS`: Obtains the base address and offset required for the instruction's byte-addressing (vs word-addressing in regular LDR). Required due to specifying WAddr only as multiples of four  
-`executeLDRB`: Sets the register `RDest` to zero as a way to preemptively set its most significant 24 bits to zero. Obtains the payload - which is the word stored in the base address - from memory. Processes the word payload to get the effective payload - the 8 bits stored in the byte-alligned effective address    
+`executeLDRB`: Sets the register `RDest` to zero as a way to preemptively set its most significant 24 bits to zero. Obtains the payload - which is the word stored in the base address - from memory. Processes the word payload to get the effective payload - the 8 bits stored in the byte-aligned effective address    
 `executeLOAD`: Updates the register map field of `DataPath` to represent the payload being loaded to a register from memory, and pre- or post-indexing of `RSrc` as required
 
 
@@ -104,24 +104,39 @@ executeMemInstr
 
 
 ## Testing
+Used `Expecto` and `Exepcto.FsCheck` packages in testing. All tests are labelled with the `[<Tests>]` attribute so that they can be called with `runTestsInAssembly`.
+
 ### Parsing
-Explanation of tests for parsing. All are unit tests, what and how are they tested? Walkthrough of the flow.
+<!-- Explanation of tests for parsing. All are unit tests, what and how are they tested? Walkthrough of the flow.   -->
+Parsing is tested by calling the `onlyParseLine` function, which returns an output of type `Result<Instr, string>`. The output of `onlyParseLine` allows us to easily check if the assembly line has been parsed correctly into its `Memory.Instr` type. It also helps in checking if the module correctly rejects poorly formatted inputs.
+
+The parsing implementation has been tested with a thorough list of unit tests in `parseUnitTest`, including their error messages when appropriate.
 
 ### Execution
-Explanation of tests for execution. Explanation of using VisUAL test framework. All are unit tests, what and how are they tested? Walkthrough of the flow. Mention testing for errors/incorrect assembler lines. 
+<!-- Explanation of tests for execution. Explanation of using VisUAL test framework. All are unit tests, what and how are they tested? Walkthrough of the flow. Mention testing for errors/incorrect assembler lines.  -->
 
-Btw, **should implement more tests**. Make sure that all the instructions have been tested. Similarly for parsing or no? If not implementing random tests, mention why (?) - left for last.
+<!-- Btw, **should implement more tests**. Make sure that all the instructions have been tested. Similarly for parsing or no? If not implementing random tests, mention why (?) - left for last. -->
+
+The robustness of the module's ability to execute or reject assembly lines are tested with a list of unit tests in `execUnitTest`. The execution is being tested against VisUAL, which is run using the [framework] provided by Dr Tom Clarke and called in `VisualMemUnitTest`. Several changes have been made to this framework, detailed below. The `VisOutput` from running VisUAL is processed and packaged into `DataPath` fields so that they can be tested with `Expecto`.
+
+In Load/Store memory instructions, it is important for the ARM simulator to not mess with memory addresses that are not being specifically allocated for data usage. VisUAL also does not allow access to memory locations that are not word-aligned (not applicable to LDRB/STRB), a practice followed by this ARM simulator . Thus, `execErrorUnitTest` is used to check for such cases. Btw does it check for poor formats?
 
 ## Differences from VisUAL
-In testing, can only test for 13 memory locations.  
-Curently case-sensitive, only accepts assembler lines in all uppercase. Plan to implement in group stage, toUpper all assembler lines. More efficient than doing it at a module level.  
-VisUAL allows `OFFSET` to be a register, numerical expressions (eg: `#4+4`) or shifted register. **I allow register and literals, will fix soon.** Numerical expression: will integrate with arithmetic modules in the group phase. Shifted registers: will integrate with shift modules in the group phase.
-DataLoc -> specify what is meant here  
-  
+1. The `Memory` module only accepts assembler line inputs that are in all uppercase, while VisUAL is case-insensitive to inputs.   
+The whole programme can easily be changed to accept assembler lines in a case-insensitive manner by forcing all inputs to uppercase. It is more efficient to implement this functionality in the top-level during the group phase of the project than to do the same conversion in each invididual module.
+
+2. ViSUAL allows `OFFSET` to be a register, a numerical expression or a shifted register. The `Memory` module allows `OFFSET` to be a register or a literal.  
+Numerical expressions and shifted registers will be implemented in the group phase by integrating with the arithmetic instructions module and shift instructions module respectively.
+
+3. VisUAL allows access to memory locations from address ... onwards. `Memory` module allows access whenever the `MachineMemory` map in `DataPath` corresponds to `DataLoc`, not `Code`.  
+When building the map in top-level, can specify which memory locations are allowed to be accessed more clearly.
+
 
 ## Changes in top-level code / VisUAL test framework
 Executing from CommonTop  
 Getting rid of flags  
+In testing, can only test for 13 memory locations.  
+
 
 ## Usage
 How to call from CommonTop. Integration with the rest of the group.  
