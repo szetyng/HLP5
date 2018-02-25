@@ -147,7 +147,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
     let macMem = data.MM
     let macRegs = data.Regs
 
-    let executeLOAD payload memLoc offsAdd d = 
+    let executeLOAD memLoc offsAdd d payload = 
         let newRegs = 
             let loadedReg = macRegs.Add (regCont, payload)
             match off with
@@ -159,7 +159,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
             | Some (_, PreIndexed) -> Map.add regAdd (memLoc+offsAdd) loadedReg        
         {d with Regs=newRegs}   
 
-    let executeSTORE payload memLoc offsAdd d = 
+    let executeSTORE memLoc offsAdd d payload = 
         let newMem = macMem.Add ((WA memLoc) , (DataLoc payload))
         let newRegs = 
             match off with 
@@ -179,7 +179,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
             | Code _ -> failwithf "What? Should not access this memory location"
         | None -> macRegs.[regCont]
 
-    let getEffecPayload payload offsAdd shift = 
+    let getShiftedPayload offsAdd shift payload = 
         match offsAdd with
         | 0u -> payload, 0xFFFFFF00u
         | 1u -> shift payload 8, 0xFFFF00FFu
@@ -189,7 +189,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
 
     let executeLSWord src execType memLoc d = 
         getPayload src
-        |> fun p -> execType p memLoc 0u d     
+        |> fun p -> execType memLoc 0u d p     
            
     // let executeLDR memLoc d = 
     //     getPayload (Some memLoc)
@@ -202,29 +202,26 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
     let executeLDRB baseAdd offsAdd d = // return smolPayload and baseAdd, then it's normal LDR?
         let prepReg = Map.add regCont 0u macRegs
         
+        // get all 4 bytes from word-alligned base address in memory
+        // shift and AND with 0xFFu to only get relevant byte -> payload
         getPayload (Some baseAdd)
-        |> fun p -> getEffecPayload p offsAdd (>>>)
+        |> getShiftedPayload offsAdd (>>>)
         |> fun (shiftedP, _) -> shiftedP &&& 0xFFu
-        |> fun effecP -> executeLOAD effecP baseAdd offsAdd ({d with Regs=prepReg})
-
-        // let payload = getPayload (Some baseAdd)
-        // let smolPayload = 
-        //     getEffecPayload payload offsAdd (>>>)
-        //     |> fun (p, _) -> p &&& 0xFFu 
-        // executeLOAD smolPayload baseAdd offsAdd ({d with Regs=prepReg})          
+        |> executeLOAD baseAdd offsAdd ({d with Regs=prepReg})     
 
     let executeSTRB baseAdd offsAdd d = // return shiftedPayload and baseAdd, then it's normal STR
-        let payload = (getPayload None) % 256u
         let restOfWord = 
             match macMem.[WA baseAdd] with
             | DataLoc p -> p
             | Code _ -> failwithf "Not allowed to access this part of memory"
-        let shiftedPayload = 
-            getEffecPayload payload offsAdd (<<<)
-            |> fun (p, mask) -> p ||| (restOfWord &&& mask) // doesn't feel right to me?
-        executeSTORE shiftedPayload baseAdd offsAdd d             
-
-
+                
+        getPayload None
+        |> fun p -> p % 256u // get LS 8bits of value in register RSrc -> byte
+        |> getShiftedPayload offsAdd (<<<) // shift the byte-y payload into correct position
+        |> fun (shiftedP, mask) -> shiftedP ||| (restOfWord &&& mask) // AND restOfWord with relevant mask to clear the byte-address (bass addr + offset addr)
+        // OR it with shifted payload to get correct word in word-alligned base address -> effective payload
+        |> executeSTORE baseAdd offsAdd d   
+                  
     let executeLS typeLS isByte d = 
         // register stores address, get that address
         let add = macRegs.[regAdd]
@@ -250,9 +247,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
             | None, _ -> Error "Memory address accessed must be divisible by 4", None                     
         match typeLS, isByte, offsAddForB with
         | LDR, None, _ -> Result.map (fun memLoc -> executeLSWord (Some memLoc) executeLOAD memLoc d) effecAdd
-        //| LDR, None, _ -> Result.map (fun memLoc -> executeLDR memLoc d) effecAdd
         | STR, None, _ -> Result.map (fun memLoc -> executeLSWord None executeSTORE memLoc d) effecAdd
-        //| STR, None, _ -> Result.map (fun memLoc -> executeSTR memLoc d) effecAdd
         | LDR, Some B, Some o -> Result.map (fun memLoc -> executeLDRB memLoc o d) effecAdd
         | STR, Some B, Some o -> Result.map (fun memLoc -> executeSTRB memLoc o d) effecAdd
         | _ -> failwithf "Impossible"

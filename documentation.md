@@ -18,7 +18,7 @@ _Table 1: List of instructions implemented_
 |LDR        |All effective addresses must be a multiple of four     |Loads the **word** stored in the memory address in `RSrc` into register `RDest`.  |
 |STR        |All effective addresses must be a multiple of four     |Stores the **word** from register `RSrc` into the memory address in `RDest`            |
 |LDRB       |No restrictions to effective addresses                 |Loads the **byte** stored in the memory address in `RSrc` into register `RDest`, with the most significant 24 bits set to zero.    |
-|STRB       |No restrictions to effective addresses                 |Stores the least significant 8 bits of the value in `RSrc` into the memory address in `RDest`      |
+|STRB       |No restrictions to effective addresses                 |Stores the least significant 8 bits of the value in register `RSrc` into the memory address in `RDest`      |
   
 _Table 2: Description of the instructions_
   
