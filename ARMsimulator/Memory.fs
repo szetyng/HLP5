@@ -85,14 +85,19 @@ let makeLS (root:string) ls suffix =
         /// converts a hexadecimal or binary number stored as a string
         /// into its correct int value
         /// Eg usage for hex: baseToInt "2A" 16
-        /// Eg usage for bin: baseToInt "10010" 2
         let baseToInt (nrStr:string) (ba:int) =
             /// get list of integer values from its char representation
             let getListInt listChar = 
                 match ba with
-                | 16 -> List.map (fun n -> Hexa.[n]) listChar
-                | 2 -> List.map (fun n -> Bina.[n]) listChar
-                | _ -> failwithf "Wrong base" // any errors in incorrect formatting of hex/bin will come from map error
+                | 16 -> 
+                    match List.choose (fun n -> Map.tryFind n Hexa) listChar with
+                    | goodList when goodList.Length = listChar.Length -> Ok goodList
+                    | _ -> Error "Not proper hexadecimal"
+                | 2 -> 
+                    match List.choose (fun n -> Map.tryFind n Bina) listChar with
+                    | goodList when goodList.Length = listChar.Length -> Ok goodList
+                    | _ -> Error "Not proper binary"
+                | _ -> Error "Wrong base" // any errors in incorrect formatting of hex/bin will come from map error
             /// when ba=16 and n is 0,1,2,... represents 16^0, 16^1, 16^2 and so on
             let timey n =
                 match n with
@@ -106,22 +111,21 @@ let makeLS (root:string) ls suffix =
                 | _ -> l, false 
             let nr = 
                 getListInt charLst
-                |> List.rev
-                |> List.map2 (*) [for i in 0..(charLst.Length)-1 -> timey i] // calculates value of each digit
-                |> List.reduce (+) // adds them together to get decimal value
+                |> Result.map List.rev
+                |> Result.map (fun lst -> List.map2 (*) [for i in 0..(charLst.Length)-1 -> timey i] lst) // calc val of each digit
+                |> Result.map (fun l -> List.reduce (+) l) // adds them together to get decimal value
             match neg with
-            | true -> 0 - nr
-            | false -> nr
+            | true -> Result.map (fun x -> 0 - x) nr
+            | false -> Result.map id nr
         let (|GetLit|_|) (nrBase:string) (valStr:string) =
             match valStr.StartsWith(nrBase) with
             | true -> 
                 let x = valStr.Substring(nrBase.Length) 
                 Some (x.Trim [|']' ; '!'|])
             | false -> None            
-
         match valStr with
-        | GetLit "#0x" hex -> baseToInt hex 16 |> Literal |> Ok
-        | GetLit "#0b" bin -> baseToInt bin 2 |> Literal |> Ok
+        | GetLit "#0x" hex -> Result.map Literal (baseToInt hex 16)
+        | GetLit "#0b" bin -> Result.map Literal (baseToInt bin 2)
         | GetLit "#" dec -> dec |> int |> Literal |> Ok
         | reg -> 
             match reg.Trim [|']' ; '!'|] |> getRName with 
