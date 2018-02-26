@@ -77,7 +77,7 @@ let makeParseLSTestList name listIOpairs =
     |> List.map (fun (i,pair) -> (makeOneTest i pair))
     |> Expecto.Tests.testList name
 
-let VisualMemUnitTest name (actualOut: DataPath<Memory.Instr>) paras inpAsm = // expOutRegs expOutMem = 
+let VisualMemUnitTest name (actualOut: DataPath<Memory.Instr>) paras inpAsm = 
     testCase name <| fun () ->
         let expectedOut = RunVisualWithFlagsOut paras inpAsm testMemValList
         let addrList = List.map WA [paras.MemReadBase..4u..paras.MemReadBase+(12u*4u)]
@@ -130,7 +130,6 @@ let parseUnitTest =
 
 [<Tests>]
 let execUnitTest = 
-    // testList "Executing LDR/STR tests"
     makeExecLSTestList "Executing LDR/STR tests"
         [
             "Normal STR" , "STR R4, [R5]" , ""
