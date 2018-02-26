@@ -148,7 +148,6 @@ let execUnitTest =
             "Pre-indexed offset STRB" , "STRB R4, [R3, #-0b1]!" , "" // R3 is not word-aligned
             "Pre-indexed offset LDRB" , "LDRB R6, [R11, #-0b100]!" , ""
 
-            //"Post-indexed offset STR" , "STR R6, [R13], R1" , "" // ERROR WHY?
             // Allows post-indexed addressing to update the register value to anything
             "Post-indexed offset STR" , "STR R6, [R11], R1", ""
             "Post-indexed offset LDR" , "LDR R11, [R5], #-5" , ""
@@ -156,11 +155,10 @@ let execUnitTest =
             "Post-indexed offset LDRB" , "LDRB R10, [R7], R3" , ""
 
             "Memory access error - word aligned" , "STR R8, [R9, #5]" , "Memory address accessed must be divisible by 4"
-            //"Memory access error - not allowed" , "LDR R0, [R5, #-4]!" , "Not allowed to access this part of the memory"
+            "Memory access error - not allowed" , "LDR R0, [R5, #-4]!" , "Not allowed to access this part of memory"
             "Parse error" , "STR R0, [R7 R0]", "Incorrect formatting"
         ]
 
-    
 
 [<EntryPoint>]
 let main argv =

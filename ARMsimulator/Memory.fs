@@ -37,13 +37,15 @@ type Instr =
 /// parse error (dummy, but will do)
 type ErrInstr = string
 
-let Hexa = 
+let hexa = 
     Seq.zip (['0'..'9'] @ ['A'..'F']) [0..15]
     |> Map.ofSeq
 
-let Bina = 
+let bina = 
     Seq.zip ['0' ; '1'] [0 ; 1] 
     |> Map.ofSeq
+
+type NrBase = Hex | Bin
 
 let memSpec = {
     InstrC = MEM
@@ -74,35 +76,26 @@ let makeLS (root:string) ls suffix =
     /// converts string to RName
     let getRName (regStr:string) = 
         let regNameStr = regStr.Trim [|'[' ; ']'|]
-        match Map.containsKey regNameStr regNames with
-        | true -> regNames.[regNameStr] |> Ok
-        | false -> Error "Invalid register name"
+        match Map.tryFind regNameStr regNames with
+        | Some r -> Ok r
+        | None -> Error "Invalid register name"
     
-
     /// converts string to OffsetVal 
     /// can be literal or stored in register   
     let getOffsetVal (valStr:string) = 
         /// converts a hexadecimal or binary number stored as a string
         /// into its correct int value
-        /// Eg usage for hex: baseToInt "2A" 16
-        let baseToInt (nrStr:string) (ba:int) =
-            /// get list of integer values from its char representation
-            let getListInt listChar = 
-                match ba with
-                | 16 -> 
-                    match List.choose (fun n -> Map.tryFind n Hexa) listChar with
-                    | goodList when goodList.Length = listChar.Length -> Ok goodList
-                    | _ -> Error "Not proper hexadecimal"
-                | 2 -> 
-                    match List.choose (fun n -> Map.tryFind n Bina) listChar with
-                    | goodList when goodList.Length = listChar.Length -> Ok goodList
-                    | _ -> Error "Not proper binary"
-                | _ -> Error "Wrong base" // any errors in incorrect formatting of hex/bin will come from map error
+        let baseToInt (nrStr:string) (ba:NrBase) =
+            let getBaInInt = function Hex -> 16 | Bin -> 2
+            let actualConv ba lst =
+                let getMap = function Hex -> hexa | Bin -> bina           
+                match List.choose (fun n -> Map.tryFind n (getMap ba)) lst with
+                | goodList when goodList.Length = lst.Length-> Ok goodList
+                | _ -> Error "Not a proper number"
             /// when ba=16 and n is 0,1,2,... represents 16^0, 16^1, 16^2 and so on
-            let timey n =
-                match n with
-                | 0 -> 1
-                | n' -> List.reduce (*) [for _ in 1..n' -> ba]
+            let timey = 
+                function | 0 -> 1 
+                         | n' ->  List.reduce (*) [for _ in 1..n' -> getBaInInt ba]
             // convert string to list of chars
             let charLst, neg = 
                 let l = [for c in nrStr -> c]
@@ -110,13 +103,13 @@ let makeLS (root:string) ls suffix =
                 | '-' -> List.filter ((<>)'-') l, true
                 | _ -> l, false 
             let nr = 
-                getListInt charLst
+                actualConv ba charLst
                 |> Result.map List.rev
                 |> Result.map (fun lst -> List.map2 (*) [for i in 0..(charLst.Length)-1 -> timey i] lst) // calc val of each digit
                 |> Result.map (fun l -> List.reduce (+) l) // adds them together to get decimal value
             match neg with
             | true -> Result.map (fun x -> 0 - x) nr
-            | false -> Result.map id nr
+            | false -> nr
         let (|GetLit|_|) (nrBase:string) (valStr:string) =
             match valStr.StartsWith(nrBase) with
             | true -> 
@@ -124,21 +117,18 @@ let makeLS (root:string) ls suffix =
                 Some (x.Trim [|']' ; '!'|])
             | false -> None            
         match valStr with
-        | GetLit "#0x" hex -> Result.map Literal (baseToInt hex 16)
-        | GetLit "#0b" bin -> Result.map Literal (baseToInt bin 2)
+        | GetLit "#0x" hex -> Result.map Literal (baseToInt hex Hex)
+        | GetLit "#0b" bin -> Result.map Literal (baseToInt bin Bin)
         | GetLit "#" dec -> dec |> int |> Literal |> Ok
-        | reg -> 
-            match reg.Trim [|']' ; '!'|] |> getRName with 
-            | Ok r -> Ok (Reg r)
-            | Error e -> Error e
+        | reg -> reg.Trim [|']' ; '!'|] |> getRName |> Result.map Reg
         | _ -> Error "Incorrect offset format" //ie forgetting '#'         
 
     /// converts string to RName, to get RAdd
     let getRn ((reg:string),offset) = 
-        match reg.StartsWith("["), reg.EndsWith("]"), offset, getRName reg with
-        | true, true, None, Ok r  -> Ok r
-        | true, false, Some PreIndexed, Ok r | true, false, Some Normal, Ok r -> Ok r
-        | true, true, Some PostIndexed, Ok r -> Ok r
+        match reg.StartsWith("["), reg.EndsWith("]"), offset with
+        | true, true, None  -> getRName reg 
+        | true, false, Some PreIndexed | true, false, Some Normal -> getRName reg 
+        | true, true, Some PostIndexed -> getRName reg
         | _ -> Error "Incorrect offset format" 
 
     let rContents = Result.bind getRName (Ok operandLst.[0])
@@ -201,7 +191,12 @@ let parse (ls: LineData) : Result<Parse<Instr>,string> option =
 
 /// Parse Active Pattern used by top-level code
 let (|IMatch|_|)  = parse
-//**********************************************Execution************************************************************//
+
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+//  Execution code begins
+///////////////////////////////////////////////
+///////////////////////////////////////////////
 
 /// Called from CommonTop to execute ins on data
 /// ins and data corresponds to Instr type of Memory module
@@ -227,7 +222,6 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
                 | Reg r -> macRegs.[r] |> fun v -> Map.add regAdd (addr + (uint32 v) + offsAdd) loadedReg             
             | Some (_, PreIndexed), WA addr -> Map.add regAdd (addr + offsAdd) loadedReg        
         {d with Regs=newRegs}   
-
     /// Updates the memory map to store wordy payload into memory
     /// Also updates register RAdd if required by pre- or post-indexing
     let executeSTORE (memLoc:WAddr) (offsAdd:uint32) (d:DataPath<Instr>) (payload:uint32) = 
@@ -249,7 +243,6 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
             | DataLoc da -> da
             | Code _ -> failwithf "What? Should not access this memory location"
         | None -> macRegs.[regCont]
-
     let getShiftedPayloadMask offsAdd shift payload = 
         match offsAdd with
         | 0u -> payload, 0xFFFFFF00u
@@ -264,11 +257,10 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
     let executeLSWord src execType (memLoc:WAddr) (d:DataPath<Instr>) : DataPath<Instr> = 
         getPayload src
         |> fun p -> execType memLoc 0u d p     
-             
     /// Processes 32-bit word found in word-aligned base address 
-    /// by locating the relevant byte and converting into small 8-bit long payload
+    /// by locating the relevant byte and converting it into small 8-bit long payload
     /// and clears register RDest preemptively. 
-    /// Normal LDR with the small payload. 
+    /// Normal LDR with the byte-y payload. 
     /// Passes base address and offset for correct pre-/post-indexing
     let executeLDRB (baseAdd: WAddr) (offsAdd: uint32) (d:DataPath<Instr>) : DataPath<Instr> =
         let prepReg = Map.add regCont 0u macRegs
@@ -277,11 +269,10 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
         |> getShiftedPayloadMask offsAdd (>>>)
         |> fun (shiftedP, _) -> shiftedP &&& 0xFFu // only get relevant byte
         |> executeLOAD baseAdd offsAdd ({d with Regs=prepReg})     
-
     /// Processes 32-bit word found in register RSrc 
     /// into its least significant 8-bit byte-y version.
     /// Shifts byte into correct position of the rest of the 32-bit word in the base address.
-    /// Normal STR with this tacked on payload.
+    /// Normal STR with this tacked-on payload.
     /// Passes base address and offset for correct pre-/post-indexing
     let executeSTRB (baseAdd: WAddr) (offsAdd: uint32) (d:DataPath<Instr>) : DataPath<Instr> = 
         // will be ANDed with relevant mask to clear the byte-address (base addr + offset addr)
@@ -296,8 +287,11 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
         |> fun (shiftedP, mask) -> shiftedP ||| (restOfWord &&& mask) // get correct word in word-alligned base address
         |> executeSTORE baseAdd offsAdd d               
 
+    /// Extracts address from RAdd and uses it to calculate effective address 
+    /// Calculates base address and offset for byte-addresing
+    /// Identify opcode and passes the processed addresses into their relevant execute functions
     let executeLS typeLS isByte d = 
-        // register stores address, get that address
+        // register stores address, get that address (src add for load, dest add for store)
         let add = macRegs.[regAdd]
         // address might have a normal/pre-indexed offset, get the effective address
         let effecAdd, offsAddForB = 
@@ -307,21 +301,18 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
                 | Some (vOrR, Normal) | Some (vOrR, PreIndexed) -> 
                     match vOrR with
                     | Literal v -> add + (uint32 v)
-                        // match v>=0 with 
-                        // | true -> add + (uint32 v)
-                        // | false -> add - (uint32 v)
                     | Reg r -> add + macRegs.[r]   
             match isByte, effecAdd' % 4u with  
             | None, 0u ->
-                match macMem.[WA effecAdd'] with 
-                | DataLoc _ -> Ok (WA effecAdd'), None 
-                | Code _ -> Error "Not allowed to access this part of memory", None  
-            // LDRB/STRB: break down byte address into word-alligned base address and its offset            
+                match Map.tryFind (WA effecAdd') macMem with
+                | Some (DataLoc _) -> Ok (WA effecAdd'), None 
+                | _ -> Error "Not allowed to access this part of memory", None    
+            // LDRB/STRB: break down byte address into word-aligned base address and its offset            
             | Some B, offs -> 
                 let wordAddr = effecAdd' - offs
-                match macMem.[WA wordAddr] with
-                | DataLoc _ -> Ok (WA wordAddr), Some offs                     
-                | Code _ -> Error "Not allowed to access this part of the memory", None                            
+                match Map.tryFind (WA wordAddr) macMem with
+                | Some (DataLoc _) -> Ok (WA wordAddr), Some offs                     
+                | _ -> Error "Not allowed to access this part of the memory", None                            
             | None, _ -> Error "Memory address accessed must be divisible by 4", None                     
         match typeLS, isByte, offsAddForB with
         | LDR, None, _ -> Result.map (fun memLoc -> executeLSWord (Some memLoc) executeLOAD memLoc d) effecAdd
