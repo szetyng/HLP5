@@ -113,11 +113,11 @@ let makeLS (root:string) ls suffix =
             | true -> 0 - nr
             | false -> nr
         let (|GetLit|_|) (nrBase:string) (valStr:string) =
-            if valStr.StartsWith(nrBase) then
+            match valStr.StartsWith(nrBase) with
+            | true -> 
                 let x = valStr.Substring(nrBase.Length) 
                 Some (x.Trim [|']' ; '!'|])
-            else
-                None
+            | false -> None            
 
         match valStr with
         | GetLit "#0x" hex -> baseToInt hex 16 |> Literal |> Ok

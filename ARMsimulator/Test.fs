@@ -18,27 +18,18 @@ open Expecto
 open FsCheck
 open System
 
-// dummy paras‭
 let myTestParas = {defaultParas with 
                     InitRegs = [1u ; 4u ; 8u ; 0x1003u ; 0x9104080u ; // R0 - R4
                                 0x1000u ; 0xAB165482u ; 0x1010u ; 0x458DE9Bu ; 0x1020u ;       // R5 - R9
                                 0x541CEEABu ; 0x1024u ; 0xD751CB1Fu ; 0x102Cu ; 0x44438ADCu]   // R10 - R14
                     MemReadBase = 0x1000u}
-// let myTestParas = {defaultParas with 
-//                     InitRegs = [4u ; 0x1004u ; 0u ; 0x100Cu ; 40u ; // R0 - R4
-//                                 0x1000u ; 60u ; 0x1030u ; 80u ; 0x1024u ;       // R5 - R9
-//                                 100u ; 0x101Cu ; 120u ; 0x1020u ; 0x44400000u]   // R10 - R14
-//                     MemReadBase = 0x1000u}
-//let myTestParas = defaultParas
 
-// dummy memoryD751CB1F
 let testMemValList = [
                         0xD751CB1Fu ; 0xAB165482u ; 0x458DE9Bu ; 0x541CEEABu ;             // 0x1000 - 0x100C
                         0x9104080u ; 0x44438ADCu ; 0x444030F0u ; 0xFF00EA21u ;             // 0x1010 - 0x101C
                         0x44400000u ; 0x54C08F0u ; 0xABCDEF48u ; 0x891CECABu ; 0x778220EDu     // 0x1020 - 0x1030
                     ]       
 
-// dummy CPUdata
 let testCPU:DataPath<Memory.Instr> = {
     Fl = {N=false ; C=false ; Z=false ; V=false};
     Regs = Seq.zip [R0;R1;R2;R3;R4;R5;R6;R7;R8;R9;R10;R11;R12;R13;R14] myTestParas.InitRegs
@@ -123,19 +114,18 @@ let makeExecLSTestList execName listNameInpErr =
 
 [<Tests>]
 let parseUnitTest = 
-    //let makeParseLSTests listIOpairs = makeParseLSTestList "LDR and STR parse tests" listIOpairs 
     makeParseLSTestList "LDR and STR parse tests"
         [
             "STRB R10, [R15, #5]!" , Ok {InstrN=STR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 5, PreIndexed)}
             "LDR R4, [R8], #3", Ok {InstrN=LDR ; Type=None; RContents=R4; RAdd=R8 ; Offset=Some (Literal 3, PostIndexed)}
             "LDRB R7, [R11, #11]", Ok {InstrN=LDR ; Type=Some B; RContents=R7; RAdd=R11 ; Offset=Some (Literal 11, Memory.Normal)} 
             "STR R5, [R2]", Ok {InstrN=STR ; Type=None; RContents=R5; RAdd=R2 ; Offset=None}
-            "LDR R10, [R15, ", Error "Incorrect formatting" //failing. Good? 
-            "LDR R10, [R15" , Error "Incorrect formatting" //ERROR, NO BRACKETS
-            "LDR R10, R15]", Error "Incorrect formatting" // ERROR, NO BRACKETS
-            "LDR R10, R15", Error "Incorrect formatting" // ERROR, NO BRACKETS
-            "LDR R10, [R15, R2!]", Error "Incorrect formatting"
-            "STR R8, [R7], 22", Error "Incorrect formatting"
+            "LDR R0, [R3, ", Error "Incorrect formatting" 
+            "STR R1, [R6" , Error "Incorrect formatting" 
+            "LDRB R13, R7]", Error "Incorrect formatting" 
+            "STRB R2, R4", Error "Incorrect formatting" 
+            "LDR R10, [R11, R2!]", Error "Incorrect formatting"
+            "STR R8, [R1], 22", Error "Incorrect formatting"
         ]    
 
 [<Tests>]
@@ -145,20 +135,21 @@ let execUnitTest =
         [
             "Normal STR" , "STR R4, [R5]" , ""
             "Normal LDR" , "LDR R1, [R7]" , ""
-            "Normal STRB" , "STRB R6, [R3]" , ""
+            "Normal STRB" , "STRB R6, [R3]" , "" // R3 stores address that is not word-aligned
             "Normal LDRB" , "LDRB R2, [R3]" , ""
 
-            "Normal offset STR" , "STR R8, [R9, #-20]" , "" //-20
+            "Normal offset STR" , "STR R8, [R9, #-20]" , "" 
             "Normal offset LDR" , "LDR R3, [R11, R2]" , ""
             "Normal offset STRB" , "STRB R10, [R13, R0]" , ""
             "Normal offset LDRB" , "LDRB R4, [R5, #28]", ""
 
             "Pre-indexed offset STR" , "STR R12, [R5, #8]!" , ""
-            "Pre-indexed offset LDR" , "LDR R5, [R3, R0]!" , "" // R3 is not div by 4, but after offset it is
-            "Pre-indexed offset STRB" , "STRB R4, [R3, #-0b1]!" , ""
+            "Pre-indexed offset LDR" , "LDR R5, [R3, R0]!" , "" // addr is not div by 4, but effective addr is
+            "Pre-indexed offset STRB" , "STRB R4, [R3, #-0b1]!" , "" // R3 is not word-aligned
             "Pre-indexed offset LDRB" , "LDRB R6, [R11, #-0b100]!" , ""
 
             //"Post-indexed offset STR" , "STR R6, [R13], R1" , "" // ERROR WHY?
+            // Allows post-indexed addressing to update the register value to anything
             "Post-indexed offset STR" , "STR R6, [R11], R1", ""
             "Post-indexed offset LDR" , "LDR R11, [R5], #-5" , ""
             "Post-indexed offset STRB" , "STRB R8, [R9], #0xA9" , ""
@@ -173,12 +164,6 @@ let execUnitTest =
 
 [<EntryPoint>]
 let main argv =
-    // printfn "%A" argv
-    // printfn "Testing LDR/STR"
-    // Expecto.Tests.runTestsInAssembly Expecto.Tests.defaultConfig [||] |> ignore
-    // Console.ReadKey() |> ignore  
-    // 0 // return an integer exit code
-    
     initCaches myTestParas
     let rc = runTestsInAssembly expectoConfig [||]
     finaliseCaches myTestParas

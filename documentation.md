@@ -80,10 +80,9 @@ Several changes have been made to the framework when used to test `Memory.fs`. T
 |All            |Accepts `OFFSET` in the form of decimal, binary and hexedecimal literals
 |All            |Accepts `OFFSET` in the form of registers
 |All            |Allows post-indexed addressing to update the register value to anything, even memory locations that are off-limits for execution
-|All            |Rejects instructions that are trying to access areas other than those tagged with `DataLoc`
+<!-- |All            |Rejects instructions that are trying to access areas other than those tagged with `DataLoc` -->
 |`LDR`/`STR`    |Allows memory access when the address in `RAdd` is not word-aligned, but the effective address after offset is
-|`LDR`/`STR`    |Rejects instructions that are trying to access memory locations that are not word-aligned
-|`LDR`/`STR`    |Rejects instructions where the address in `RAdd` is word-aligned, but the effective address after offset is not  
+|`LDR`/`STR`    |Rejects instructions that are trying to access memory locations that are not word-aligned  
 |`LDRB`/`STRB`  |Allows memory addresses that are not word-aligned for `LDRB`/`STRB`
 |`LDRB`/`STRB`  |Able to access memory addresses that are not word-aligned in addition to offsets for `LDRB`/`STRB`
 
@@ -97,7 +96,7 @@ The parsing implementation has been tested with a thorough list of unit tests in
 ### Execution
 The robustness of the module's ability to execute or reject assembly lines is tested with a list of unit tests in `execUnitTest`. The execution is being tested against VisUAL, which is run using the [framework](https://intranet.ee.ic.ac.uk/t.clarke/hlp/images/VisualTesting.zip) provided by Dr Tom Clarke and called in `VisualMemUnitTest`. The `VisOutput` from running VisUAL is processed and packaged into appropriate `DataPath` fields so that they can be tested with the output from the `Memory` module using `Expecto`.
 
-In Load/Store memory instructions, it is important for the ARM simulator to not mess with memory addresses that are not being specifically allocated for data usage. VisUAL also does not allow access to memory locations that are not word-aligned (not applicable to LDRB/STRB), a practice followed by this ARM simulator . Thus, `execErrorUnitTest` is used to check for such cases as well as any other instruction lines that lead to execution errors.  
+In Load/Store memory instructions, it is important for the ARM simulator to not mess with memory addresses that are not being specifically allocated for data usage. VisUAL also does not allow access to memory locations that are not word-aligned (not applicable to LDRB/STRB), a practice followed by this ARM simulator. Thus, `execErrorUnitTest` is used to check for such cases as well as any other instruction lines that lead to execution errors.  
 
 ## Differences from VisUAL
 |VisUAL     |`Memory.fs`    |Reasons        |
