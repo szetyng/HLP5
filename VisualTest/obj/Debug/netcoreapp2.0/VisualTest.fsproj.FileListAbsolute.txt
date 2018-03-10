@@ -1,0 +1,17 @@
+C:/src17/VisualTesting/VisualTest/obj/Debug/netcoreapp2.0/VisualTest.fsprojResolveAssemblyReference.cache
+c:/Users/Nicholas/Desktop/VisualTesting/VisualTest/bin/Debug/netcoreapp2.0/VisualTest.deps.json
+c:/Users/Nicholas/Desktop/VisualTesting/VisualTest/bin/Debug/netcoreapp2.0/VisualTest.runtimeconfig.json
+c:/Users/Nicholas/Desktop/VisualTesting/VisualTest/bin/Debug/netcoreapp2.0/VisualTest.runtimeconfig.dev.json
+c:/Users/Nicholas/Desktop/VisualTesting/VisualTest/bin/Debug/netcoreapp2.0/VisualTest.dll
+c:/Users/Nicholas/Desktop/VisualTesting/VisualTest/bin/Debug/netcoreapp2.0/VisualTest.pdb
+c:/Users/Nicholas/Desktop/VisualTesting/VisualTest/obj/Debug/netcoreapp2.0/VisualTest.fsprojResolveAssemblyReference.cache
+c:/Users/Nicholas/Desktop/VisualTesting/VisualTest/obj/Debug/netcoreapp2.0/VisualTest.dll
+c:/Users/Nicholas/Desktop/VisualTesting/VisualTest/obj/Debug/netcoreapp2.0/VisualTest.pdb
+/Users/nicholaslow/Google Drive/VisualTest/bin/Debug/netcoreapp2.0/VisualTest.deps.json
+/Users/nicholaslow/Google Drive/VisualTest/bin/Debug/netcoreapp2.0/VisualTest.runtimeconfig.json
+/Users/nicholaslow/Google Drive/VisualTest/bin/Debug/netcoreapp2.0/VisualTest.runtimeconfig.dev.json
+/Users/nicholaslow/Google Drive/VisualTest/bin/Debug/netcoreapp2.0/VisualTest.dll
+/Users/nicholaslow/Google Drive/VisualTest/bin/Debug/netcoreapp2.0/VisualTest.pdb
+/Users/nicholaslow/Google Drive/VisualTest/obj/Debug/netcoreapp2.0/VisualTest.fsprojResolveAssemblyReference.cache
+/Users/nicholaslow/Google Drive/VisualTest/obj/Debug/netcoreapp2.0/VisualTest.dll
+/Users/nicholaslow/Google Drive/VisualTest/obj/Debug/netcoreapp2.0/VisualTest.pdb
