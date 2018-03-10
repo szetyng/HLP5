@@ -1,1 +1,1 @@
-/C "..\visualapp\visual\jre\bin\java -jar ..\visualapp\visual\content\visual_headless.jar --headless ..\VisualWork\d1/source.s ..\VisualWork\d1/visoutput.log --cycles --regs --syntax --runtime --mode:all  --meminstsize:0x1000 "
+/C "..\visualapp\visual\jre\bin\java -jar ..\visualapp\visual\content\visual_headless.jar --headless ..\visualWork\d1/source.s ..\visualWork\d1/visoutput.log --cycles --regs --syntax --runtime --mode:all  --meminstsize:0x1000 "

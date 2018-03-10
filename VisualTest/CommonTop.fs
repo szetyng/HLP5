@@ -10,12 +10,14 @@ open CommonData
 /// allows different modules to return different instruction types
 type Instr =
     | IMEM of MultiR.Instr
+    | ISINGMEM of Memory.Instr
     | IDP of Shift.Instr
 
 /// allows different modules to return different error info
 /// by default all return string so this is not needed
 type ErrInstr =
     | ERRIMEM of MultiR.ErrInstr
+    | ERRISINGMEM of Memory.ErrInstr
     | ERRIDP of Shift.ErrInstr
     | ERRTOPLEVEL of string
 
@@ -27,6 +29,7 @@ type ErrInstr =
 let IMatch (ld: LineData) : Result<Parse<Instr>,ErrInstr> option =
     let pConv fr fe p = pResultInstrMap fr fe p |> Some
     match ld with
+    | Memory.IMatch pa -> pConv ISINGMEM ERRISINGMEM pa
     | MultiR.IMatch pa -> pConv IMEM ERRIMEM pa
     | Shift.IMatch pa -> pConv IDP ERRIDP pa
     | _ -> None
@@ -80,3 +83,18 @@ let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
     |> splitIntoWords
     |> Array.toList
     |> matchLine
+
+
+// extract Instr from Result<Parse<Instr>,errortype>
+let execute (asmLine:string) (d:DataPath<Memory.Instr>) =
+    let executeAnyInstr (instr:Instr) (d:DataPath<Memory.Instr>) = 
+        let exec d =
+            match instr with
+            | ISINGMEM ins -> Memory.executeMemInstr ins d 
+            | _ -> Error "Not yet implemented"
+        exec d  
+    match parseLine None (WA 0u) asmLine with
+    | Ok pr -> executeAnyInstr pr.PInstr d // parsed correctly
+    | Error e ->  
+        match e with
+        | ERRIMEM e' | ERRIDP e' | ERRTOPLEVEL e' | ERRISINGMEM e' -> Error e'
