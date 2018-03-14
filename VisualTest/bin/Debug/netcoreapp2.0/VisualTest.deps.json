@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.0",
-    "signature": "1be1e557dd73544cc1732bcf8ee07e26bc6ab317"
+    "signature": "144089b4dbda992f180b4b6bc365406c65113894"
   },
   "compilationOptions": {},
   "targets": {
@@ -9,8 +9,7 @@
       "VisualTest/1.0.0": {
         "dependencies": {
           "Expecto": "5.1.2",
-          "Expecto.FsCheck": "5.1.2",
-          "FSharp.Core": "4.2.3"
+          "Expecto.FsCheck": "5.1.2"
         },
         "runtime": {
           "VisualTest.dll": {}
@@ -18,7 +17,7 @@
       },
       "Argu/3.7.0": {
         "dependencies": {
-          "FSharp.Core": "4.2.3",
+          "FSharp.Core": "4.1.18",
           "System.Xml.XDocument": "4.0.11"
         },
         "runtime": {
@@ -28,7 +27,7 @@
       "Expecto/5.1.2": {
         "dependencies": {
           "Argu": "3.7.0",
-          "FSharp.Core": "4.2.3",
+          "FSharp.Core": "4.1.18",
           "Mono.Cecil": "0.10.0-beta7",
           "System.Diagnostics.FileVersionInfo": "4.3.0"
         },
@@ -39,7 +38,7 @@
       "Expecto.FsCheck/5.1.2": {
         "dependencies": {
           "Expecto": "5.1.2",
-          "FSharp.Core": "4.2.3",
+          "FSharp.Core": "4.1.18",
           "FsCheck": "2.10.4"
         },
         "runtime": {
@@ -48,13 +47,13 @@
       },
       "FsCheck/2.10.4": {
         "dependencies": {
-          "FSharp.Core": "4.2.3"
+          "FSharp.Core": "4.1.18"
         },
         "runtime": {
           "lib/netstandard1.6/FsCheck.dll": {}
         }
       },
-      "FSharp.Core/4.2.3": {
+      "FSharp.Core/4.1.18": {
         "dependencies": {
           "System.Collections": "4.3.0",
           "System.Console": "4.0.0",
@@ -82,6 +81,16 @@
         },
         "runtime": {
           "lib/netstandard1.6/FSharp.Core.dll": {}
+        },
+        "runtimeTargets": {
+          "runtimes/any/native/FSharp.Core.optdata": {
+            "rid": "any",
+            "assetType": "native"
+          },
+          "runtimes/any/native/FSharp.Core.sigdata": {
+            "rid": "any",
+            "assetType": "native"
+          }
         }
       },
       "Microsoft.NETCore.Targets/1.1.0": {},
@@ -864,12 +873,12 @@
       "path": "fscheck/2.10.4",
       "hashPath": "fscheck.2.10.4.nupkg.sha512"
     },
-    "FSharp.Core/4.2.3": {
+    "FSharp.Core/4.1.18": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-PthzJd0cY9L7+mPHoMB0B9Z9moR4oO1rU5RDrVW44cfMm0R9AYFf+F3BsuTvP9clr9w/Wa0wbSfEwbJV8sV80A==",
-      "path": "fsharp.core/4.2.3",
-      "hashPath": "fsharp.core.4.2.3.nupkg.sha512"
+      "sha512": "sha512-LxCp5pMcNbqoIWAaE76/rqJp/2/O6rrmIvnWXoxx5NDiIOV7X4NcLYC1RdImReroq2m/AUAa1RrvraBEWrMOmQ==",
+      "path": "fsharp.core/4.1.18",
+      "hashPath": "fsharp.core.4.1.18.nupkg.sha512"
     },
     "Microsoft.NETCore.Targets/1.1.0": {
       "type": "package",
