@@ -8,15 +8,13 @@ open CommonData
 open CommonLex
 open System.Text.RegularExpressions
 
-type ErrInstr = string
-type ErrRun = string
 type Instr = {
         InstrC:InstrClass; 
         OpCode: string; 
         AMode:string; 
         Rn:RName; 
         WrB:bool; 
-        RList:Result<RName list,ErrInstr> 
+        RList:Result<RName list,string> 
         }
 let mSpec = {
     InstrC = Shift          
@@ -32,7 +30,7 @@ let (|RegExpMatch|_|) pattern input =
    if m.Success then
       Some (List.tail [ for g in m.Groups -> g.Value ]) else None
 
-let parse (ls: LineData) : Result<Parse<Instr>,ErrInstr> option =
+let parse (ls: LineData) : Result<Parse<Instr>,string> option =
     let parse'(instrC, (root,suffix,pCond)) =
         let initInstr = {InstrC=instrC; OpCode=root; AMode= suffix; Rn=R0; WrB = false; RList=Error ""}
         let (WA la) = ls.LoadAddr 
@@ -55,7 +53,7 @@ let parse (ls: LineData) : Result<Parse<Instr>,ErrInstr> option =
             // Converts an element in the reglist into corresponding RName equivalent
             // Each element can be a either a single register or a range of registers
             // Result is a register list with a single element or a a list of registers
-            let parseRegList (x:string): Result<RName list, ErrInstr> =
+            let parseRegList (x:string): Result<RName list, string> =
                 // convert range of register into list of register
                 // Example R0-R3 -> R0,R1,R2,R3
                 let expandRange (r1:string) (r2:string) =
@@ -72,7 +70,7 @@ let parse (ls: LineData) : Result<Parse<Instr>,ErrInstr> option =
                 
                 // convert parsed string list from regex into list of registers 
                 // x can be ["r1-r9";"r1";"r9"] or ["r1";"";""]
-                let strToR (x:string list): Result<RName list,ErrInstr> = 
+                let strToR (x:string list): Result<RName list,string> = 
                     let i1 = x.[0]           
                     let i2 = x.[1]          
                     let i3 = x.[2]
@@ -138,7 +136,7 @@ let parse (ls: LineData) : Result<Parse<Instr>,ErrInstr> option =
 
 let (|IMatch|_|) = parse
 
-let execute (i:Instr) (d:DataPath<Instr>):Result<DataPath<Instr>,ErrRun> = 
+let execute (i:Instr) (d:DataPath<'INS>):Result<DataPath<'INS>,string> = 
     let (|IA|DB|) x = 
         match i.OpCode with
         | "STM" -> match x with

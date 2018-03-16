@@ -10,8 +10,6 @@ open System.Text.RegularExpressions
 
 type SVal = Sh of int | Rs of RName | RRX
 type Instr = {InstrC:InstrClass ;OpCode: string; Rd: RName; Rm: RName; Op2: SVal; SBit: string}
-type ErrInstr = string
-type ErrRun = string
 
 /// Specification for Shift instructions
 let dPSpec = {
@@ -27,7 +25,7 @@ let (|RegExpMatch|_|) pattern input =
    if m.Success then
       Some (List.tail [ for g in m.Groups -> g.Value ]) else None
 
-let parse (ls: LineData) : Result<Parse<Instr>,ErrInstr> option =
+let parse (ls: LineData) : Result<Parse<Instr>,string> option =
     let parse' (instrC, (root,suffix,pCond)) =
         let initInstr = {
                         InstrC=instrC; 
@@ -80,7 +78,7 @@ let parse (ls: LineData) : Result<Parse<Instr>,ErrInstr> option =
 /// Parse Active Pattern used by top-level code
 let (|IMatch|_|) = parse
 
-let execute (i:Instr) (d:DataPath<Instr>): Result<DataPath<Instr>,ErrRun> = 
+let execute (i:Instr) (d:DataPath<'INS>): Result<DataPath<'INS>,string> = 
     let intToBool = function
         | 1 -> true
         | 0 -> false
@@ -99,7 +97,7 @@ let execute (i:Instr) (d:DataPath<Instr>): Result<DataPath<Instr>,ErrRun> =
         | _ -> false
 
     // Function that updates Flags if S is set using the given flags and dataPath
-    let checkS (updatedFlag:Flags) (d:DataPath<Instr>) : DataPath<Instr> = 
+    let checkS (updatedFlag:Flags) (d:DataPath<'INS>) : DataPath<'INS> = 
         match i.SBit with
         | "S" -> {d with Fl = updatedFlag}   
         | "" -> d
@@ -163,7 +161,7 @@ let execute (i:Instr) (d:DataPath<Instr>): Result<DataPath<Instr>,ErrRun> =
             | _ -> nBitFlag (n%32)
         {d.Fl with C = cF; Z = setZ res; N = setN res}
     
-    let makeShift (makeReg) (makeFlag) (i:Instr) (d:DataPath<Instr>)  =
+    let makeShift (makeReg) (makeFlag) (i:Instr) (d:DataPath<'INS>)  =
         let sV = 
             match i.Op2 with
             | Sh x -> x
@@ -179,7 +177,7 @@ let execute (i:Instr) (d:DataPath<Instr>): Result<DataPath<Instr>,ErrRun> =
     let makeASR = makeShift regASR flagASR
     let makeROR = makeShift regROR flagROR
 
-    let makeRRX: DataPath<Instr> =
+    let makeRRX: DataPath<'INS> =
         let regRRX (r:RName): uint32 = 
             d.Regs.[r] >>> 1 ||| ((d.Fl.C |> boolToInt |> uint32) <<< 31)
         let flagRRX (res:uint32): Flags =  

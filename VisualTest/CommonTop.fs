@@ -12,23 +12,17 @@ type Instr =
     | IMEM of MultiR.Instr
     | IDP of Shift.Instr
 
-/// allows different modules to return different error info
-/// by default all return string so this is not needed
-type ErrInstr =
-    | ERRIMEM of MultiR.ErrInstr
-    | ERRIDP of Shift.ErrInstr
-    | ERRTOPLEVEL of string
 
 /// Note that Instr in Mem and DP modules is NOT same as Instr in this module
 /// Instr here is all possible isntruction values combines with a D.U.
 /// that tags the Instruction class
 /// Similarly ErrInstr
 /// Similarly IMatch here is combination of module IMatches
-let IMatch (ld: LineData) : Result<Parse<Instr>,ErrInstr> option =
+let IMatch (ld: LineData) : Result<Parse<Instr>,string> option =
     let pConv fr fe p = pResultInstrMap fr fe p |> Some
     match ld with
-    | MultiR.IMatch pa -> pConv IMEM ERRIMEM pa
-    | Shift.IMatch pa -> pConv IDP ERRIDP pa
+    | MultiR.IMatch pa -> pConv IMEM string pa
+    | Shift.IMatch pa -> pConv IDP string pa
     | _ -> None
 
 
@@ -72,9 +66,9 @@ let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
                     with Label=Some label} 
                   |> IMatch with
             | None -> 
-                Error (ERRTOPLEVEL (sprintf "Unimplemented instruction %s" opc))
+                Error (sprintf "Unimplemented instruction %s" opc)
             | Some pa -> pa
-        | _ -> Error (ERRTOPLEVEL (sprintf "Unimplemented instruction %A" words))
+        | _ -> Error (sprintf "Unimplemented instruction %A" words)
     asmLine
     |> removeComment
     |> splitIntoWords
