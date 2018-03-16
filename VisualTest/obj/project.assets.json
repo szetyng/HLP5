@@ -5100,11 +5100,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/nicholaslow/Google Drive/VisualTest/VisualTest.fsproj",
+      "projectUniqueName": "/Users/nicholaslow/HLP5/VisualTest/VisualTest.fsproj",
       "projectName": "VisualTest",
-      "projectPath": "/Users/nicholaslow/Google Drive/VisualTest/VisualTest.fsproj",
+      "projectPath": "/Users/nicholaslow/HLP5/VisualTest/VisualTest.fsproj",
       "packagesPath": "/Users/nicholaslow/.nuget/packages/",
-      "outputPath": "/Users/nicholaslow/Google Drive/VisualTest/obj/",
+      "outputPath": "/Users/nicholaslow/HLP5/VisualTest/obj/",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"

@@ -25,6 +25,10 @@ let IMatch (ld: LineData) : Result<Parse<Instr>,string> option =
     | Shift.IMatch pa -> pConv IDP string pa
     | _ -> None
 
+let IExecute (i:Instr) (d:DataPath<'INS>):Result<DataPath<'INS>,string> =
+    match i with
+    | IDP x -> Shift.execute x d
+    | IMEM x -> MultiR.execute x d
 
 
 type CondInstr = Condition * Instr
