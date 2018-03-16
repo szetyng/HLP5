@@ -29,18 +29,21 @@ let tD = {
          }
 
 
-let splitIntoWords ( line:string ) =
+let splitIntoLines ( line:string ) =
                 line.Split( ([|'\n'|] : char array), 
                     System.StringSplitOptions.RemoveEmptyEntries)
 
-let asm = "LABEL LSR R1,R1,#2 \n LABEL1 STM R1, {R1,R2}"
-let parseAndExecute asm tD = 
+let asm = "LABEL LSR R4,R1,#2 \n LABEL1 STM R1, {R1,R2}"
+/// Assume that program has been parsed and is valid.
+let parseAndExecute tD asm= 
     let parsedRes = parseLine None (WA 0ul) asm
-    match parsedRes with
-    | Ok x -> IExecute x.PInstr tD
-    | (Error e) -> Error e
+    match parsedRes, tD with
+    | Ok x, Ok d -> IExecute x.PInstr d
+    | Error e, _ -> Error e
+    | _, Error e -> Error e
 
 
-let prog = asm |> splitIntoWords 
+let prog = asm |> splitIntoLines 
+let parseSingle = parseAndExecute (Ok tD) prog.[1]   // example of parsing a single line
 
-parseAndExecute prog.[1] tD
+Array.fold parseAndExecute (Ok tD) prog
