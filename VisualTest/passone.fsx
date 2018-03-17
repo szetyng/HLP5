@@ -58,7 +58,7 @@ Array.fold parseAndExecute (Ok tD) prog
 //         | Error e, _ -> Error e
 //         | _, Error e -> Error e
 //     Array.fold (parseAndExecute None) (Ok cpuData) lineLst
-let tab = ["LABEL1"; "LABEL2"]
+let tab = ["LABEL3"; "LABEL2"]
 let tab2 = [0x1000u; 0x1004u]
 let tabl = Seq.zip tab tab2 |> Map.ofSeq
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -94,17 +94,17 @@ let firstPass (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
                 | Some _ -> Ok (makeLineData opc operands) //|> IMatch
                 | None -> Error "Not an opcode"
             | _ -> failwithf "None"
-        
         match pNoLabel, words with
         | Ok lD, _ -> lD
         | _, label :: opc :: operands -> 
-            match { makeLineData opc operands 
-                    with Label=Some label} with
+            let add = 
+                match loadAddr with
+                | WA a -> a
+            let newSymTab = Option.map (fun x -> Map.add label add x) symtab
+            match { makeLineData opc operands with Label=Some label; SymTab=newSymTab} with
             | lD -> 
                 let oldSymTab = lD.SymTab
                 {lD with SymTab=oldSymTab}              
-            | _ -> 
-                failwithf "Uimplementer instructions"
         | _ -> failwithf "Uimplementer instructions"
     asmLine
     |> removeComment
@@ -124,9 +124,12 @@ let execMultiLine src cpuData =
         | _, Error e -> Error e
 
     let passOne state oneLine = 
+        let newState = 
+            match state.LoadAddr with
+            | WA x -> WA (x + 4u)
         let x = firstPass state.SymTab state.LoadAddr oneLine
         match x with
-        | pa -> pa, pa
+        | pa -> pa, {pa with LoadAddr=newState}
         | _ -> failwithf "Error"
 
     let state = {LoadAddr=WA 0u; Label = None ; SymTab= Some tabl ; OpCode = ""; Operands= ""}
