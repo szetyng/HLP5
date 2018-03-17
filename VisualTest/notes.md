@@ -1,0 +1,1 @@
+If there are multiple labels with the same name, current code rewrites old label value

@@ -42,8 +42,6 @@ let parseAndExecute tD asm=
     | Ok x, Ok d -> IExecute x.PInstr d
     | Error e, _ -> Error e
     | _, Error e -> Error e
-
-
 let prog = asm |> splitIntoLines 
 let parseSingle = parseAndExecute (Ok tD) prog.[1]   // example of parsing a single line
 
@@ -63,6 +61,8 @@ Array.fold parseAndExecute (Ok tD) prog
 let tab = ["LABEL1"; "LABEL2"]
 let tab2 = [0x1000u; 0x1004u]
 let tabl = Seq.zip tab tab2 |> Map.ofSeq
+/////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
 
 let firstPass (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
     /// put parameters into a LineData record
@@ -96,16 +96,13 @@ let firstPass (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
             | _ -> failwithf "None"
         
         match pNoLabel, words with
-        | Ok lD, _ -> {lD with SymTab = None}
+        | Ok lD, _ -> lD
         | _, label :: opc :: operands -> 
             match { makeLineData opc operands 
                     with Label=Some label} with
             | lD -> 
-                let oldSymTab =
-                    match lD.SymTab with
-                    | Some x -> x
-                    | _ -> failwithf "No"
-                {lD with SymTab=None}              
+                let oldSymTab = lD.SymTab
+                {lD with SymTab=oldSymTab}              
             | _ -> 
                 failwithf "Uimplementer instructions"
         | _ -> failwithf "Uimplementer instructions"
@@ -126,14 +123,16 @@ let execMultiLine src cpuData =
         | Error e, _ -> Error e
         | _, Error e -> Error e
 
-    let passOne symTab oneLine = 
-        let x = firstPass symTab (WA 0ul) oneLine
+    let passOne state oneLine = 
+        let x = firstPass state.SymTab state.LoadAddr oneLine
         match x with
-        | pa -> pa, pa.SymTab
+        | pa -> pa, pa
         | _ -> failwithf "Error"
 
+    let state = {LoadAddr=WA 0u; Label = None ; SymTab= Some tabl ; OpCode = ""; Operands= ""}
     // needs to return list of line data, thus, need to change pass2's parseLine
-    let newListLD, newSymTab = Array.mapFold passOne (Some tabl) lineLst
+    let newListLD, newSymTabSrc = Array.mapFold passOne state lineLst
+    let newSymTab = newSymTabSrc.SymTab
     Array.map (fun lD -> {lD with SymTab = newSymTab}) newListLD
 
 
