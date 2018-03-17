@@ -1,15 +1,15 @@
 // To be split into several modules?
-module Test
+module SingleRTests
 
 open VisualTest.VCommon
 open VisualTest.VData
 open VisualTest.Visual
 open VisualTest.VTest
 
-open CommonData
 open CommonLex
-open Memory
+open SingleR
 open CommonTop
+open CommonData
 
 open Expecto
 open FsCheck
@@ -27,7 +27,7 @@ let testMemValList = [
                         0x44400000u ; 0x54C08F0u ; 0xABCDEF48u ; 0x891CECABu ; 0x778220EDu     // 0x1020 - 0x1030
                     ]       
 
-let testCPU:DataPath<Memory.Instr> = {
+let testCPU:DataPath<SingleR.Instr> = {
     Fl = {N=false ; C=false ; Z=false ; V=false};
     Regs = Seq.zip [R0;R1;R2;R3;R4;R5;R6;R7;R8;R9;R10;R11;R12;R13;R14] myTestParas.InitRegs
             |> List.ofSeq
@@ -73,7 +73,7 @@ let onlyParseLine (asmLine:string) =
             match words with
             | opc :: operands -> 
                 makeLineData opc operands 
-                |> Memory.parse
+                |> SingleR.parse
             | _ -> None
         match pNoLabel with
         | Some (Ok pa) -> Ok pa.PInstr
@@ -93,7 +93,7 @@ let makeParseLSTestList name listIOpairs =
     |> List.map (fun (i,pair) -> (makeOneTest i pair))
     |> Expecto.Tests.testList name
 
-let VisualMemUnitTest name (actualOut: DataPath<Memory.Instr>) paras inpAsm = 
+let VisualMemUnitTest name (actualOut: DataPath<'INS>) paras inpAsm = 
     testCase name <| fun () ->
         let expectedOut = RunVisualMem testMemValList paras inpAsm 
         let addrList = List.map WA [paras.MemReadBase..4u..paras.MemReadBase+(12u*4u)]
@@ -134,7 +134,7 @@ let parseUnitTest =
         [
             "STRB R10, [R15, #5]!" , Ok {InstrN=STR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=Some (Literal 5, PreIndexed)}
             "LDR R4, [R8], #3", Ok {InstrN=LDR ; Type=None; RContents=R4; RAdd=R8 ; Offset=Some (Literal 3, PostIndexed)}
-            "LDRB R7, [R11, #11]", Ok {InstrN=LDR ; Type=Some B; RContents=R7; RAdd=R11 ; Offset=Some (Literal 11, Memory.Normal)} 
+            "LDRB R7, [R11, #11]", Ok {InstrN=LDR ; Type=Some B; RContents=R7; RAdd=R11 ; Offset=Some (Literal 11, SingleR.Normal)} 
             "STR R5, [R2]", Ok {InstrN=STR ; Type=None; RContents=R5; RAdd=R2 ; Offset=None}
             "LDR R0, [R3, ", Error "Incorrect formatting" 
             "STR R1, [R6" , Error "Incorrect formatting" 

@@ -5,13 +5,12 @@ module CommonTop
 
 open CommonLex
 open CommonData
-open System.Security.Principal
 
 /// allows different modules to return different instruction types
 type Instr =
-    | ISINGMEM of Memory.Instr 
-    | IMEM of MultiR.Instr
-    | IDP of Shift.Instr
+    | ISINGMEM of SingleR.Instr 
+    | IMULTIMEM of MultiR.Instr
+    | ISHIFT of Shift.Instr
 
 
 /// Note that Instr in Mem and DP modules is NOT same as Instr in this module
@@ -22,15 +21,16 @@ type Instr =
 let IMatch (ld: LineData) : Result<Parse<Instr>,string> option =
     let pConv fr fe p = pResultInstrMap fr fe p |> Some
     match ld with
-    | Memory.IMatch pa -> pConv ISINGMEM string pa
-    | MultiR.IMatch pa -> pConv IMEM string pa
-    | Shift.IMatch pa -> pConv IDP string pa
+    | SingleR.IMatch pa -> pConv ISINGMEM string pa
+    | MultiR.IMatch pa -> pConv IMULTIMEM string pa
+    | Shift.IMatch pa -> pConv ISHIFT string pa
     | _ -> None
 
 let IExecute (i:Instr) (d:DataPath<'INS>):Result<DataPath<'INS>,string> =
     match i with
-    | IDP x -> Shift.execute x d
-    | IMEM x -> MultiR.execute x d
+    | ISHIFT x -> Shift.execute x d
+    | IMULTIMEM x -> MultiR.execute x d
+    | ISINGMEM x -> SingleR.execute x d
 
 type CondInstr = Condition * Instr
 
@@ -82,11 +82,11 @@ let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
 
 
 // extract Instr from Result<Parse<Instr>,errortype>
-let execute (asmLine:string) (d:DataPath<Memory.Instr>) = 
-    let executeAnyInstr (instr:Instr) (d:DataPath<Memory.Instr>) = 
+let execute (asmLine:string) (d:DataPath<'INS>) = 
+    let executeAnyInstr (instr:Instr) (d:DataPath<'INS>) = 
         let exec d =
             match instr with
-            | ISINGMEM ins -> Memory.executeMemInstr ins d 
+            | ISINGMEM ins -> SingleR.execute ins d 
             | _ -> Error "Not yet implemented"
         exec d  
     match parseLine None (WA 0u) asmLine with

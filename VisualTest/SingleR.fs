@@ -1,14 +1,10 @@
-module Memory 
+module SingleR 
 //////////////////////////////////////////////////////////////////////////////////////////
 //                   Sample (skeleton) instruction implementation modules
 //////////////////////////////////////////////////////////////////////////////////////////
 
 open CommonLex
 open CommonData
-open System.Xml
-
-open System
-open System
 
 type InstrName = LDR | STR
 type MemType = B
@@ -200,7 +196,7 @@ let (|IMatch|_|)  = parse
 
 /// Called from CommonTop to execute ins on data
 /// ins and data corresponds to Instr type of Memory module
-let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
+let execute (ins:Instr) (data: DataPath<'INS>) =
     let instrName = ins.InstrN
     let isByte = ins.Type
     let off = ins.Offset
@@ -211,7 +207,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
 
     /// Updates the register map to load wordy payload into a register 
     /// Also updates register RAdd if required by pre- or post-indexing 
-    let executeLOAD (memLoc:WAddr) (offsAdd:uint32) (d:DataPath<Instr>) (payload:uint32) = 
+    let executeLOAD (memLoc:WAddr) (offsAdd:uint32) (d:DataPath<'INS>) (payload:uint32) = 
         let newRegs = 
             let loadedReg = macRegs.Add (regCont, payload)
             match off, memLoc with
@@ -224,7 +220,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
         {d with Regs=newRegs}   
     /// Updates the memory map to store wordy payload into memory
     /// Also updates register RAdd if required by pre- or post-indexing
-    let executeSTORE (memLoc:WAddr) (offsAdd:uint32) (d:DataPath<Instr>) (payload:uint32) = 
+    let executeSTORE (memLoc:WAddr) (offsAdd:uint32) (d:DataPath<'INS>) (payload:uint32) = 
         let newMem = macMem.Add ((memLoc) , (DataLoc payload))
         let newRegs = 
             match off, memLoc with 
@@ -254,7 +250,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
     /// Get payload from memory or from register, based on type of LS instruction
     /// Some src: address where payload is located for LDR instruction
     /// None: payload is stored in register, for STR instruction  
-    let executeLSWord src execType (memLoc:WAddr) (d:DataPath<Instr>) : DataPath<Instr> = 
+    let executeLSWord src execType (memLoc:WAddr) (d:DataPath<'INS>) : DataPath<'INS> = 
         getPayload src
         |> fun p -> execType memLoc 0u d p     
     /// Processes 32-bit word found in word-aligned base address 
@@ -262,7 +258,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
     /// and clears register RDest preemptively. 
     /// Normal LDR with the byte-y payload. 
     /// Passes base address and offset for correct pre-/post-indexing
-    let executeLDRB (baseAdd: WAddr) (offsAdd: uint32) (d:DataPath<Instr>) : DataPath<Instr> =
+    let executeLDRB (baseAdd: WAddr) (offsAdd: uint32) (d:DataPath<'INS>) : DataPath<'INS> =
         let prepReg = Map.add regCont 0u macRegs
        
         getPayload (Some baseAdd) // get all 4 bytes from word-alligned base address in memory
@@ -274,7 +270,7 @@ let executeMemInstr (ins:Instr) (data: DataPath<Instr>) =
     /// Shifts byte into correct position of the rest of the 32-bit word in the base address.
     /// Normal STR with this tacked-on payload.
     /// Passes base address and offset for correct pre-/post-indexing
-    let executeSTRB (baseAdd: WAddr) (offsAdd: uint32) (d:DataPath<Instr>) : DataPath<Instr> = 
+    let executeSTRB (baseAdd: WAddr) (offsAdd: uint32) (d:DataPath<'INS>) : DataPath<'INS> = 
         // will be ANDed with relevant mask to clear the byte-address (base addr + offset addr)
         let restOfWord = 
             match macMem.[baseAdd] with
