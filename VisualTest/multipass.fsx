@@ -48,7 +48,7 @@ let parseSingle = parseAndExecute (Ok tD) prog.[1]   // example of parsing a sin
 let tabl = Seq.zip ["LABEL3"; "LABEL2"] [0x1000u; 0x1004u] |> Map.ofSeq
 /////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
-let firstPass (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
+let myParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
     /// put parameters into a LineData record
     let makeLineData opcode operands = {
         OpCode=opcode
@@ -68,72 +68,52 @@ let firstPass (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
     let splitIntoWords ( line:string ) =
         line.Split( ([||] : char array), 
             System.StringSplitOptions.RemoveEmptyEntries)
+    let passOne words = 
+        let newSymTab = symtab.Value
+        let add =
+            match loadAddr with
+            | WA a -> a
+        let isLabel = 
+            match words with
+            | opc :: _ ->
+                match Map.tryFind opc opCodes with
+                | Some _ -> false
+                | None -> true
+            | _ -> failwithf "idk"            
+        match isLabel, words with
+        | true, label :: _ -> Some (Map.add label add newSymTab)
+        | false, _ -> Some newSymTab
+        | _ -> failwithf "idk"
+    /// second pass
     /// try to parse 1st word, or 2nd word, as opcode
     /// If 2nd word is opcode 1st word must be label
-    let matchLine words =
+    let matchLine stab words =
         let pNoLabel =
             match words with
             | opc :: operands -> 
-                match Map.tryFind opc opCodes with
-                | Some _ -> Ok (makeLineData opc operands) //|> IMatch
-                | None -> Error "Not an opcode"
-            | _ -> failwithf "None"
+                makeLineData opc operands 
+                |> IMatch
+            | _ -> None
+        
         match pNoLabel, words with
-        | Ok lD, _ -> lD
-        | _, label :: opc :: operands -> 
-            let add = 
-                match loadAddr with
-                | WA a -> a
-            let newSymTab = Option.map (fun x -> Map.add label add x) symtab
-            match { makeLineData opc operands with Label=Some label; SymTab=newSymTab} with
-            | lD -> 
-                let oldSymTab = lD.SymTab
-                {lD with SymTab=oldSymTab}              
-        | _ -> failwithf "Uimplementer instructions"
-    asmLine
-    |> removeComment
-    |> splitIntoWords
-    |> Array.toList
-    |> matchLine
-
-// only works on one line of lineData
-let secondPass (symtab: SymbolTable option) (loadAddr: WAddr) (asmData:LineData) =
-    /// try to parse 1st word, or 2nd word, as opcode
-    /// If 2nd word is opcode 1st word must be label
-    let matchData d = 
-        match d with
-        | da-> IMatch
-
-    asmData
-    |> matchData
-
-let execMultiLine src cpuData = 
-    let lineLst = splitIntoLines src
-
-    let parseAndExecute symTab cpuData asm = 
-        let parsedRes = parseLine symTab (WA 0ul) asm
-
-        match parsedRes, cpuData with
-        | Ok x, Ok d -> IExecute x.PInstr d
-        | Error e, _ -> Error e
-        | _, Error e -> Error e
-
-    let passOne state oneLine = 
-        let newState = 
-            match state.LoadAddr with
-            | WA x -> WA (x + 4u)
-        let x = firstPass state.SymTab state.LoadAddr oneLine
-        match x with
-        | pa -> pa, {pa with LoadAddr=newState}
-        | _ -> failwithf "Error"
-
-    let state = {LoadAddr=WA 0u; Label = None ; SymTab= Some tabl ; OpCode = ""; Operands= ""}
-    // needs to return list of line data, thus, need to change pass2's parseLine
-    let newListLD, newSymTabSrc = Array.mapFold passOne state lineLst
-    let newSymTab = newSymTabSrc.SymTab
-    Array.map (fun lD -> {lD with SymTab = newSymTab}) newListLD
+        | Some pa, _ -> pa
+        | None, label :: opc :: operands -> 
+            match { makeLineData opc operands 
+                    with Label=Some label; SymTab=stab} 
+                  |> IMatch with
+            | None -> 
+                Error (sprintf "Unimplemented instruction %s" opc)
+            | Some pa -> pa
+        | _ -> Error (sprintf "Unimplemented instruction %A" words)
+    let lineInList =     
+        asmLine
+        |> removeComment
+        |> splitIntoWords
+        |> Array.toList
+    let newSym = passOne lineInList
+    matchLine newSym lineInList
 
 
+myParseLine (Some tabl) (WA 0u) prog.[0]
 
-execMultiLine asm tD
 
