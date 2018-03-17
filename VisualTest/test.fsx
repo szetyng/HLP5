@@ -2,6 +2,7 @@
 #load "CommonLex.fs"
 #load "Shift.fs"
 #load "MultiR.fs"
+#load "SingleR.fs"
 #load "CommonTop.fs"
 
 open CommonData
@@ -22,12 +23,12 @@ let tMem memVal: MachineMemory<'INS> =
     let waList = List.map WA [memBase..4u..(memBase+ 4u*(n-1u))]
     let valList = List.map DataLoc memVal
     List.zip waList valList |> Map.ofList     
-let tD = {
+
+let tD = { 
             Fl = {N = false; C =false; Z = false; V = false}
             Regs = tRegs regVal
             MM = tMem memVal
          }
-
 
 let splitIntoLines ( line:string ) =
                 line.Split( ([|'\n'|] : char array), 
