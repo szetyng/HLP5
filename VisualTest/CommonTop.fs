@@ -1,14 +1,15 @@
 ////////////////////////////////////////////////////////////////////////////////////
 //      Code defined at top level after the instruction processing modules
 ////////////////////////////////////////////////////////////////////////////////////
-
-module CommonTop
+module CommonTop 
 
 open CommonLex
 open CommonData
+open System.Security.Principal
 
 /// allows different modules to return different instruction types
 type Instr =
+    | ISINGMEM of Memory.Instr 
     | IMEM of MultiR.Instr
     | IDP of Shift.Instr
 
@@ -21,6 +22,7 @@ type Instr =
 let IMatch (ld: LineData) : Result<Parse<Instr>,string> option =
     let pConv fr fe p = pResultInstrMap fr fe p |> Some
     match ld with
+    | Memory.IMatch pa -> pConv ISINGMEM string pa
     | MultiR.IMatch pa -> pConv IMEM string pa
     | Shift.IMatch pa -> pConv IDP string pa
     | _ -> None
@@ -29,7 +31,6 @@ let IExecute (i:Instr) (d:DataPath<'INS>):Result<DataPath<'INS>,string> =
     match i with
     | IDP x -> Shift.execute x d
     | IMEM x -> MultiR.execute x d
-
 
 type CondInstr = Condition * Instr
 
@@ -78,3 +79,22 @@ let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
     |> splitIntoWords
     |> Array.toList
     |> matchLine
+
+
+// extract Instr from Result<Parse<Instr>,errortype>
+let execute (asmLine:string) (d:DataPath<Memory.Instr>) = 
+    let executeAnyInstr (instr:Instr) (d:DataPath<Memory.Instr>) = 
+        let exec d =
+            match instr with
+            | ISINGMEM ins -> Memory.executeMemInstr ins d 
+            | _ -> Error "Not yet implemented"
+        exec d  
+    match parseLine None (WA 0u) asmLine with
+    | Ok pr -> executeAnyInstr pr.PInstr d // parsed correctly
+    | Error e ->  Error e
+        
+
+        
+
+
+          

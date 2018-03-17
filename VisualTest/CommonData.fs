@@ -1,8 +1,7 @@
+module CommonData 
 //////////////////////////////////////////////////////////////////////////////////////
 //                   Common types and code used by all modules
 //////////////////////////////////////////////////////////////////////////////////////
-
-module CommonData
 
 /// ARM Status bits
 type Flags = { N: bool; C:bool; Z: bool; V:bool}
@@ -13,13 +12,12 @@ type Flags = { N: bool; C:bool; Z: bool; V:bool}
 
 /// ARM register names
 /// NB R15 is the program counter as read
-
-// [<Struct>]
+[<Struct>]
 type RName = R0 | R1 | R2 | R3 | R4 | R5 | R6 | R7 
              | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15
 
 
-    
+
 /// Map used to convert strings into RName values, 
 /// includes register aliasses PC, LR, SP
 let regNames = 
