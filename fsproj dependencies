@@ -1,0 +1,11 @@
+    <Compile Include="CommonData.fs" />
+    <Compile Include="CommonLex.fs" />
+    <Compile Include="Shift.fs" />
+    <Compile Include="MultiR.fs"/>
+    <Compile Include="SingleR.fs"/>
+    <Compile Include="CommonTop.fs" />
+    <Compile Include="VRest.fs" />
+    <Compile Include="ShiftTests.fs" />
+    <Compile Include="MultiRTests.fs"/>
+    <Compile Include="SingleRTests.fs"/>
+    <Compile Include="VProgram.fs" />
