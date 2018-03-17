@@ -1,0 +1,7 @@
+FSharp.Core,4.3.2,Direct,Main,false
+Argu,4.2.1,Transitive,Main,false
+FsCheck,2.10.6,Transitive,Main,false
+Mono.Cecil,0.10.0-beta7,Transitive,Main,false
+System.ValueTuple,4.4,Transitive,Main,false
+Expecto,5.1.2,Direct,Main,false
+Expecto.FsCheck,5.1.2,Direct,Main,false
