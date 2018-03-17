@@ -8,7 +8,7 @@ open VisualTest.VTest
 
 open CommonLex
 open SingleR
-open CommonTop
+// open CommonTop
 open CommonData
 
 open Expecto
@@ -37,7 +37,51 @@ let testCPU:DataPath<SingleR.Instr> = {
         Seq.zip addrList (List.map DataLoc testMemValList) 
         |> Map.ofSeq
 } 
-
+let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
+    /// put parameters into a LineData record
+    let makeLineData opcode operands = {
+        OpCode=opcode
+        Operands=String.concat "" operands
+        Label=None
+        LoadAddr = loadAddr
+        SymTab = symtab
+    }
+    /// remove comments from string
+    let removeComment (txt:string) =
+        txt.Split(';')
+        |> function 
+            | [|x|] -> x 
+            | [||] -> "" 
+            | lineWithComment -> lineWithComment.[0]
+    /// split line on whitespace into an array
+    let splitIntoWords ( line:string ) =
+        line.Split( ([||] : char array), 
+            System.StringSplitOptions.RemoveEmptyEntries)
+    /// try to parse 1st word, or 2nd word, as opcode
+    /// If 2nd word is opcode 1st word must be label
+    let matchLine words =
+        let pNoLabel =
+            match words with
+            | opc :: operands -> 
+                makeLineData opc operands 
+                |> parse
+            | _ -> None
+        
+        match pNoLabel, words with
+        | Some pa, _ -> pa
+        | None, label :: opc :: operands -> 
+            match { makeLineData opc operands 
+                    with Label=Some label} 
+                  |> parse with
+            | None -> 
+                Error ( (sprintf "Unimplemented instruction %s" opc))
+            | Some pa -> pa
+        | _ -> Error ( (sprintf "Unimplemented instruction %A" words))
+    asmLine
+    |> removeComment
+    |> splitIntoWords
+    |> Array.toList
+    |> matchLine
 let STOREALLMEM memVals memBase = 
     let n = List.length memVals |> uint32
     let mAddrList = [memBase..4u..(memBase + (n-1u)*4u)]
@@ -118,6 +162,12 @@ let execErrorUnitTest name errActual errExpected inpAsm =
     testCase name <| fun () ->
     Expecto.Expect.equal errActual errExpected <|
         sprintf "Error executing line: %s" inpAsm
+
+let execute asm tD = 
+    let parsedRes = parseLine None (WA 0ul) asm
+    match parsedRes with
+    | Ok x -> execute x.PInstr tD
+    | (Error e) -> Error e
 
 let makeExecLSTestList execName listNameInpErr = 
     let makeOneTest name inp err = 

@@ -81,18 +81,6 @@ let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
     |> matchLine
 
 
-// extract Instr from Result<Parse<Instr>,errortype>
-let execute (asmLine:string) (d:DataPath<'INS>) = 
-    let executeAnyInstr (instr:Instr) (d:DataPath<'INS>) = 
-        let exec d =
-            match instr with
-            | ISINGMEM ins -> SingleR.execute ins d 
-            | _ -> Error "Not yet implemented"
-        exec d  
-    match parseLine None (WA 0u) asmLine with
-    | Ok pr -> executeAnyInstr pr.PInstr d // parsed correctly
-    | Error e ->  Error e
-        
 
         
 
