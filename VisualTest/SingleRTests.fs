@@ -1,18 +1,13 @@
-// To be split into several modules?
 module SingleRTests
 
+open CommonData
+open CommonLex
+open SingleR
+open Expecto
 open VisualTest.VCommon
 open VisualTest.VData
 open VisualTest.Visual
 open VisualTest.VTest
-
-open CommonLex
-open SingleR
-open CommonData
-
-open Expecto
-open FsCheck
-open System
 
 let myTestParas = {defaultParas with 
                     InitRegs = [1u ; 4u ; 8u ; 0x1003u ; 0x9104080u ; // R0 - R4
@@ -178,13 +173,4 @@ let execUnitTest =
             "Memory access error - not allowed" , "LDR R0, [R5, #-4]!" , "Not allowed to access this part of memory"
             "Parse error" , "STR R0, [R7 R0]", "Incorrect formatting"
         ]
-
-
-// [<EntryPoint>]
-// let main argv =
-//     initCaches myTestParas
-//     let rc = runTestsInAssembly expectoConfig [||]
-//     finaliseCaches myTestParas
-//     System.Console.ReadKey() |> ignore                
-//     rc // return an integer exit code - 0 if all tests pass
 
