@@ -26,52 +26,6 @@ let tD = {
             MM = tMem memVal
          }
 
-let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
-    /// put parameters into a LineData record
-    let makeLineData opcode operands = {
-        OpCode=opcode
-        Operands=String.concat "" operands
-        Label=None
-        LoadAddr = loadAddr
-        SymTab = symtab
-    }
-    /// remove comments from string
-    let removeComment (txt:string) =
-        txt.Split(';')
-        |> function 
-            | [|x|] -> x 
-            | [||] -> "" 
-            | lineWithComment -> lineWithComment.[0]
-    /// split line on whitespace into an array
-    let splitIntoWords ( line:string ) =
-        line.Split( ([||] : char array), 
-            System.StringSplitOptions.RemoveEmptyEntries)
-    /// try to parse 1st word, or 2nd word, as opcode
-    /// If 2nd word is opcode 1st word must be label
-    let matchLine words =
-        let pNoLabel =
-            match words with
-            | opc :: operands -> 
-                makeLineData opc operands 
-                |> parse
-            | _ -> None
-        
-        match pNoLabel, words with
-        | Some pa, _ -> pa
-        | None, label :: opc :: operands -> 
-            match { makeLineData opc operands 
-                    with Label=Some label} 
-                  |> parse with
-            | None -> 
-                Error ( (sprintf "Unimplemented instruction %s" opc))
-            | Some pa -> pa
-        | _ -> Error ( (sprintf "Unimplemented instruction %A" words))
-    asmLine
-    |> removeComment
-    |> splitIntoWords
-    |> Array.toList
-    |> matchLine
-
 // given a list of memory values and the base address, store them by writing assembler
 let STOREALLMEM memVals memBase = 
     let n = List.length memVals |> uint32
@@ -95,9 +49,9 @@ let RunVisualMem memVal paras src =
 
 
 let parseAndExecute asm tD = 
-    let parsedRes = parseLine None (WA 0ul) asm
+    let parsedRes = CommonTop.parseLine None (WA 0ul) asm
     match parsedRes with
-    | Ok x -> execute x.PInstr tD
+    | Ok x -> CommonTop.IExecute x.PInstr tD
     | (Error e) -> Error e
 
 let executeMultiR asm tD: DataPath<Instr> =
@@ -143,7 +97,9 @@ let VisualUnitMemTest paras name src memVal tD subset  =
 let MakeParseTests name tList =
     let singleTest i (input,expected)  =
         testCase (sprintf "Parse Test %s #%d" name i) <| fun () ->
-        let actual = parseLine None (WA 0ul) input
+        // let pConv p = pResultInstrMap Instr string p
+        let actual = CommonTop.parseLine None (WA 0ul) input 
+
         Expecto.Expect.equal actual expected (sprintf "Test parsing of %s" input) 
     tList
     |>List.indexed
@@ -161,17 +117,21 @@ let MakeExErrTests name tList =
     |> Expecto.Tests.testList name
 
 
-let parseResult opcode dir rn w reglist = Ok {
-            PInstr = {InstrC = Shift;
-                      OpCode = opcode;
-                      AMode = dir;
-                      Rn = rn;
-                      WrB = w;
-                      RList = reglist;
-                    };
-            PLabel = None;
-            PSize = 4u;
-            PCond = Cal;}
+let parseResult opcode dir rn w reglist = 
+    let pConv p = pResultInstrMap CommonTop.IMULTIMEM string p
+    Ok {
+        PInstr = {InstrC = Shift;
+                  OpCode = opcode;
+                  AMode = dir;
+                  Rn = rn;
+                  WrB = w;
+                  RList = reglist;
+                };
+        PLabel = None;
+        PSize = 4u;
+        PCond = Cal;
+        } |> pConv
+        
 [<Tests>]
 let parseTestBasic = 
     MakeParseTests "Basic Syntax"
