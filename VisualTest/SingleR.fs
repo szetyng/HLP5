@@ -178,9 +178,9 @@ let parse (ls: LineData) : Result<Parse<Instr>,string> option =
     let parse' (instrC, (root,suffix,pCond)) =
         match instrC with
         | MEM ->
-            match makeLS root ls suffix with
-            | Ok parsedInstr -> Ok { PInstr= parsedInstr ; PLabel = None ; PSize = 4u; PCond = pCond }
-            | Error e -> Error e
+            match makeLS root ls suffix, ls.LoadAddr with
+            | Ok parsedInstr,WA a -> Ok { PInstr= parsedInstr ; PLabel = Option.map (fun l -> l,a) ls.Label ; PSize = 4u; PCond = pCond }
+            | Error e, _ -> Error e
         | _ -> failwithf "Wrong instruction class passed to the Memory module" // not error bc of opCodes map
     Map.tryFind ls.OpCode opCodes
     |> Option.map parse'

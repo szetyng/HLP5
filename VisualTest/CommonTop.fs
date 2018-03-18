@@ -81,8 +81,3 @@ let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
     |> matchLine
 
 
-
-        
-
-
-          
