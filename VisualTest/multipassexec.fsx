@@ -31,18 +31,10 @@ let tD = {
             MM = tMem memVal
          }
  
-/// Assume that program has been parsed and is valid.
-let parseAndExecute tD asm= 
-    let parsedRes = parseLine None (WA 0ul) asm
-    match parsedRes, tD with
-    | Ok x, Ok d -> IExecute x.PInstr d
-    | Error e, _ -> Error e
-    | _, Error e -> Error e
 
 let prog = File.ReadAllLines("input.txt")
-// let parseSingle = parseAndExecute (Ok tD) prog.[1]   // example of parsing a single line
 
-let result = Array.fold parseAndExecute (Ok tD) prog
+let result = myParseAndExecute (Ok tD) prog
 
 let printRegisters result = 
     match result with
@@ -76,7 +68,7 @@ File.AppendAllText("output.txt", printMem result)
 
 
 
-Array.fold parseAndExecute (Ok tD) prog
-
+myParseAndExecute (Ok tD) prog
+multiParseLine None (WA 0ul) prog
 
 
