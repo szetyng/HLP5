@@ -3,6 +3,8 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 #load "CommonData.fs"
+open System.ComponentModel
+open SingleR
 #load "CommonLex.fs"
 #load "Shift.fs"
 #load "MultiR.fs"
@@ -11,7 +13,7 @@
 
 open CommonData
 open CommonTop
-
+open System.IO
 
 /// Define values in memory and registers
 let memVal = []
@@ -31,13 +33,12 @@ let tD = {
             MM = tMem memVal
          }
 
-let splitIntoLines ( line:string ) =
-                line.Split( ([|'\n'|] : char array), 
-                    System.StringSplitOptions.RemoveEmptyEntries)
+
+
 
 /// Program string
-let asm = "LABEL LSR R4,R1,#2 \n LABEL1 STM R1, {R1,R2}"
-
+// let asm = "LABEL LSR R4,R1,#2 \n LABEL1 STM R1, {R1,R2}"
+ 
 /// Assume that program has been parsed and is valid.
 let parseAndExecute tD asm= 
     let parsedRes = parseLine None (WA 0ul) asm
@@ -47,7 +48,41 @@ let parseAndExecute tD asm=
     | _, Error e -> Error e
 
 
-let prog = asm |> splitIntoLines 
-let parseSingle = parseAndExecute (Ok tD) prog.[1]   // example of parsing a single line
+let prog = File.ReadAllLines("input.txt")
 
-Array.fold parseAndExecute (Ok tD) prog
+// let parseSingle = parseAndExecute (Ok tD) prog.[1]   // example of parsing a single line
+
+let result = Array.fold parseAndExecute (Ok tD) prog
+
+let printRegisters result = 
+    match result with
+    | Ok x ->
+        let reg = x.Regs |> Map.toList |> List.splitAt 10
+        let printRes a b = a + sprintf "%A \t \t %A \n" (fst b) (snd b)
+        let printRes' a b = a + sprintf "%A \t %A \n" (fst b) (snd b)
+        let res = List.fold printRes "" (fst reg)
+        List.fold printRes' res (snd reg)
+
+    | Error e -> sprintf "%A" e
+
+let printMem result = 
+    match result with
+    | Ok x ->
+        let mem = x.MM |> Map.toList 
+        let printRes a b = a + sprintf "%A \t \t %A \n" (fst b) (snd b)
+        List.fold printRes "" mem
+    | Error e -> sprintf "%A" e
+
+File.WriteAllText("output.txt","Instructions\n\n")
+File.AppendAllText("output.txt", File.ReadAllText("input.txt"))
+File.AppendAllText("output.txt", "\n\nInitial Register State \n\n")
+File.AppendAllText("output.txt", printRegisters (Ok tD))
+File.AppendAllText("output.txt", "\n\nInitial Memory State \n\n")
+File.AppendAllText("output.txt", printMem (Ok tD))
+File.AppendAllText("output.txt", "\n\nRegister State \n\n")
+File.AppendAllText("output.txt", printRegisters result)
+File.AppendAllText("output.txt", "\n\nMemory State \n\n")
+File.AppendAllText("output.txt", printMem result)
+
+
+
