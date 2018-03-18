@@ -33,16 +33,6 @@ type Instr =
 /// parse error (dummy, but will do)
 type ErrInstr = string
 
-// let hexa = 
-//     Seq.zip (['0'..'9'] @ ['A'..'F']) [0..15]
-//     |> Map.ofSeq
-
-// let bina = 
-//     Seq.zip ['0' ; '1'] [0 ; 1] 
-//     |> Map.ofSeq
-
-// type NrBase = Hex | Bin
-
 let memSpec = {
     InstrC = MEM
     Roots = ["LDR";"STR"]
@@ -78,7 +68,7 @@ let makeLS (root:string) ls suffix =
     
     /// converts string to OffsetVal 
     /// can be literal or stored in register   
-    let getOffsetVal (valStr:string) = 
+    let getOffsetVal (valStr:string) =  
         let (|GetLit|_|) (nrBase:string) (valStr:string) =
             match valStr.StartsWith(nrBase) with
             | true -> Some (valStr.Trim [|'#';']' ; '!'|])
