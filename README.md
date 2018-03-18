@@ -13,8 +13,7 @@ This project supports of a subset of ARM UAL instructions with documentation for
 The listed modules have been implemented and tested to simulate the Data processing and Memory instructions. This project uses the [VisUAL](https://salmanarif.bitbucket.io/visual/index.html) program and a VisualInterface framework for testing. 
 
 ## Testing
-Individual module testing uses a common VisualInterface and Expecto framework, which makes it easy to understand, refactor, and develop tests for existing and new modules. 
-Top level testing aims to ...
+Individual module testing uses a common VisualInterface and Expecto framework, which makes it easy to understand, refactor, and develop tests for existing and new modules. Top level testing aims to ensure that valid programs involving instructions from multiple modules execute correctly. This is done in the test module `CommonTest.fs`.
 
 ## Top Level functionality
 Explain how the code integrates the existing modules, how it does multi-pass to read a program.
