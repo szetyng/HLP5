@@ -3,8 +3,6 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 #load "CommonData.fs"
-open System.ComponentModel
-open SingleR
 #load "CommonLex.fs"
 #load "Shift.fs"
 #load "MultiR.fs"
@@ -32,12 +30,6 @@ let tD = {
             Regs = tRegs regVal
             MM = tMem memVal
          }
-
-
-
-
-/// Program string
-// let asm = "LABEL LSR R4,R1,#2 \n LABEL1 STM R1, {R1,R2}"
  
 /// Assume that program has been parsed and is valid.
 let parseAndExecute tD asm= 
@@ -47,9 +39,7 @@ let parseAndExecute tD asm=
     | Error e, _ -> Error e
     | _, Error e -> Error e
 
-
 let prog = File.ReadAllLines("input.txt")
-
 // let parseSingle = parseAndExecute (Ok tD) prog.[1]   // example of parsing a single line
 
 let result = Array.fold parseAndExecute (Ok tD) prog
