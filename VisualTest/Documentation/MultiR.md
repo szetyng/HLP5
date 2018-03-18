@@ -1,5 +1,40 @@
 # MultiR Module
+## Specification
+<center>
+
+Name | OpCode | Syntax 
+| :---:| :---: | :---: |
+|Load Multiple Registers| LDM | LDM{dir} Rn{!}, [reglist]
+|Store Multiple Registers| STM | STM{dir} Rn{!}, [reglist]
+</center>
+
+where:
+
+- ```{...}``` denote optional fields
+- ```dir``` specifies stack direction or equivalently address mode. It can be either ```IA```,```DB```,```FD``` or ```EA```
+- ```Rn``` specifies register on which the memory addresses are based.
+- ```!``` is an optional writeback suffix. If specified, the final address is written back to ```Rn```.
+- ```reglist``` is a list of one or more registers to be loaded or stored, enclosed in ```{...}```. 
+
+This specification follows the [ARM documentation](http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0552a/BABCAEDD.html) closely.
+
+#### Restrictions
+- ```Rn``` cannot be ```PC``` (also called ```R15```)
+- ```reglist``` must not contain ```SP``` (also called ```R13```)
+- In any ```STM``` instruction, ```reglist``` must not contain ```PC```
+- In any ```LDM``` instruction, ```reglist``` must not contain ```PC``` if it contains ```LR``` (also called ```R14```)
+- ```reglist``` must not contain ```Rn``` if writeback suffix is specified
+
+#### Additional syntax
+- ```reglist``` can contain register range (Example: {R1-R4} ={R1,R2,R3,R4})
+- ```reglist``` must be comma separated if it contains more than one register or register range
+- ```reglist``` cannot be empty
+## Differences from VisUAL
+- ```dir``` is optional.
+- ```{cond}``` specifies the conditon code, to be implemented in the group stage
+
 ## Implementation
+
 ### Parse
 The ```parse``` function uses regular expression patterns to match the syntax described in specification. On top of that, it has to ensure that none of the restrictions were violated, and ```reglist``` is in the appropriate format. Errors are passed in a monadic fashion due to the many invalid cases. Refer to code and test plan for details. 
 
