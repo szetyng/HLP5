@@ -33,15 +33,15 @@ type Instr =
 /// parse error (dummy, but will do)
 type ErrInstr = string
 
-let hexa = 
-    Seq.zip (['0'..'9'] @ ['A'..'F']) [0..15]
-    |> Map.ofSeq
+// let hexa = 
+//     Seq.zip (['0'..'9'] @ ['A'..'F']) [0..15]
+//     |> Map.ofSeq
 
-let bina = 
-    Seq.zip ['0' ; '1'] [0 ; 1] 
-    |> Map.ofSeq
+// let bina = 
+//     Seq.zip ['0' ; '1'] [0 ; 1] 
+//     |> Map.ofSeq
 
-type NrBase = Hex | Bin
+// type NrBase = Hex | Bin
 
 let memSpec = {
     InstrC = MEM
@@ -79,42 +79,13 @@ let makeLS (root:string) ls suffix =
     /// converts string to OffsetVal 
     /// can be literal or stored in register   
     let getOffsetVal (valStr:string) = 
-        /// converts a hexadecimal or binary number stored as a string
-        /// into its correct int value
-        let baseToInt (nrStr:string) (ba:NrBase) =
-            let getBaInInt = function Hex -> 16 | Bin -> 2
-            let actualConv ba lst =
-                let getMap = function Hex -> hexa | Bin -> bina           
-                match List.choose (fun n -> Map.tryFind n (getMap ba)) lst with
-                | goodList when goodList.Length = lst.Length-> Ok goodList
-                | _ -> Error "Not a proper number"
-            /// when ba=16 and n is 0,1,2,... represents 16^0, 16^1, 16^2 and so on
-            let timey = 
-                function | 0 -> 1 
-                         | n' ->  List.reduce (*) [for _ in 1..n' -> getBaInInt ba]
-            // convert string to list of chars
-            let charLst, neg = 
-                let l = [for c in nrStr -> c]
-                match l.[0] with
-                | '-' -> List.filter ((<>)'-') l, true
-                | _ -> l, false 
-            let nr = 
-                actualConv ba charLst
-                |> Result.map List.rev
-                |> Result.map (fun lst -> List.map2 (*) [for i in 0..(charLst.Length)-1 -> timey i] lst) // calc val of each digit
-                |> Result.map (fun l -> List.reduce (+) l) // adds them together to get decimal value
-            match neg with
-            | true -> Result.map (fun x -> 0 - x) nr
-            | false -> nr
         let (|GetLit|_|) (nrBase:string) (valStr:string) =
             match valStr.StartsWith(nrBase) with
-            | true -> 
-                let x = valStr.Substring(nrBase.Length) 
-                Some (x.Trim [|']' ; '!'|])
+            | true -> Some (valStr.Trim [|'#';']' ; '!'|])
             | false -> None            
         match valStr with
-        | GetLit "#0x" hex -> Result.map Literal (baseToInt hex Hex)
-        | GetLit "#0b" bin -> Result.map Literal (baseToInt bin Bin)
+        | GetLit "#0x" hex -> int(hex) |> Literal |> Ok
+        | GetLit "#0b" bin -> int(bin) |> Literal |> Ok
         | GetLit "#" dec -> dec |> int |> Literal |> Ok
         | reg -> reg.Trim [|']' ; '!'|] |> getRName |> Result.map Reg
         | _ -> Error "Incorrect offset format" //ie forgetting '#'         
