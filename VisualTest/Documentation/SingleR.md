@@ -1,5 +1,5 @@
 # Documentation
-This zip file contains code that accepts as input an assembler line with instructions for LDR, STR, LDRB and STRB, then parses and executes it in a similar manner that [VisUAL](https://salmanarif.bitbucket.io/visual/index.html) does. The parsing and execution of the instructions are done in the `Memory` module, and the processing between these two functions are done in the `CommonTop` module. Any differences from VisUAL will be documented here. Further explanation on the usage of the code is available [below](#usage), and information on how to run the tests is available in the [test plan](#test-plan). How my code contributes to the group deliverable can be seen from its [usage](#usage) and from the [specifications](#specifications).
+This zip file contains code that accepts as input an assembler line with instructions for LDR, STR, LDRB and STRB, then parses and executes it in a similar manner that [VisUAL](https://salmanarif.bitbucket.io/visual/index.html) does. The parsing and execution of the instructions are done in the `SingleR` module, and the processing between these two functions are done in the `CommonTop` module. Any differences from VisUAL will be documented here. Further explanation on the usage of the code is available [below](#usage), and information on how to run the tests is available in the [test plan](#test-plan). How my code contributes to the group deliverable can be seen from its [usage](#usage) and from the [specifications](#specifications).
 
 ## Table of contents
 - [Specifications](#specifications)
@@ -63,7 +63,7 @@ Used `Expecto` and `Expecto.FsCheck` packages in testing. All tests are labelled
 
 All the modules in the VisUAL framework provided have been placed in `VProgam.fs` and have been given the namespace `VisualTest`. Any changes in the file directory for `VisualApp`, `VisualTest` and `VisualWork` are to be reflected accordingly in `defaultParas` located in the `VTest` module. 
 
-Several changes have been made to the framework when used to test `Memory.fs`. The function `RunVisualWithFlagsOut` has been modified so that it can read 13 memory locations in postlude by using register `R0` which was initially used to store the flags. As a result, it has lost the functionality to check for flags, which is not needed by this module but can be easily reverted if need be. Furthermore, `GETWRAPPER` has been prepended with `STOREALLMEM` to allow us to write test data into memory.
+Several changes have been made to the framework when used to test `SingleR.fs`. The function `RunVisualWithFlagsOut` has been modified so that it can read 13 memory locations in postlude by using register `R0` which was initially used to store the flags. As a result, it has lost the functionality to check for flags, which is not needed by this module but can be easily reverted if need be. Furthermore, `GETWRAPPER` has been prepended with `STOREALLMEM` to allow us to write test data into memory.
 
 |Instructions   |Feature specification tested|
 |---------------|----------------------------|
@@ -81,17 +81,17 @@ Several changes have been made to the framework when used to test `Memory.fs`. T
 
 
 ### Parsing
-Parsing is tested by calling the `onlyParseLine` function, which returns an output of type `Result<Instr, string>`. The output of `onlyParseLine` allows us to easily check if the assembly line has been parsed correctly into its `Memory.Instr` type. It also helps in checking if the module correctly rejects poorly formatted inputs.
+Parsing is tested by calling the `onlyParseLine` function, which returns an output of type `Result<Instr, string>`. The output of `onlyParseLine` allows us to easily check if the assembly line has been parsed correctly into its `SingleR.Instr` type. It also helps in checking if the module correctly rejects poorly formatted inputs.
 
 The parsing implementation has been tested with a thorough list of unit tests in `parseUnitTest`, including their error messages when appropriate. 
 
 ### Execution
-The robustness of the module's ability to execute or reject assembly lines is tested with a list of unit tests in `execUnitTest`. The execution is being tested against VisUAL, which is run using the [framework](https://intranet.ee.ic.ac.uk/t.clarke/hlp/images/VisualTesting.zip) provided by Dr Tom Clarke and called in `VisualMemUnitTest`. The `VisOutput` from running VisUAL is processed and packaged into appropriate `DataPath` fields so that they can be tested with the output from the `Memory` module using `Expecto`. Each test checks both the register map and the memory map.
+The robustness of the module's ability to execute or reject assembly lines is tested with a list of unit tests in `execUnitTest`. The execution is being tested against VisUAL, which is run using the [framework](https://intranet.ee.ic.ac.uk/t.clarke/hlp/images/VisualTesting.zip) provided by Dr Tom Clarke and called in `VisualMemUnitTest`. The `VisOutput` from running VisUAL is processed and packaged into appropriate `DataPath` fields so that they can be tested with the output from the `SingleR` module using `Expecto`. Each test checks both the register map and the memory map.
 
 In Load/Store memory instructions, it is important for the ARM simulator to not mess with memory addresses that are not being specifically allocated for data usage. VisUAL also does not allow access to memory locations that are not word-aligned (not applicable to LDRB/STRB), a practice followed by this ARM simulator. Thus, `execErrorUnitTest` is used to check for such cases as well as any other instruction lines that may lead to execution errors.  
 
 ## Differences from VisUAL
-|VisUAL     |`Memory.fs`    |Reasons        |
+|VisUAL     |`SingleR.fs`    |Reasons        |
 |-----------|---------------|---------------|
 |Inputs are case-insensitive    |Only accepts inputs in all uppercase   |The whole programme can be easily changed to accept assembler lines in a case-insensitive manner by forcing all inputs to uppercase. It is more efficient to implement this functionality in the top-level during the group phase of the project than to do the same conversion in each invididual module. |
 |`OFFSET` can be a register, a numerical expression or a shifted register   |`OFFSET` can be a register or a literal    |Numerical expressions and shifted registers will be implemented in the group phase by integrating with the arithmetic instructions module and shift instructions module respectively.  |
@@ -100,15 +100,15 @@ In Load/Store memory instructions, it is important for the ARM simulator to not 
 
 
 ## Usage
-There are two interfaces to the `Memory` module: 
-- `parse` takes a `LineData` input and will return `Result<Parse<Memory.Instr>,string> option`.   
-- `executeMemInstr` takes inputs of types `Memory.Instr` and `DataPath<Memory.Instr>`.
+There are two interfaces to the `SingleR` module: 
+- `parse` takes a `LineData` input and will return `Result<Parse<SingleR.Instr>,string> option`.   
+- `executeMemInstr` takes inputs of types `Single.Instr` and `DataPath<'INS>`.
 
-The `CommonTop` module has several functions that allow us to input an assembly line and receive an output of the CPUdata that has been acted upon accordingly. I have written a function called `execute` to do so, which parses the line if it belongs to the `Memory` module (other instruction types have not yet been implemented) and processes the output so that it can be used in `executeMemInstr`. Any kind of interface function that converts the output of `parse` into a suitable input for `executeMemInstr` is allowed.
+The `CommonTop` module has several functions that allow us to input an assembly line and receive an output of the CPUdata that has been acted upon accordingly. I have written a function called `execute` to do so, which parses the line if it belongs to the `SingleR` module (other instruction types have not yet been implemented) and processes the output so that it can be used in `executeMemInstr`. Any kind of interface function that converts the output of `parse` into a suitable input for `executeMemInstr` is allowed.
 
 In summary, `CommonTop` calls `parse`, whose output is processed by `CommonTop` and passed back to `executeMemInstr`. Tests are run using the `execute` function that I wrote in `CommonTop`, so it is necessary to include this module while testing. `DP` module is a useless dummy that is included in the zip file because of the references from `CommonTop`.
 
-Ensure that the CPUdata being used is of type `DataPath<Memory.Instr>`. Better top-level execution integration will be needed when other modules are added in the group phase, but is currently not necessary. If you intend to run `executeMemInstr` without using inputs generated by `parse`, make sure that the registers are valid because the register-checking is done in the parse function.
+Ensure that the CPUdata being used is of type `DataPath<'INS>`. Better top-level execution integration will be needed when other modules are added in the group phase, but is currently not necessary. If you intend to run `executeMemInstr` without using inputs generated by `parse`, make sure that the registers are valid because the register-checking is done in the parse function.
 
 
 
