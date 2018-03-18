@@ -75,8 +75,9 @@ The memory for ```STM``` tests is empty initally, but has 6 values starting from
 
 ## Differences in VisUAL
 As the testing is done in a restricted fashion, not many differences were observed. This module will, however, differ if consecutive instructions are used. For example, executing two ```STMIA``` instructions using the ```MultiR``` module with disjoint ```Rn``` will result in an invalid memory map with non-continuous keys. In VisUAL, the second instruction seems to be ignored. More testing in this regard should be considered.  
-## Contribution to group deliverable
-### Interfaces and Usage
+
+## Interfaces and Usage
 The relevance of the MultiR Module to group effort can be seen through the type signatures of two interfaces to the ```MultiR``` module:
 - ```parse: LineData -> Result<Parse<MultiR.Instr>,string> option```
 - ```execute: MultiR.Instr -> DataPath<'INS> -> Result<DataPath<'INS>,string>``` 
+

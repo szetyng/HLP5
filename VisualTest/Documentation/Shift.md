@@ -48,7 +48,7 @@ Note that for ROR with n as a multiple of 32, the shift value has the result of 
 
 
 ## Test Plan
-The ``parse`` and ``execute`` functions were tested for functionality using the Expecto framework in program ```ShiftTests.fs```. As the ```Shift``` module will be integrated in the group stage, the function ```parseLine``` from module ```CommonTop``` was borrowed to convert an assembly string into ```LineData``` for testing. The function ```makeExecute``` allows for direct comparison of results with the given VisUAL testing framework.
+The ``parse`` and ``execute`` functions were tested for functionality using the Expecto framework in program ```ShiftTests.fs```. As the ```Shift``` module will be integrated in the group stage, the function ```parseLine``` from module ```CommonTop``` was used to convert an assembly string into ```LineData``` for testing. The function ```makeExecute``` allows for direct comparison of results with the given VisUAL testing framework.
 ### Parse Tests
 | Test Description | Test status
 | :---:|:---:|
@@ -78,9 +78,9 @@ RORS     r1,r1,#32
 ### Interfaces and Usage
 
 The relevance of the Shift Module to group effort can be seen through the type signatures of two interfaces to the ```Shift``` module:
-- ```parse: LineData -> Result<Parse<Shift.Instr>,Shift.ErrInstr> option```
-- ```execute: Shift.Instr -> DataPath<Shift.Instr> -> Result<DataPath<Shift.Instr>,ErrRun>``` 
+- ```parse: LineData -> Result<Parse<Shift.Instr>,string> option```
+- ```execute: Shift.Instr -> DataPath<'INS> -> Result<DataPath<'INS>,string>``` 
 
-Hence, any top level module can use the ```Shift``` module to parse and execute shift instructions using the two functions and the ```Instr``` type defined. ``` ErrInstr``` and ```ErrRun``` are error types of the module for the parse and execute functions respectively. 
+Hence, any top level module can use the ```Shift``` module to parse and execute shift instructions using the two functions and the ```Instr``` type defined. The error types of the module for the parse and execute functions respectively are `strings`. 
 
 Care has also been taken to use functional abstraction to allow for faster refactoring and simple code, but not to the extent that it causes confusion. For example, it was decided that the subfunctions in ```execute``` such as ```regLSL```,```flagLSL``` should be kept separate for different opCodes for clarity purposes, despite possibilities for funtional abstraction.  
