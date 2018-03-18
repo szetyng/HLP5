@@ -140,8 +140,8 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
     let listLineDataWSymTab = List.map (fun d -> {d with SymTab=finalLineData.SymTab}) listLineData
     List.map secondPass listLineDataWSymTab
 
-/// Assume that program has been parsed and is valid.
-let myParseAndExecute tD asm= 
+/// Assume that program starts at word address 0x00, each instruction is of size 4u
+let parseAndExecute tD asm= 
     let parsedResList = multiParseLine None (WA 0ul) asm
     let exec tD parsedRes = 
         match parsedRes, tD with

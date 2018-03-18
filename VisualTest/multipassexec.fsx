@@ -34,7 +34,7 @@ let tD = {
 
 let prog = File.ReadAllLines("input.txt")
 
-let result = myParseAndExecute (Ok tD) prog
+let result = parseAndExecute (Ok tD) prog
 
 let printRegisters result = 
     match result with
@@ -68,7 +68,7 @@ File.AppendAllText("output.txt", printMem result)
 
 
 
-myParseAndExecute (Ok tD) prog
+parseAndExecute (Ok tD) prog
 multiParseLine None (WA 0ul) prog
 
 
