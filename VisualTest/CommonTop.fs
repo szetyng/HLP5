@@ -151,14 +151,13 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
         asmMultiLine  
         |> Array.toList 
         |> List.map (removeComment >> splitIntoWords >> Array.toList)
-
     let listLineData, finalLineData = List.mapFold firstPass dummyLD asmSplitLineSplitWords   
     // Update all line data with the correct symbol table
     // Pass each line's LineData to module-specific parsers
     List.map ((fun d -> {d with SymTab=finalLineData.SymTab}) >> secondPass) listLineData
 
 
-
+/// Assume that program starts at word address 0x00, each instruction is of size 4u
 /// Accepts an array of multiple instruction lines stored as strings
 /// Parses each line in a two pass assembler to get multiple Parse types
 /// Executes each line on tD consecutively
