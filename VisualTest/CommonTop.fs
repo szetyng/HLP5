@@ -63,9 +63,10 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
     let splitIntoWords ( line:string ) =
         line.Split( ([||] : char array), 
             System.StringSplitOptions.RemoveEmptyEntries)
-    /// parse each line of LineData
-    /// LineData contains SymbolTable
-    let secondPass data =
+
+    /// fully parses the LineData 
+    /// sends the LineData to 
+    let secondPass data : Result<Parse<Instr>,string> =
         match data |> IMatch with
         | Some pa -> pa
         | None -> failwithf "idk"
@@ -73,14 +74,20 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
     /// prevLD: to be threaded through the list to keep track of address & symbol table
     /// src: a single line of the instruction, stored as a list of strings
     /// processes each line into a LineData with relevant label, address and a continually updated symbol table
-    /// second LineData in output tuple is processed prevLD, holding the final symbol table
-    let firstPass prevLD src = 
+    /// second LineData in output tuple is the processed prevLD, holding the final symbol table
+    let firstPass (prevLD:LineData) (src:string list) = 
+        /// address of this line of instruction
+        /// will be incremented by 4 at the end
+        /// further implementation for instructions with different types of memory addresses to be included
         let (WA currAddr) = prevLD.LoadAddr
+        /// current symbol table of the program
         let currSymTab = prevLD.SymTab        
         match src with
+        // 2nd word is an opcode, so 1st word is a label
         | label :: opc :: operands ->
             match Map.tryFind opc opCodes with          
             | Some _ -> 
+                /// updated symbol table with the label and address of this line included in it
                 let newSymTab =  
                     match currSymTab,currAddr with
                     | None, a -> Some (Map.ofList [label,a])
@@ -90,6 +97,7 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
                     {prevLD with LoadAddr=WA(currAddr+4u);SymTab=newSymTab}                  
             | None ->  
                 match src with
+                // 1st word is an opcode, there are no labels
                 | opc' :: operands' ->
                     match Map.tryFind opc' opCodes with
                     | Some _ -> {makeLineData opc' operands'
@@ -99,16 +107,19 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
         | _ -> failwithf "Instructions not yet implemented"                                        
 
     /// LineData dummy to keep track of address and symbol table
-    let dummyLD = {LoadAddr=loadAddr ; Label=None ; SymTab=None ; OpCode="" ; Operands=""}                 
+    let dummyLD = {LoadAddr=loadAddr ; Label=None ; SymTab=None ; OpCode="" ; Operands=""}        
     /// list of list of string
-    /// each line is an element of the outer list
+    /// each line is an element of the outer list 
     /// each word in the line is an element of the inner list
     let asmSplitLineSplitWords = 
         asmMultiLine  
         |> Array.toList 
-        |> List.map (makeUpper >> removeComment >> splitIntoWords >> Array.toList)
+        |> List.map (makeUpper >> removeComment >> splitIntoWords >> Array.toList)    
     let listLineData, finalLineData = List.mapFold firstPass dummyLD asmSplitLineSplitWords   
+    
+    // To check symbolTable, uncomment the following line
     // printfn "symbolTable = %A" finalLineData.SymTab
+    
     // Update all line data with the correct symbol table
     // Pass each line's LineData to module-specific parsers
     List.map ((fun d -> {d with SymTab=finalLineData.SymTab}) >> secondPass) listLineData
@@ -122,7 +133,7 @@ let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
 /// Accepts an array of multiple instruction lines stored as strings
 /// Parses each line in a two pass assembler to get multiple Parse types
 /// Executes each line on tD consecutively
-let fullExecute tD asm= 
+let fullExecute tD asm = 
     let parsedResList = multiParseLine None (WA 0ul) asm
     let exec tD parsedRes = 
         match parsedRes, tD with
