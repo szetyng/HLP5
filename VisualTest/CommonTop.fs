@@ -123,6 +123,7 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
         let currSymTab = prevLD.SymTab        
         match src with
         | label :: opc :: operands ->
+            //printf "label: %A \n opc: %A \n operands: %A \n" label opc operands
             match Map.tryFind label SingleR.opCodes with
             // line starts with opcode, no label
             | Some _ -> {makeLineData opc operands 
@@ -133,11 +134,13 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
                             // the second part of the tuple
             // line starts with a label                        
             | None -> 
+                let operands' = opc::operands
+                printf "label: %A \n operands': %A \n" label operands 
                 let newSymTab =  
                     match currSymTab,currAddr with
                     | None, a -> Some (Map.ofList [label,a])
                     | Some s, a -> Some (Map.add label a s)
-                {makeLineData opc operands
+                {makeLineData label operands'
                     with LoadAddr=WA currAddr;Label=Some label;SymTab=newSymTab}, {prevLD with LoadAddr=WA(currAddr+4u);SymTab=newSymTab}
         // some instructions might not have operands
         | _ -> failwithf "Instructions not yet implemented"                                        
