@@ -28,12 +28,13 @@ The inner subfunction, `firstPass`, is sent one line of the program at at time, 
 
 Another inner subfunction, `secondPass`, receives one `LineData` at a time and sends it to its relevant module's `parse` function. The result is a list of parsed outputs for each line of the program.
 
-`fullExecute` is the interface which runs `IExecute` with the parsed lines consecutively on the `DataPath`.
+`fullExecute` is the interface which runs `IExecute` with the parsed lines consecutively on the `DataPath` given. The output is the resultant `DataPath` after executing all the instructions in the program. 
 
 ## Usage
 An example script to use the modules written is `test.fsx`. The desired ARM program is written in the file `input.txt`. The script file `test.fsx` runs the instructions on some initialized values of registers and memory, and the results are stored in the file `output.txt`. The default initial state of the registers and memory can be changed in the script file `test.fsx`. 
 
-The assembler is case-insensitive to inputs. 
+The assembler is case-insensitive to inputs. To execute an assembler program, call `CommonTop.fullExecute` with the initial `DataPath` and an array of strings to represent multiple lines of instructions. If you only want to parse the program, call `CommonTop.multiParseLine` with the array of strings, initial symbol table and initial memory address
+
 
 ## Future integration of modules
 Due to the simple dependencies between modules, it is easy to create and integrate new modules. Any new module `NewModule` needs to have two interfaces:
