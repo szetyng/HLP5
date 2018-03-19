@@ -34,41 +34,48 @@ let tD = {
 
 let prog = File.ReadAllLines("input.txt")
 
-let result = fullExecute (Ok tD) prog
+// let result = fullExecute (Ok tD) prog
 
-let printRegisters result = 
-    match result with
-    | Ok x ->
-        let reg = x.Regs |> Map.toList |> List.splitAt 10
-        let printRes a b = a + sprintf "%A \t \t %A \n" (fst b) (snd b)
-        let printRes' a b = a + sprintf "%A \t %A \n" (fst b) (snd b)
-        let res = List.fold printRes "" (fst reg)
-        List.fold printRes' res (snd reg)
+// let printRegisters result = 
+//     match result with
+//     | Ok x ->
+//         let reg = x.Regs |> Map.toList |> List.splitAt 10
+//         let printRes a b = a + sprintf "%A \t \t %A \n" (fst b) (snd b)
+//         let printRes' a b = a + sprintf "%A \t %A \n" (fst b) (snd b)
+//         let res = List.fold printRes "" (fst reg)
+//         List.fold printRes' res (snd reg)
 
-    | Error e -> sprintf "%A" e
+//     | Error e -> sprintf "%A" e
 
-let printMem result = 
-    match result with
-    | Ok x ->
-        let mem = x.MM |> Map.toList 
-        let printRes a b = a + sprintf "%A \t \t %A \n" (fst b) (snd b)
-        List.fold printRes "" mem
-    | Error e -> sprintf "%A" e
+// let printMem result = 
+//     match result with
+//     | Ok x ->
+//         let mem = x.MM |> Map.toList 
+//         let printRes a b = a + sprintf "%A \t \t %A \n" (fst b) (snd b)
+//         List.fold printRes "" mem
+//     | Error e -> sprintf "%A" e
 
-File.WriteAllText("output.txt","Instructions\n\n")
-File.AppendAllText("output.txt", File.ReadAllText("input.txt"))
-File.AppendAllText("output.txt", "\n\nInitial Register State \n\n")
-File.AppendAllText("output.txt", printRegisters (Ok tD))
-File.AppendAllText("output.txt", "\n\nInitial Memory State \n\n")
-File.AppendAllText("output.txt", printMem (Ok tD))
-File.AppendAllText("output.txt", "\n\nRegister State \n\n")
-File.AppendAllText("output.txt", printRegisters result)
-File.AppendAllText("output.txt", "\n\nMemory State \n\n")
-File.AppendAllText("output.txt", printMem result)
+// File.WriteAllText("output.txt","Instructions\n\n")
+// File.AppendAllText("output.txt", File.ReadAllText("input.txt"))
+// File.AppendAllText("output.txt", "\n\nInitial Register State \n\n")
+// File.AppendAllText("output.txt", printRegisters (Ok tD))
+// File.AppendAllText("output.txt", "\n\nInitial Memory State \n\n")
+// File.AppendAllText("output.txt", printMem (Ok tD))
+// File.AppendAllText("output.txt", "\n\nRegister State \n\n")
+// File.AppendAllText("output.txt", printRegisters result)
+// File.AppendAllText("output.txt", "\n\nMemory State \n\n")
+// File.AppendAllText("output.txt", printMem result)
 
 
 
 fullExecute (Ok tD) prog
 multiParseLine None (WA 0ul) prog
 
+multiParseLine (None) (WA 0u) [|"LABEL LDR R2, [R3]"|]
+multiParseLine (None) (WA 0u) [|"LDR R2, [R3]"|]
+multiParseLine (None) (WA 0u) [|"LDR R2, [R3]" ; "STR R1, [R2]"|]
+multiParseLine (None) (WA 0u) [|"STR R1, [R2]"; "LDR R2, [R3]"|]
+parseLine (None) (WA 0u) "LDR R2, [R3]"
 
+let asm = "LDR R2, [R3]"
+let arr = Array.create 1 asm
