@@ -11,12 +11,14 @@ Name | OpCode | Syntax
 where:
 
 - ```{...}``` denote optional fields
-- ```dir``` specifies stack direction or equivalently address mode. It can be either ```IA```,```DB```,```FD``` or ```EA```
+- ```dir``` specifies stack direction or equivalently address mode. It can be either ```IA```,```DB```,```FD``` or ```EA```. If unspecified, defaults to `IA`.
 - ```Rn``` specifies register on which the memory addresses are based.
 - ```!``` is an optional writeback suffix. If specified, the final address is written back to ```Rn```.
 - ```reglist``` is a list of one or more registers to be loaded or stored, enclosed in ```{...}```. 
 
-This specification follows the [ARM documentation](http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0552a/BABCAEDD.html) closely.
+This specification follows the [ARM documentation](http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0552a/BABCAEDD.html) closely. 
+
+Note that the `dir` values of `IB`, `DA`, `ED`, `FA` have yet to be implemented. 
 
 #### Restrictions
 - ```Rn``` cannot be ```PC``` (also called ```R15```)
