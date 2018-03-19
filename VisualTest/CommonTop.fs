@@ -108,6 +108,7 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
         |> Array.toList 
         |> List.map (makeUpper >> removeComment >> splitIntoWords >> Array.toList)
     let listLineData, finalLineData = List.mapFold firstPass dummyLD asmSplitLineSplitWords   
+    // printfn "symbolTable = %A" finalLineData.SymTab
     // Update all line data with the correct symbol table
     // Pass each line's LineData to module-specific parsers
     List.map ((fun d -> {d with SymTab=finalLineData.SymTab}) >> secondPass) listLineData

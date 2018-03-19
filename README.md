@@ -15,6 +15,8 @@ The listed modules have been implemented and tested to simulate the Data process
 ## Testing
 Individual module testing uses a common VisualInterface and Expecto framework, which makes it easy to understand, refactor, and develop tests for existing and new modules. Top level testing aims to ensure that valid programs involving instructions from multiple modules execute correctly. This is done in the test module `CommonTest.fs`.
 
+The project currently does not contain instructions which involve forward references, so the robustness of the multipass assembler can be checked by calling `multiParseLine`.
+
 ## Top Level functionality
 Explain how the code integrates the existing modules, how it does multi-pass to read a program.
 
@@ -29,6 +31,11 @@ Due to the simple dependencies between modules, it is easy to create and integra
 The new module will have to be included in `CommonTop` as a new `Instr` type, with it's `parse` and `execute` functions included using a match statement.
 
 ## Improvements to be made for existing modules
+### MultiR 
 - Only half of the LDM/STM operations have been implemented
 - Use more complex match instead of if then else
 - More use of D.U.s as types instead of strings
+
+### SingleR
+- The instructions currently only accepts register and literal offsets, VisUAL accepts numerical expressions and shifted registers, too
+- Remove zero offset, it should be equivalent to an instruction with no offsets.
