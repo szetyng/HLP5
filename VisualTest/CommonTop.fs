@@ -34,6 +34,10 @@ let IExecute (i:Instr) (d:DataPath<'INS>):Result<DataPath<'INS>,string> =
 
 type CondInstr = Condition * Instr
 
+let opCodes = 
+    Map.fold (fun newMap k v -> Map.add k v newMap) SingleR.opCodes MultiR.opCodes
+    |> Map.fold (fun newMap k v -> Map.add k v newMap) Shift.opCodes
+
 let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
     /// put parameters into a LineData record
     let makeLineData opcode operands = {
@@ -123,26 +127,23 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
         let currSymTab = prevLD.SymTab        
         match src with
         | label :: opc :: operands ->
-            //printf "label: %A \n opc: %A \n operands: %A \n" label opc operands
-            match Map.tryFind label SingleR.opCodes with
-            // line starts with opcode, no label
-            | Some _ -> {makeLineData opc operands 
+            match Map.tryFind opc opCodes with
+            | Some _ -> {makeLineData opc operands
                             with LoadAddr=WA currAddr}, {prevLD with LoadAddr=WA(currAddr+4u)}
-                            // further implementation of instructions
-                            // that take more than 4bytes in memory
-                            // can be added here when returning 
-                            // the second part of the tuple
-            // line starts with a label                        
-            | None -> 
-                let operands' = opc::operands
-                printf "label: %A \n operands': %A \n" label operands 
+            | None ->
                 let newSymTab =  
                     match currSymTab,currAddr with
                     | None, a -> Some (Map.ofList [label,a])
                     | Some s, a -> Some (Map.add label a s)
-                {makeLineData label operands'
-                    with LoadAddr=WA currAddr;Label=Some label;SymTab=newSymTab}, {prevLD with LoadAddr=WA(currAddr+4u);SymTab=newSymTab}
-        // some instructions might not have operands
+                match src with
+                | opc' :: operands' ->
+                    printf "opc': %A \n operands': %A \n" opc' operands' 
+                    match Map.tryFind opc' opCodes with
+                    | Some _ ->  {makeLineData opc' operands'
+                                    with LoadAddr=WA currAddr;Label=Some label;SymTab=newSymTab}, 
+                                    {prevLD with LoadAddr=WA(currAddr+4u);SymTab=newSymTab} 
+                    | _ -> failwithf "idk branch"
+                | _ -> failwithf "idk branch2"                                                                      
         | _ -> failwithf "Instructions not yet implemented"                                        
 
     /// LineData dummy to keep track of address and symbol table
