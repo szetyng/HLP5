@@ -4,9 +4,9 @@
 
 #load "CommonData.fs"
 #load "CommonLex.fs"
-#load "Shift.fs"
-#load "MultiR.fs"
-#load "SingleR.fs"
+#load "Modules/Shift.fs"
+#load "Modules/MultiR.fs"
+#load "Modules/SingleR.fs"
 #load "CommonTop.fs"
 
 open CommonData
@@ -83,5 +83,4 @@ simulateARM tD prog
 // Example of multipass parsing
 CommonTop.fullExecute (Ok tD) prog
 CommonTop.multiParseLine None (WA 0ul) prog
-
 
