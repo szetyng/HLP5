@@ -34,51 +34,11 @@ let IExecute (i:Instr) (d:DataPath<'INS>):Result<DataPath<'INS>,string> =
 
 type CondInstr = Condition * Instr
 
-let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
-    /// put parameters into a LineData record
-    let makeLineData opcode operands = {
-        OpCode=opcode
-        Operands=String.concat "" operands
-        Label=None
-        LoadAddr = loadAddr
-        SymTab = symtab
-    }
-    /// remove comments from string
-    let removeComment (txt:string) =
-        txt.Split(';')
-        |> function 
-            | [|x|] -> x 
-            | [||] -> "" 
-            | lineWithComment -> lineWithComment.[0]
-    /// split line on whitespace into an array
-    let splitIntoWords ( line:string ) =
-        line.Split( ([||] : char array), 
-            System.StringSplitOptions.RemoveEmptyEntries)
-    /// try to parse 1st word, or 2nd word, as opcode
-    /// If 2nd word is opcode 1st word must be label
-    let matchLine words =
-        let pNoLabel =
-            match words with
-            | opc :: operands -> 
-                makeLineData opc operands 
-                |> IMatch
-            | _ -> None
-        
-        match pNoLabel, words with
-        | Some pa, _ -> pa
-        | None, label :: opc :: operands -> 
-            match { makeLineData opc operands 
-                    with Label=Some label} 
-                  |> IMatch with
-            | None -> 
-                Error (sprintf "Unimplemented instruction %s" opc)
-            | Some pa -> pa
-        | _ -> Error (sprintf "Unimplemented instruction %A" words)
-    asmLine
-    |> removeComment
-    |> splitIntoWords
-    |> Array.toList
-    |> matchLine
+let opCodes = 
+    Map.fold (fun newMap k v -> Map.add k v newMap) SingleR.opCodes MultiR.opCodes
+    |> Map.fold (fun newMap k v -> Map.add k v newMap) Shift.opCodes
+
+
 
 /// Accepts an array of multiple instruction lines stored as strings
 /// Does a two pass parsing
@@ -91,11 +51,7 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
         LoadAddr = loadAddr
         SymTab = symtab
     }
-    /// split multiline separated by \n into an array
-    /// each element of the array is a newline
-    let splitIntoLines ( line:string ) =
-                line.Split( ([|'\n'|] : char array), 
-                    System.StringSplitOptions.RemoveEmptyEntries)
+    let makeUpper (txt:string) : string = txt.ToUpper()
     /// remove comments from string
     let removeComment (txt:string) =
         txt.Split(';')
@@ -123,23 +79,23 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
         let currSymTab = prevLD.SymTab        
         match src with
         | label :: opc :: operands ->
-            match Map.tryFind label SingleR.opCodes with
-            // line starts with opcode, no label
-            | Some _ -> {makeLineData opc operands 
-                            with LoadAddr=WA currAddr}, {prevLD with LoadAddr=WA(currAddr+4u)}
-                            // further implementation of instructions
-                            // that take more than 4bytes in memory
-                            // can be added here when returning 
-                            // the second part of the tuple
-            // line starts with a label                        
-            | None -> 
+            match Map.tryFind opc opCodes with          
+            | Some _ -> 
                 let newSymTab =  
                     match currSymTab,currAddr with
                     | None, a -> Some (Map.ofList [label,a])
                     | Some s, a -> Some (Map.add label a s)
                 {makeLineData opc operands
-                    with LoadAddr=WA currAddr;Label=Some label;SymTab=newSymTab}, {prevLD with LoadAddr=WA(currAddr+4u);SymTab=newSymTab}
-        // some instructions might not have operands
+                    with LoadAddr=WA currAddr;Label=Some label;SymTab=newSymTab}, 
+                    {prevLD with LoadAddr=WA(currAddr+4u);SymTab=newSymTab}                  
+            | None ->  
+                match src with
+                | opc' :: operands' ->
+                    match Map.tryFind opc' opCodes with
+                    | Some _ -> {makeLineData opc' operands'
+                                    with LoadAddr=WA currAddr}, {prevLD with LoadAddr=WA(currAddr+4u)}
+                    | _ -> failwithf "Instructions not yet implemented"
+                | _ -> failwithf "Instructions not yet implemented"                                                                     
         | _ -> failwithf "Instructions not yet implemented"                                        
 
     /// LineData dummy to keep track of address and symbol table
@@ -150,14 +106,18 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
     let asmSplitLineSplitWords = 
         asmMultiLine  
         |> Array.toList 
-        |> List.map (removeComment >> splitIntoWords >> Array.toList)
+        |> List.map (makeUpper >> removeComment >> splitIntoWords >> Array.toList)
     let listLineData, finalLineData = List.mapFold firstPass dummyLD asmSplitLineSplitWords   
     // Update all line data with the correct symbol table
     // Pass each line's LineData to module-specific parsers
     List.map ((fun d -> {d with SymTab=finalLineData.SymTab}) >> secondPass) listLineData
 
+/// Accepts a single line of instruction and store it in an array
+/// To pass to multiParseLine
+let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
+    multiParseLine symtab loadAddr (Array.create 1 asmLine)
+    |> List.exactlyOne
 
-/// Assume that program starts at word address 0x00, each instruction is of size 4u
 /// Accepts an array of multiple instruction lines stored as strings
 /// Parses each line in a two pass assembler to get multiple Parse types
 /// Executes each line on tD consecutively
