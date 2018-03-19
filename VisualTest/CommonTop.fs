@@ -5,6 +5,7 @@ module CommonTop
 
 open CommonLex
 open CommonData
+open SingleR
 
 /// allows different modules to return different instruction types
 type Instr =
@@ -34,6 +35,7 @@ let IExecute (i:Instr) (d:DataPath<'INS>):Result<DataPath<'INS>,string> =
 
 type CondInstr = Condition * Instr
 
+/// All possible opcodes accepted by the assembler
 let opCodes = 
     Map.fold (fun newMap k v -> Map.add k v newMap) SingleR.opCodes MultiR.opCodes
     |> Map.fold (fun newMap k v -> Map.add k v newMap) Shift.opCodes
@@ -69,7 +71,7 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
     let secondPass data : Result<Parse<Instr>,string> =
         match data |> IMatch with
         | Some pa -> pa
-        | None -> failwithf "idk"
+        | None -> Error "Instruction not yet implemented"
 
     /// prevLD: to be threaded through the list to keep track of address & symbol table
     /// src: a single line of the instruction, stored as a list of strings
@@ -94,17 +96,17 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
                     | Some s, a -> Some (Map.add label a s)
                 {makeLineData opc operands
                     with LoadAddr=WA currAddr;Label=Some label;SymTab=newSymTab}, 
-                    {prevLD with LoadAddr=WA(currAddr+4u);SymTab=newSymTab}                  
+                    {prevLD with LoadAddr=WA(currAddr+4u);SymTab=newSymTab}                
             | None ->  
                 match src with
                 // 1st word is an opcode, there are no labels
                 | opc' :: operands' ->
                     match Map.tryFind opc' opCodes with
                     | Some _ -> {makeLineData opc' operands'
-                                    with LoadAddr=WA currAddr}, {prevLD with LoadAddr=WA(currAddr+4u)}
-                    | _ -> failwithf "Instructions not yet implemented"
-                | _ -> failwithf "Instructions not yet implemented"                                                                     
-        | _ -> failwithf "Instructions not yet implemented"                                        
+                                        with LoadAddr=WA currAddr}, {prevLD with LoadAddr=WA(currAddr+4u)}
+                    | _ -> failwithf "Instruction not yet implemented"
+                | _ -> failwithf "Instruction not yet implemented"                                                                   
+        | _ -> failwithf "Instruction not yet implemented"                                       
 
     /// LineData dummy to keep track of address and symbol table
     let dummyLD = {LoadAddr=loadAddr ; Label=None ; SymTab=None ; OpCode="" ; Operands=""}        
@@ -116,10 +118,10 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
         |> Array.toList 
         |> List.map (makeUpper >> removeComment >> splitIntoWords >> Array.toList)    
     let listLineData, finalLineData = List.mapFold firstPass dummyLD asmSplitLineSplitWords   
-    
+
     // To check symbolTable, uncomment the following line
     // printfn "symbolTable = %A" finalLineData.SymTab
-    
+
     // Update all line data with the correct symbol table
     // Pass each line's LineData to module-specific parsers
     List.map ((fun d -> {d with SymTab=finalLineData.SymTab}) >> secondPass) listLineData
