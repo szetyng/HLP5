@@ -32,7 +32,7 @@ let genTestData memVal regVal: DataPath<'INS> =
 
 /// Run program on a given CPU state and output result to file
 let simulateARM tD prog=
-    let result = CommonTop.parseAndExecute (Ok tD) prog
+    let result = CommonTop.fullExecute (Ok tD) prog
     let printRes a b = a + sprintf "%A \t \t %A \n" (fst b) (snd b)
 
     let printRegisters result = 
@@ -81,7 +81,7 @@ let prog = File.ReadAllLines("input.txt")
 simulateARM tD prog
 
 // Example of multipass parsing
-CommonTop.parseAndExecute (Ok tD) prog
+CommonTop.fullExecute (Ok tD) prog
 CommonTop.multiParseLine None (WA 0ul) prog
 
 
