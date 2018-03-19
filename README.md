@@ -6,20 +6,23 @@ Low Zuo Kai Nicholas, Sze Tyng Lee, Jee Yong Park
 This project supports of a subset of ARM UAL instructions with documentation for specific modules in the `\VisualWork\Documentation` folder.
 
 ## Implemented modules:
+### Data Processing
 - Shift
+### Memory
 - SingleR
 - MultiR
 
 The listed modules have been implemented and tested to simulate the Data processing and Memory instructions. This project uses the [VisUAL](https://salmanarif.bitbucket.io/visual/index.html) program and a VisualInterface framework for testing. 
 
-## Testing
-Individual module testing uses a common VisualInterface and Expecto framework, which makes it easy to understand, refactor, and develop tests for existing and new modules. Top level testing aims to ensure that valid programs involving instructions from multiple modules execute correctly. This is done in the test module `CommonTest.fs`.
+## Top-Level 
+### Integration of future modules
+Due to the simple dependencies between modules, it is easy to create and integrate new modules. Any new module `NewModule` needs to have two interfaces:
+- `parse: LineData -> Result<Parse<NewModule.Instr>,string> option`
+- `execute: NewModule.Instr -> DataPath<'INS> -> Result<DataPath<'INS>,string>`
 
-The project currently does not contain instructions which involve forward references, so the robustness of the multipass assembler can be checked by calling `multiParseLine`. The labelling and addressing of each line should be shown clearly in the result of this function. Uncommenting one of the lines in the function would print the Symbol Table for further inspection.
+The new module will require a type record `Instr` to be defined and included in `CommonTop` as D.U. Also, it's `parse` and `execute` functions are to be included using a match statement in functions `IMatch` and `IExecute`.
 
-## Top Level Functionality
-Explain how the code integrates the existing modules, how it does multi-pass to read a program.
-
+### Multipass Functionality
 The individual modules have been parsing and executing instruction lines one at a time; they do not accept multiple lines of instructions as an input. In order to allow that, the functions `fullExecute` and `multiParseLine` have been added in the `CommonTop` module. The original `parseLine`, which accepts a single string of assembler line and outputs a single parsed output, has been modified to become an interface to `multiParseLine`. This is to avoid renaming all the instances where `parseLine` was called in the individual modules and tests.
 
 The first of the integration functions, `multiParseLine`, does a two pass parsing of the assembler program, which is represented as multiple lines of instructions. It accepts an array of strings as an input, wherein each line of the assembly program is stored as a string in the array. It is called with `SymbolTable` and `WAddr`, which represent the initial symbol table and the memory address of the assembler. Our demo codes are initialising the assembler to start at memory address 0 with an empty symbol table. 
@@ -30,6 +33,11 @@ Another inner subfunction, `secondPass`, receives one `LineData` at a time and s
 
 `fullExecute` is the interface which runs `IExecute` with the parsed lines consecutively on the `DataPath` given. The output is the resultant `DataPath` after executing all the instructions in the program. 
 
+## Testing
+Individual module testing uses a common VisualInterface and Expecto framework, which makes it easy to understand, refactor, and develop tests for existing and new modules. Top level testing aims to ensure that valid programs involving instructions from multiple modules execute correctly. This is done in the test module `CommonTest.fs`.
+
+The project currently does not contain instructions which involve forward references, so the robustness of the multipass assembler can be checked by calling `multiParseLine`. The labelling and addressing of each line should be shown clearly in the result of this function. Uncommenting one of the lines in the function would print the Symbol Table for further inspection.
+
 ## Usage
 An example script to use the modules written is `test.fsx`. The desired ARM program is written in the file `input.txt`. The script file `test.fsx` runs the instructions on some initialized values of registers and memory, and the results are stored in the file `output.txt`. The default initial state of the registers and memory can be changed in the script file `test.fsx`. 
 
@@ -37,12 +45,6 @@ The assembler is case-insensitive to inputs. To execute an assembler program, ca
 
 
 
-## Future integration of modules
-Due to the simple dependencies between modules, it is easy to create and integrate new modules. Any new module `NewModule` needs to have two interfaces:
-- `parse: LineData -> Result<Parse<NewModule.Instr>,string> option`
-- `execute: NewModule.Instr -> DataPath<'INS> -> Result<DataPath<'INS>,string>`
-
-The new module will have to be included in `CommonTop` as a new `Instr` type, with it's `parse` and `execute` functions included using a match statement.
 
 ## Improvements to be made for existing modules
 ### MultiR 
