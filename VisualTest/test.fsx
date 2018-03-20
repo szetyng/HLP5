@@ -84,3 +84,7 @@ simulateARM tD prog
 CommonTop.fullExecute (Ok tD) prog
 CommonTop.multiParseLine None (WA 0ul) prog
 
+let labelMap = 
+    Map.ofList [ 
+        "LABEL",0u ; "LABEL1",4u 
+    ] 

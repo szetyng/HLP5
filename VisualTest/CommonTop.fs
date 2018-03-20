@@ -44,7 +44,8 @@ let opCodes =
 
 /// Accepts an array of multiple instruction lines stored as strings
 /// Does a two pass parsing
-let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:string []): Result<Parse<Instr>,string>list =
+let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:string []) =
+// let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:string []): Result<Parse<Instr>,string>list =
     /// put parameters into a LineData record
     let makeLineData opcode operands = {
         OpCode=opcode
@@ -124,19 +125,19 @@ let multiParseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmMultiLine:
 
     // Update all line data with the correct symbol table
     // Pass each line's LineData to module-specific parsers
-    List.map ((fun d -> {d with SymTab=finalLineData.SymTab}) >> secondPass) listLineData
-
+    let res = List.map ((fun d -> {d with SymTab=finalLineData.SymTab}) >> secondPass) listLineData
+    (res,finalLineData.SymTab)
 /// Accepts a single line of instruction and store it in an array
 /// To pass to multiParseLine
 let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
     multiParseLine symtab loadAddr (Array.create 1 asmLine)
-    |> List.exactlyOne
+    |> fst |> List.exactlyOne
 
 /// Accepts an array of multiple instruction lines stored as strings
 /// Parses each line in a two pass assembler to get multiple Parse types
 /// Executes each line on tD consecutively
 let fullExecute tD asm = 
-    let parsedResList = multiParseLine None (WA 0ul) asm
+    let parsedResList = multiParseLine None (WA 0ul) asm |> fst
     let exec tD parsedRes = 
         match parsedRes, tD with
         | Ok x, Ok d -> IExecute x.PInstr d
