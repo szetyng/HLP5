@@ -36,6 +36,8 @@ let IExecute (i:Instr) (d:DataPath<'INS>):Result<DataPath<'INS>,string> =
 type CondInstr = Condition * Instr
 
 /// All possible opcodes accepted by the assembler
+/// Helps identify if opcode is 2nd or 1st word in the ASM line
+/// Needs to be updated if new instructions are added
 let opCodes = 
     Map.fold (fun newMap k v -> Map.add k v newMap) SingleR.opCodes MultiR.opCodes
     |> Map.fold (fun newMap k v -> Map.add k v newMap) Shift.opCodes
