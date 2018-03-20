@@ -20,7 +20,7 @@ Due to the simple dependencies between modules, it is easy to create and integra
 - `parse: LineData -> Result<Parse<NewModule.Instr>,string> option`
 - `execute: NewModule.Instr -> DataPath<'INS> -> Result<DataPath<'INS>,string>`
 
-The new module will require a type record `Instr` to be defined and included in `CommonTop` as D.U. Also, it's `parse` and `execute` functions are to be included using a match statement in functions `IMatch` and `IExecute`.
+The new module will require a type record `Instr` to be defined and included in `CommonTop` as D.U. Also, its `parse` and `execute` functions are to be included using a match statement in functions `IMatch` and `IExecute`. Its opcodes need to be included at the beginning of the top level module. The opcodes are used in the multipass parser when checking for labels in the lines.
 
 ### Multipass Functionality
 The individual modules have been parsing and executing instruction lines one at a time; they do not accept multiple lines of instructions as an input. In order to allow that, the functions `fullExecute` and `multiParseLine` have been added in the `CommonTop` module. The original `parseLine`, which accepts a single string of assembler line and outputs a single parsed output, has been modified to become an interface to `multiParseLine`. This is to avoid renaming all the instances where `parseLine` was called in the individual modules and tests.
@@ -34,7 +34,7 @@ Another inner subfunction, `secondPass`, receives one `LineData` at a time and s
 `fullExecute` is the interface which runs `IExecute` with the parsed lines consecutively on the `DataPath` given. The output is the resultant `DataPath` after executing all the instructions in the program. 
 
 ## Testing
-Individual module testing uses a common VisualInterface and Expecto framework, which makes it easy to understand, refactor, and develop tests for existing and new modules. Top level testing aims to ensure that valid programs involving instructions from multiple modules execute correctly. This is done in the test module `CommonTest.fs`.
+Individual module testing uses a common VisualInterface and Expecto framework, which makes it easy to understand, refactor and develop tests for existing and new modules. Top level testing aims to ensure that valid programs involving instructions from multiple modules execute correctly. This is done in the test module `CommonTest.fs`.
 
 The project currently does not contain instructions which involve forward references, so the robustness of the multipass assembler can be checked by calling `multiParseLine`. The labelling and addressing of each line should be shown clearly in the result of this function. Uncommenting one of the lines in the function would print the Symbol Table for further inspection.
 
@@ -57,4 +57,4 @@ The assembler is case-insensitive to inputs. To execute an assembler program, ca
 - Remove zero offset, it should be equivalent to an instruction with no offsets.
 
 ### Top level
-- The current multipass assembler gives each line a 4 bytes address, because that is what is requires by all the instructions included here. Further implementation of other instructions, such as `FIll` or `DCD`, would require changes to the `firstPass` function in `multiParseLine`
+- The current multipass assembler gives each line a 4 bytes address, because that is what is required by all the instructions included here. Further implementation of other instructions, such as `FIll` or `DCD`, would require changes to the `firstPass` function in `multiParseLine`
