@@ -3,10 +3,9 @@ module SingleRTests
 open CommonData
 open CommonLex
 open SingleR
+open CommonTest
 open Expecto
 open VisualTest.VCommon
-open VisualTest.VData
-open VisualTest.Visual
 open VisualTest.VTest
 
 let myTestParas = {defaultParas with 
@@ -21,36 +20,8 @@ let testMemValList = [
                         0x44400000u ; 0x54C08F0u ; 0xABCDEF48u ; 0x891CECABu ; 0x778220EDu     // 0x1020 - 0x1030
                     ]       
 
-let testCPU:DataPath<'INS> = {
-    Fl = {N=false ; C=false ; Z=false ; V=false};
-    Regs = Seq.zip [R0;R1;R2;R3;R4;R5;R6;R7;R8;R9;R10;R11;R12;R13;R14] myTestParas.InitRegs
-            |> List.ofSeq
-            |> Map.ofList
-    MM = 
-        let addrList = List.map WA [myTestParas.MemReadBase..4u..myTestParas.MemReadBase+(12u*4u)]
-        Seq.zip addrList (List.map DataLoc testMemValList) 
-        |> Map.ofSeq
-} 
+let testCPU = genTestData testMemValList myTestParas.InitRegs
 
-let STOREALLMEM memVals memBase = 
-    let n = List.length memVals |> uint32
-    let mAddrList = [memBase..4u..(memBase + (n-1u)*4u)]
-    List.zip mAddrList memVals
-    |> List.map (fun (a,v) -> STORELOC v a)
-    |> String.concat ""
-
-// Run VisUAL, initialize using paras and memVal, and run src, then read 13 words back to registers during postlude.
-let RunVisualMem memVal paras src = 
-    let memPrelude = 
-        STOREALLMEM memVal paras.MemReadBase +
-        SETALLREGS paras.InitRegs +
-        "\r\n"
-    let memPostlude =
-        READMEMORY paras.MemReadBase 
-    let res = RunVisual {paras with Prelude = memPrelude; Postlude = memPostlude} src
-    match res with
-    | Error e -> failwithf "Error %A" e
-    | Ok vso -> vso
 let onlyParseLine (asmLine:string) = 
     let makeLineData opcode operands = {
         OpCode=opcode
