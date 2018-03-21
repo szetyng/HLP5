@@ -28,8 +28,6 @@ let genTestData memVal regVal: DataPath<'INS> =
              }
     testData   
 
-
-
 /// Run program on a given CPU state and output result to file
 let simulateARM tD prog=
     let result = CommonTop.fullExecute (Ok tD) prog
@@ -68,7 +66,11 @@ let simulateARM tD prog=
 //////////////////////////////////////////////////////////////////////////////////////
 
 // Define values in memory and registers
-let memVal = []
+let memVal = [
+                0xD751CB1Fu ; 0xAB165482u ; 0x458DE9Bu ; 0x541CEEABu ;             // 0x1000 - 0x100C
+                0x9104080u ; 0x44438ADCu ; 0x444030F0u ; 0xFF00EA21u ;             // 0x1010 - 0x101C
+                0x44400000u ; 0x54C08F0u ; 0xABCDEF48u ; 0x891CECABu ; 0x778220EDu     // 0x1020 - 0x1030
+            ]  
 let regVal = [0x1000u;4120u;4144u] @ [3ul..14ul] 
 
 // Generate CPU State
