@@ -41,10 +41,12 @@ let labelTest =
         [
             [|"LABEL LSR R4,R1,#2"; "LABEL1 STM R1, {R1,R2}"|], Some labelMap
             [|"LABEL LSR R4,R1,#2"; "STM R1, {R1,R2}"; "LABEL1 STM R1, {R1,R2}"|], Some labelMap1
+            [|"LDR R2, [R8]"; "STRB R5, [R0], #0x12"|], None
         ]
 
 /// Test with empty memory 
-let testProgram = "STMIA R0,{R4-R9} \n LSR R4,R1,#2"
+let testProgram1 = "STMIA R0,{R4-R9} \n LSR R4,R1,#2" 
+let testProgram2 = "ldr r2, [r0] \n str r7, [r0,#8]! \n lsl r5,r1,#4"
 let testName = "Multi-Line program test"
 let testParas = {defaultParas with InitRegs = regVal}
 let numMem = 6          // number of memory addresses to check. R4-R9, hence 6 memory addresses to check
@@ -52,17 +54,17 @@ let numMem = 6          // number of memory addresses to check. R4-R9, hence 6 m
 let testCaseOne = 
     testList "Program tests"
         [
-            VisualUnitMemTest testParas testName testProgram memVal tD numMem
+            VisualUnitMemTest testParas testName testProgram1 memVal tD numMem
         ] 
 
-/// Test with loaded memory
-        
-        
+/// Test with loaded memory          
 let loadMemVal = [1ul;2ul;3ul;4ul;5ul;6ul]
 let loadTD = genTestData loadMemVal regVal
+
 [<Tests>]
 let testCaseTwo = 
     testList "Program tests with memory"
         [
-            VisualUnitMemTest testParas testName testProgram loadMemVal loadTD numMem
+            VisualUnitMemTest testParas "Multi-Line program test 1" testProgram1 loadMemVal loadTD numMem
+            VisualUnitMemTest testParas "Multi-Line program test 2" testProgram2 loadMemVal loadTD numMem
         ]

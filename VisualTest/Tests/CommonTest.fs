@@ -60,7 +60,7 @@ let VisualUnitMemTest paras name src memVal tD numMem  =
             let res = CommonTop.fullExecute (Ok tD) (splitIntoLines src) 
             match res with
             | Ok x -> x
-            | Error e -> failwithf "Error"
+            | Error e -> failwithf "%s" e
 
         let memActual:MachineMemory<'INS>= 
             let memVal = outActual.State.VMemData
