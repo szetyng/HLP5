@@ -39,11 +39,11 @@ The shift value for shift instructions can either be a constant integer [0,255] 
 | ASR | Arithmetic shift right n bits, n = [0,31].<br> All bits set to Rm[31] otherwise| Flag updated to Rm[n-1], n = [1,32]. <br>Flag updated to Rm[31] otherwise. 
 | LSR | Logical shift right n bits, n = [0,31].<br> Result is zero otherwise | Flag updated to Rm[n-1], n = [1,32]. <br>Flag updated to Rm[31] otherwise.
 | LSL |  Logical shift left n bits, n = [0,31].<br> Result is zero otherwise  |Flag updated to Rm[32-n], n = [1,32]. <br>Flag updated to false otherwise.
-| ROR | Rotate right by n bits, n = n-32 for n > 32 | Flag updated to Rm[n-1], n = n-32 for n > 32 <br> Flag updated to Rm[31] if n % 32 = 0, n$\neq$ 0
+| ROR | Rotate right by n bits, n = n-32 for n > 32 | Flag updated to Rm[n-1], n = n-32 for n > 32 
 | RRX | Right shift by 1, copies carry flag into Rm[31]       | Flag updated to Rm[0]
 
 ### Differences in VisUAL
-Note that for ROR with n as a multiple of 32, the shift value has the result of zero, but flags are updated. This differs from the implementation in VisUAL. Also, the value in ```Rs``` is allowed to exceed the range [0-255] without throwing an error in VisUAL.
+Values of ```Rs``` are allowed to exceed the range [0-255] without throwing an error in VisUAL.
 
 
 
@@ -66,11 +66,6 @@ The ``parse`` and ``execute`` functions were tested for functionality using the 
 | Shift lengths of 1, 31, 32 , 33| Test on positive, negative and random register values, random flags | Equivalent to VisUAL except ROR* | All except RRX, RRXS | Passed
 | Random Shift lengths | Use random registers as shift values**| Equivalent to VisUAL | All except RRX, RRXS | Passed
 
-*For ROR with shift value 32. If carry bit is updated, VisUAL sets it to false while the ARM documentation requires it to be set to the MSB of ```Rm```. Tests for ROR are hence expected to fail! This can be verified in VisUAL:
-```
-MOV      r1, #-1
-RORS     r1,r1,#32   
-```
 **Shift values from registers could be negative integers, hence shift values must be constrained to range 0 < n < 32 during implementation.
 
 *The points marked by asterisk were discovered during testing.*

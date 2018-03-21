@@ -155,7 +155,7 @@ let execute (i:Instr) (d:DataPath<'INS>): Result<DataPath<'INS>,string> =
         let cF = 
             match n with
             | 0 -> d.Fl.C
-            | n when n=32 -> nBitFlag 32
+            // | n when n=32 -> nBitFlag 32
             // | n when (n%32=0) -> nBitFlag 32
             | n when (n%32=0) -> false
             | _ -> nBitFlag (n%32)
