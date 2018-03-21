@@ -3,7 +3,7 @@
 Low Zuo Kai Nicholas, Sze Tyng Lee, Jee Yong Park
 
 #### Purpose
-This project supports of a subset of ARM UAL instructions with documentation for specific modules in the `\VisualWork\Documentation` folder.
+This project supports of a subset of ARM UAL instructions written as individual modules in the `Modules` folder. Testing and documentation for specific modules can be found in the `Testing` and `Documentation` folders respectively.
 
 ## Implemented modules:
 ### Data Processing
@@ -12,10 +12,10 @@ This project supports of a subset of ARM UAL instructions with documentation for
 - SingleR
 - MultiR
 
-The listed modules have been implemented and tested to simulate the Data processing and Memory instructions. This project uses the [VisUAL](https://salmanarif.bitbucket.io/visual/index.html) program and a VisualInterface framework for testing. 
+The listed modules have been implemented and tested to simulate the Data processing and Memory instructions. This project uses the [VisUAL](https://salmanarif.bitbucket.io/visual/index.html) program and a `VisualInterface` framework for testing. 
 
 ## Top-Level 
-### Integration of future modules
+### Creation and Integration of future modules
 Due to the simple dependencies between modules, it is easy to create and integrate new modules. Any new module `NewModule` needs to have two interfaces:
 - `parse: LineData -> Result<Parse<NewModule.Instr>,string> option`
 - `execute: NewModule.Instr -> DataPath<'INS> -> Result<DataPath<'INS>,string>`
@@ -34,7 +34,7 @@ Another inner subfunction, `secondPass`, receives one `LineData` at a time and s
 `fullExecute` is the interface which runs `IExecute` with the parsed lines consecutively on the `DataPath` given. The output is the resultant `DataPath` after executing all the instructions in the program. 
 
 ## Testing
-Individual module testing uses a common VisualInterface and Expecto framework, which makes it easy to understand, refactor and develop tests for existing and new modules. Top level testing aims to ensure that valid programs involving instructions from multiple modules execute correctly. This is done in the test module `CommonTest.fs`.
+Individual module testing uses a common modules `VisualInterface`, `CommonTest` and the Expecto framework, which makes it easy to understand, refactor and develop tests for existing and new modules. Top level testing aims to ensure that valid programs involving instructions from multiple modules execute correctly. This is done in the test module `Integration.fs`. Due to the functional nature of the code, individual instructions have well-defined input and outputs, thus integrating multiple modules and simulating multi-line programs can be naturally extended from the work done in individual modules.  
 
 The project currently does not contain instructions which involve forward references, so the robustness of the multipass assembler can be checked by calling `multiParseLine`. The labelling and addressing of each line should be shown clearly in the result of this function. Uncommenting one of the lines in the function would print the Symbol Table for further inspection.
 
@@ -42,8 +42,6 @@ The project currently does not contain instructions which involve forward refere
 An example script to use the modules written is `test.fsx`. The desired ARM program is written in the file `input.txt`. The script file `test.fsx` runs the instructions on some initialized values of registers and memory, and the results are stored in the file `output.txt`. The default initial state of the registers and memory can be changed in the script file `test.fsx`. 
 
 The assembler is case-insensitive to inputs. To execute an assembler program, call `CommonTop.fullExecute` with the initial `DataPath` and an array of strings to represent multiple lines of instructions. If you only want to parse the program, call `CommonTop.multiParseLine` with the array of strings, initial symbol table and initial memory address.
-
-
 
 
 ## Improvements to be made for existing modules
