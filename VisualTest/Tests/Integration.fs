@@ -43,28 +43,26 @@ let labelTest =
             [|"LABEL LSR R4,R1,#2"; "STM R1, {R1,R2}"; "LABEL1 STM R1, {R1,R2}"|], Some labelMap1
         ]
 
+/// Test with empty memory 
+let testProgram = "STMIA R0,{R4-R9} \n LSR R4,R1,#2"
+let testName = "Multi-Line program test"
 let testParas = {defaultParas with InitRegs = regVal}
 let numMem = 6          // number of memory addresses to check. R4-R9, hence 6 memory addresses to check
 [<Tests>]
-let executeStoreTest = 
+let testCaseOne = 
     testList "Program tests"
         [
-            VisualUnitMemTest testParas "STMIA Test" "STMIA R0,{R4-R9} \n LSR R4,R1,#2" memVal tD numMem
+            VisualUnitMemTest testParas testName testProgram memVal tD numMem
         ] 
 
-
+/// Test with loaded memory
         
         
-// let loadMemVal = [1ul;2ul;3ul;4ul;5ul;6ul]
-// let loadTD = {tD with MM = tMem loadMemVal}
-// [<Tests>]
-// let executeLoadTest = 
-//     testList "LDM tests"
-//         [
-//             VisualUnitMemTest testParas "LDMIA Test" "LDMIA R0,{R4-R9}" loadMemVal loadTD 6
-//             VisualUnitMemTest testParas "LDMEA Test" "LDMEA R1,{R4-R9}" loadMemVal loadTD 6
-//             VisualUnitMemTest testParas "LDMIA Test with Writeback" "LDMIA R0!,{R4-R9}" loadMemVal loadTD 6
-//             VisualUnitMemTest testParas "LDMFD Test with Writeback" "LDMFD R0!,{R4-R9}" loadMemVal loadTD 6
-//             VisualUnitMemTest testParas "LDMEA Test with Writeback" "LDMEA R1!,{R4-R9}" loadMemVal loadTD 6
-//             VisualUnitMemTest testParas "LDMDB Test with Writeback" "LDMDB R1!,{R4-R9}" loadMemVal loadTD 6
-//         ]
+let loadMemVal = [1ul;2ul;3ul;4ul;5ul;6ul]
+let loadTD = genTestData loadMemVal regVal
+[<Tests>]
+let testCaseTwo = 
+    testList "Program tests with memory"
+        [
+            VisualUnitMemTest testParas testName testProgram loadMemVal loadTD numMem
+        ]
