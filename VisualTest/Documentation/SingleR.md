@@ -63,7 +63,6 @@ Used `Expecto` and `Expecto.FsCheck` packages in testing. All tests are labelled
 
 All the modules in the VisUAL framework provided have been placed in `VProgam.fs` and have been given the namespace `VisualTest`. Any changes in the file directory for `VisualApp`, `VisualTest` and `VisualWork` are to be reflected accordingly in `defaultParas` located in the `VTest` module. 
 
-Several changes have been made to the framework when used to test `SingleR.fs`. The function `RunVisualWithFlagsOut` has been modified so that it can read 13 memory locations in postlude by using register `R0` which was initially used to store the flags. As a result, it has lost the functionality to check for flags, which is not needed by this module but can be easily reverted if need be. Furthermore, `GETWRAPPER` has been prepended with `STOREALLMEM` to allow us to write test data into memory.
 
 |Instructions   |Feature specification tested|
 |---------------|----------------------------|
@@ -73,6 +72,7 @@ Several changes have been made to the framework when used to test `SingleR.fs`. 
 |All            |Accepts `OFFSET` in the form of registers
 |All            |Allows post-indexed addressing to update the register value to anything, even memory locations that are off-limits for execution
 |All            |Rejects instructions that are trying to access areas other than those tagged with `DataLoc`
+|All            |Parses zero offset to be equivalent to no offset
 |`LDR`/`STR`    |Allows memory access when the address in `RAdd` is not word-aligned, but the effective address after offset is
 |`LDR`/`STR`    |Rejects instructions that are trying to access memory locations that are not word-aligned  
 |`LDRB`/`STRB`  |Allows memory addresses that are not word-aligned for `LDRB`/`STRB`
@@ -93,7 +93,7 @@ In Load/Store memory instructions, it is important for the ARM simulator to not 
 ## Differences from VisUAL
 |VisUAL     |`SingleR.fs`    |Reasons        |
 |-----------|---------------|---------------|
-|Inputs are case-insensitive    |Only accepts inputs in all uppercase   |The whole programme can be easily changed to accept assembler lines in a case-insensitive manner by forcing all inputs to uppercase. It is more efficient to implement this functionality in the top-level during the group phase of the project than to do the same conversion in each invididual module. |
+|Inputs are case-insensitive    |Only accepts inputs in all uppercase   |The whole programme can be easily changed to accept assembler lines in a case-insensitive manner by forcing all inputs to uppercase. It is more efficient to implement this functionality in the top-level during the group phase of the project than to do the same conversion in each invididual module.<br>UPDATE: Inputs are now case-insensitive in group phase. Parse tests in `SingleRTests` are still case-insensitive due to the built in parser for the test module. |
 |`OFFSET` can be a register, a numerical expression or a shifted register   |`OFFSET` can be a register or a literal    |Numerical expressions and shifted registers will be implemented in the group phase by integrating with the arithmetic instructions module and shift instructions module respectively.  |
 |Allows access to memory locations from address `0x1000` onwards. Addresses before that are reserved for instructions. | Allows access to memory locations corresponding to `DataLoc` tag in `MemLoc` D.U.     |When building the memory map in the top-level, we can clearly specify which memory locations are allowed to be accessed as `DataLoc`, and which are reserved as `Code`. It is up to the group's decision whether or not to follow VisUAL's memory map, or to expand/reduce the area reserved for instructions.    |
 |LS instructions with a register offset are not allowed use of R13 or R15 as the source base address, because they are the source pointer (SP) and program counter (PC) respectively. This was discovered during testing.  |LS instructions with a register offset are allowed use of R13 or R15 as the source base address  |Changing SP or PC when finding offset address is dangerous because the programme would lose its position in execution. This restriction will be implemented in the group phase by integrating with the branch instructions.    |

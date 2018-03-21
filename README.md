@@ -52,7 +52,6 @@ The assembler is case-insensitive to inputs. To execute an assembler program, ca
 
 ### SingleR
 - The instructions currently only accepts register and literal offsets, VisUAL accepts numerical expressions and shifted registers, too
-- Remove zero offset, it should be equivalent to an instruction with no offsets.
 
 ### Top level
 - The current multipass assembler gives each line a 4 bytes address, because that is what is required by all the instructions included here. Further implementation of other instructions, such as `FIll` or `DCD`, would require changes to the `firstPass` function in `multiParseLine`

@@ -113,6 +113,10 @@ let parseUnitTest =
             "STRB R2, R4", Error "Incorrect formatting" 
             "LDR R10, [R11, R2!]", Error "Incorrect formatting"
             "STR R8, [R1], 22", Error "Incorrect formatting"
+
+            // After individual phase
+            "STRB R10, [R15, #0]!" , Ok {InstrN=STR ; Type=Some B; RContents=R10; RAdd=R15 ; Offset=None}
+
         ]    
 
 [<Tests>]
@@ -143,5 +147,8 @@ let execUnitTest =
             "Memory access error - word aligned" , "STR R8, [R9, #5]" , "Memory address accessed must be divisible by 4"
             "Memory access error - not allowed" , "LDR R0, [R5, #-4]!" , "Not allowed to access this part of memory"
             "Parse error" , "STR R0, [R7 R0]", "Incorrect formatting"
+
+            // After inidividual phase
+            "Offset zero STR" , "str r8, [r9, #0]" , "" 
         ]
 

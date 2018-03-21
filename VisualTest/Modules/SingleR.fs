@@ -113,12 +113,15 @@ let makeLS (root:string) ls suffix =
         | 3 ->
             let op2 = operandLst.[2]
             let value = Ok op2 |> Result.bind getOffsetVal 
-            match op2.EndsWith("]!"), op2.EndsWith("]"), op2.Contains("!"), value with
-            | true, false, true, Ok v -> Some (v, PreIndexed) |> Ok
-            | false, false, false, Ok v -> Some (v, PostIndexed) |> Ok
-            | false, true, false, Ok v -> Some (v, Normal) |> Ok
-            | _, _, _, Error e -> Error e
-            | _ -> Error "Formatting offset error"                
+            match value with
+            | Ok (Literal v) when v = 0 -> Ok None
+            | Ok v -> 
+                match op2.EndsWith("]!"), op2.EndsWith("]"), op2.Contains("!") with
+                | true, false, true -> Some (v, PreIndexed) |> Ok
+                | false, false, false -> Some (v, PostIndexed) |> Ok
+                | false, true, false -> Some (v, Normal) |> Ok
+                | _ -> Error "Formatting offset error"  
+            | Error e -> Error e                                      
         | _ -> Error "Too many operands" 
 
     let instrDummy = {
