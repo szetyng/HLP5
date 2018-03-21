@@ -88,3 +88,5 @@ let labelMap =
     Map.ofList [ 
         "LABEL",0u ; "LABEL1",4u 
     ] 
+
+Some labelMap
