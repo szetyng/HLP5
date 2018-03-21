@@ -2,6 +2,7 @@ module ShiftTests
 
 open CommonData
 open CommonLex
+open CommonTest
 open Shift
 open Expecto
 open VisualTest.VCommon
@@ -26,8 +27,7 @@ let rndReg minV maxV = rnd.GetValues(minV,maxV) |> Seq.take 15 |> Seq.toList |> 
 let rndFlag = rnd.GetValues(0,1) |> Seq.take 4 |> Seq.toList |> intToFlags
 
 
-// Given a assembly string, parse and execute, and return the register values and flags 
-// in the format that VisualShiftTest does for comparison.
+/// Given a assembly string, parse and execute, and return the register values and flags in the format that VisualShiftTest does for comparison.
 let makeExecute (flags:Flags) (initRegs:uint32 list) (asm:string) =       
     // Generate cpu data from given flags and initRegs      
     let dataExecute  (flags:Flags) (initRegs:uint32 list) =
@@ -39,10 +39,10 @@ let makeExecute (flags:Flags) (initRegs:uint32 list) (asm:string) =
                     MM = tMem
                  }
         tD 
-    // parse asm string          
+    /// parse asm string          
     let parseExecute = CommonTop.parseLine None (WA 0ul) asm         
     
-    // execute using parsed information and data given
+    /// execute using parsed information and data given
     let runExecute parsedInstr tD = 
         match parsedInstr with
         |  (Ok x) -> CommonTop.IExecute x.PInstr tD               
@@ -56,16 +56,10 @@ let makeExecute (flags:Flags) (initRegs:uint32 list) (asm:string) =
     // return a tuple of registers and flags after parse-execute
     (expectedRegs,expectedFlags)
 
-let MakeParseTests name tList =
-    let singleTest i (input,expected)  =
-        testCase (sprintf "Parse Test %s #%d" name i) <| fun () ->
-        let actual = CommonTop.parseLine None (WA 0ul) input
-        Expecto.Expect.equal actual expected (sprintf "Test parsing of %s" input) 
-    tList
-    |>List.indexed
-    |>List.map (fun (x,y) -> singleTest x y)
-    |> Expecto.Tests.testList name
+/// parse and execute on register and flag values from given paras, returns expected registers and flags
+let runParseAndExecute paras =  makeExecute paras.InitFlags paras.InitRegs
 
+/// Make Expecto test using VisUAL with given parameters
 let VisualShiftTest paras name src (outExpected: (Out * int) list * Flags) =
     testCase name <| fun () ->
         let flagsActual, outActual = RunVisualWithFlagsOut paras src
@@ -81,17 +75,23 @@ let VisualShiftTest paras name src (outExpected: (Out * int) list * Flags) =
         Expecto.Expect.equal outActualNoted (outExpected |> fst |> List.sort) <|
             sprintf "Register outputs>\n%A\n<don't match expected outputs, src=%s" outActual.Regs src
 
-let runParseAndExecute paras =  makeExecute paras.InitFlags paras.InitRegs
+
+// Initialize different parameters for testing
 let posParas = {defaultParas with InitRegs = rndReg 1 1 ; InitFlags = rndFlag }
 let negParas = {defaultParas with InitRegs = rndReg -1 -1 ; InitFlags = rndFlag }
 let rndParas = {defaultParas with InitRegs = rndReg -100 100 ; InitFlags = rndFlag }
+
+// Curry VisualShiftTest with different parameters
 let sTestPos = VisualShiftTest posParas
 let sTestNeg = VisualShiftTest negParas
 let sTestRnd = VisualShiftTest rndParas
 
-// run both Shift module and VisUAL for given parameters, asm and test name.
-let runTest (p:Params) (name:string) (asm:string) = VisualShiftTest p name asm (runParseAndExecute p asm)
+// Compare both Shift module (expected) and VisUAL result for given parameters, asm and test name.
+let runTest (p:Params) (name:string) (asm:string) = 
+    let expected = runParseAndExecute p asm
+    VisualShiftTest p name asm expected
 
+/// Make a Shift parse result for given parameters
 let parseResult opcode rd rm sval s = 
     let pConv p = pResultInstrMap CommonTop.ISHIFT string p
     Ok {

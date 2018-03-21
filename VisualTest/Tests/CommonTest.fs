@@ -36,7 +36,9 @@ let splitIntoLines ( line:string ) =
                 line.Split( ([|'\n'|] : char array), 
                     System.StringSplitOptions.RemoveEmptyEntries)
 
-/// Run VisUAL, initialize using paras and memVal, and run src, then read 13 words back to registers during postlude.
+
+/// Run VisUAL, initialize using paras and memVal, and run src, then read 13 words back to registers during postlude. 
+/// To be used in VisualUnitMemTest
 let RunVisualMem memVal paras src = 
     let memPrelude = 
         STOREALLMEM memVal paras.MemReadBase +
@@ -83,3 +85,14 @@ let VisualUnitMemTest paras name src memVal tD numMem  =
         Expecto.Expect.equal regActual outExpected.Regs <|
         sprintf "Register outputs>\n%A\n<don't match expected outputs, src=%s" outActual.Regs src
 
+/// Make Expecto Test for parsing
+let MakeParseTests name tList =
+    let singleTest i (input,expected)  =
+        testCase (sprintf "Parse Test %s #%d" name i) <| fun () ->
+        let actual = CommonTop.parseLine None (WA 0ul) input 
+        Expecto.Expect.equal actual expected (sprintf "Test parsing of %s" input) 
+
+    tList
+    |>List.indexed
+    |>List.map (fun (x,y) -> singleTest x y)
+    |> Expecto.Tests.testList name

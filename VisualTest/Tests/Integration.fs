@@ -13,11 +13,10 @@ let tD = genTestData memVal regVal
 
 
 
-
+/// Make Expecto test for label checking in Symbol Table 
 let MakeLabelTest name tList =
     let singleTest i (input,expected)  =
         testCase (sprintf "Label Test %s #%d" name i) <| fun () ->
-        // let pConv p = pResultInstrMap Instr string p
         let actual = CommonTop.multiParseLine None (WA 0ul) input |> snd
 
         Expecto.Expect.equal actual expected (sprintf "Test parsing of %A" input) 
