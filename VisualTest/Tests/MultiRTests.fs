@@ -15,33 +15,38 @@ let regVal = [defaultParas.MemReadBase;4120u;4144u] @ [3ul..14ul]
 
 let tD = genTestData memVal regVal
 
+/// Parse and Execute single line instructions
 let parseAndExecute asm tD = 
     let parsedRes = CommonTop.parseLine None (WA 0ul) asm
     match parsedRes with
     | Ok x -> CommonTop.IExecute x.PInstr tD
     | (Error e) -> Error e
 
+/// Perform Execution of MultiR Instructions, assume valid output
 let executeMultiR asm tD: DataPath<Instr> =
     match parseAndExecute asm tD with
     | Ok x -> x
     | _ -> failwithf "Not testing for errors here"
 
+/// Perform Execution of MultiR Instructions, assume error occurs
 let executeErr asm tD: string = 
     match parseAndExecute asm tD with
     | Error e -> e
     | _ -> failwithf "Not testing for correctness here"
 
+/// Make Expecto Test for parsing
 let MakeParseTests name tList =
     let singleTest i (input,expected)  =
         testCase (sprintf "Parse Test %s #%d" name i) <| fun () ->
         let actual = CommonTop.parseLine None (WA 0ul) input 
-
         Expecto.Expect.equal actual expected (sprintf "Test parsing of %s" input) 
+
     tList
     |>List.indexed
     |>List.map (fun (x,y) -> singleTest x y)
     |> Expecto.Tests.testList name
 
+/// Make Expecto Test for execution errors
 let MakeExErrTests name tList =
     let singleTest i (src,tD,expected)  =
         testCase (sprintf "Execute Errors Test %s #%d" name i) <| fun () ->
@@ -52,6 +57,7 @@ let MakeExErrTests name tList =
     |>List.map (fun (x,y) -> singleTest x y)
     |> Expecto.Tests.testList name
 
+/// Make a parse result for given parameters
 let parseResult opcode dir rn w reglist = 
     let pConv p = pResultInstrMap CommonTop.IMULTIMEM string p
     Ok {
@@ -100,7 +106,7 @@ let parseTestReglist =
             "LDM R1,{r15}", parseResult "LDM" "" R1 false (Ok [R15])
         ]    
 
-
+// Currying to check various errors
 let parseLDMResult x = parseResult "LDM" "" R1 true x
 [<Tests>]
 let parseTestError =
@@ -124,6 +130,7 @@ let parseTestError =
         ]
 
 [<Tests>]
+// Generate test data with invalid register values
 let tD' = CommonTest.genTestData memVal [0ul..14ul]
 let executeErrTest =
     MakeExErrTests "Execute Error Tests"
@@ -147,9 +154,12 @@ let executeStoreTest =
             VisualUnitMemTest testParas "STMFD Test with Writeback" "STMFD R1!,{R4-R9}" memVal tD 6
             VisualUnitMemTest testParas "STMDB Test with Writeback" "STMDB R1!,{R4-R9}" memVal tD 6
         ]
+        
+[<Tests>]
+// Generate test data with memory values
 let loadMemVal = [1ul;2ul;3ul;4ul;5ul;6ul]
 let loadTD = CommonTest.genTestData loadMemVal regVal
-[<Tests>]
+
 let executeLoadTest = 
     testList "LDM tests"
         [
