@@ -1,4 +1,4 @@
-﻿module Arithmetic 
+module Arithmetic 
 open CommonData
 open CommonLex
 open FlexOp
@@ -9,8 +9,8 @@ type Instr = {
     OpCode: OpInstr
     OpFlag: bool //true if parsed opcode has suffix "S"
     OpCond: Condition //condition is NOT option bc "" is included in CommonLex.condMap
-    Dest: RName
-    Op1: Operand //FlexOp.Operand
+    Dest: RName //destination register
+    Op1: RName //op1 must be register
     Op2: Op2 //FlexOp.Op2
     }
 
@@ -59,30 +59,34 @@ let parse (ls: LineData) : Result<Parse<Instr>,string> option =
         let makeInstr (ld:LineData) = 
             match opCodes.TryFind ld.OpCode with
             | Some (_, (r,s,c))
-                -> Ok {OpCode= getRoot r; OpFlag= getSuffix s; OpCond= c; Dest= R0; Op1= Reg(R0); Op2 = Literal(0u)}
+                -> Ok {OpCode= getRoot r; OpFlag= getSuffix s; OpCond= c; Dest= R0; Op1= R0; Op2 = Literal(0u)}
             | None -> failwithf "Incorrect opcode" // should not happen since tryfind is already done by parse
         makeInstr ls
 
     // get dummy Instr from parseOpCode and update with parsed operands info
     // ins to be pipelined via Result.bind from parseOpCode
     let parseOperand (ls: LineData) (ins:Instr) :Result<Instr,string> =
+        //let wordList = // [dest ; op1 ; op2 ; SHIFT_op ; #expression]
+        //    ls.Operands.Split([|',' ; ' '|])
+        //    |> Array.toList
+        //    |> List.filter (fun str -> if str <> "" then true else false)
         let wordList = // [dest ; op1 ; op2 ; SHIFT_op ; #expression]
-            ls.Operands.Split([|',' ; ' '|])
+            ls.Operands.Split([|' ';','|], System.StringSplitOptions.RemoveEmptyEntries)
             |> Array.toList
-            |> List.filter (fun str -> if str <> "" then true else false)
-
         let (|CheckReg|_|) (str:string) = // check if opStr is register, return RName option
             match str.StartsWith("R") with
             | true  -> regNames.TryFind str
-            | false -> None            
+            | false -> None
         let (|CheckLit|_|) (str:string) = // check if opStr is Lit, return Lit option
             let mutable uval = 0u
             if System.UInt32.TryParse(str.Substring(1), &uval) 
-                then Some (makeLiteral uval)
+                then makeLiteral uval
                 else None
 
         let excludePC reg = // only for op2 if wordList.Length > 3
-            if reg <> R15 then Ok reg else Error "Cannot use PC register for op2 with shift"
+            match reg with
+            | R15 -> Error "Cannot use PC register for op2 with shift"
+            | _ -> Ok reg
         let getReg str = //None not allowed bc input string is already sorted as Reg/Num/Shift
             match str with
             | CheckReg reg -> Ok reg
@@ -91,7 +95,7 @@ let parse (ls: LineData) : Result<Parse<Instr>,string> option =
             match opStr with
             | CheckReg r -> Reg r |> Ok
             | CheckLit l -> Lit l |> Ok
-            | _ -> Error "Invalid operands"  
+            | _ -> Error "Invalid op2"
         let getShift str =
             let initShiftReg =
                 getReg wordList.[2]
@@ -115,7 +119,7 @@ let parse (ls: LineData) : Result<Parse<Instr>,string> option =
         let updateDest ins =
             getReg wordList.[0] |> Result.bind (fun x -> Ok {ins with Dest = x})
         let updateOp1 ins =
-            getOperand wordList.[1] |> Result.bind (fun x -> Ok {ins with Op1 = x})
+            getReg wordList.[1] |> Result.bind (fun x -> Ok {ins with Op1 = x})
         let updateOp2 ins =
             match wordList.Length with
             | 3 -> 
@@ -126,14 +130,17 @@ let parse (ls: LineData) : Result<Parse<Instr>,string> option =
                 getOperand wordList.[2] 
                 |> Result.bind operandToOp2
             | 4 ->
-                if wordList.[3] = "RRX"
-                    then getReg wordList.[2]
-                        |> Result.bind excludePC
-                        |> Result.bind (fun x -> Ok {ins with Op2 = RRX(x)})
-                    else Error "Invalid shift operation"
-            | 5 -> getShift wordList.[3]
+                match wordList.[3] with
+                | "RRX" -> 
+                    wordList.[2]
+                    |> getReg
+                    |> Result.bind excludePC
+                    |> Result.bind (fun x -> Ok {ins with Op2 = RRX(x)})
+                | _ -> Error "Invalid shift operation" //Length 5 ends up here. why?
+            | 5 -> wordList.[3]
+                |> getShift 
                 |> Result.bind (fun x -> Ok {ins with Op2 = x})
-            | _ -> Error "Invalid operand"
+            | _ -> Error "Too many operands"
         updateDest ins
         |> Result.bind updateOp1
         |> Result.bind updateOp2
@@ -183,9 +190,7 @@ let execute (ins: Instr) (d: DataPath<Instr>) =
 
     // arithmetics bit
     let callOpValues ins d = // call uint32 values represented by op1, op2
-        match ins.Op1, ins.Op2 with
-        | Reg op1, op2 -> (d.Regs.[op1], flexOp2 op2 d)
-        | Lit op1, op2 -> (op1, flexOp2 op2 d) //no need for makeLiteral op1 cos it's done in parse
+        d.Regs.[ins.Op1], (flexOp2 ins.Op2 d)
     let arithmetic (a,b) = // returns arithmetic result in uint64
         match ins.OpCode with
         | ADD -> uint64 a + uint64 b
