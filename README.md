@@ -55,3 +55,4 @@ The assembler is case-insensitive to inputs. To execute an assembler program, ca
 
 ### Top level
 - The current multipass assembler gives each line a 4 bytes address, because that is what is required by all the instructions included here. Further implementation of other instructions, such as `FIll` or `DCD`, would require changes to the `firstPass` function in `multiParseLine`
+- The current exeuction of multi-line programs returns the last error encountered in the program, and does not distinguish between parse errors or execution errors. Improvements can be made in the form of an error combinator, which identifies the exact line of the program where the error occurs, and whether or not it is a parse or execute error.
