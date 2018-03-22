@@ -14,14 +14,6 @@ open VisualTest.VTest
 type System.Random with                     /// Generates an infinite sequence of random numbers within the given range.
     member this.GetValues(minValue, maxValue) =
         Seq.initInfinite (fun _ -> this.Next(minValue, maxValue))
-
-/// convenience function, convert int list of size 4 to NZCV status flag record
-let intToFlags (s:int list) =
-    let toBool = function | 0 -> false | 1 -> true | s -> failwithf "Bad character in flag specification '%d'" s
-    match s |> List.map toBool with
-    | [ a ; b ; c ; d] -> { FN=a; FZ=b;FC=c;FV=d}
-    | _ -> failwithf "Wrong number of characters (should be 4) in flag specification %A" s
-
 let rnd = System.Random()
 let rndReg minV maxV = rnd.GetValues(minV,maxV) |> Seq.take 15 |> Seq.toList |> List.map uint32
 let rndFlag = rnd.GetValues(0,1) |> Seq.take 4 |> Seq.toList |> intToFlags

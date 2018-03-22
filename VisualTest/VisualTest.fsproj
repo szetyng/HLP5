@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="CommonData.fs" />
+    <Compile Include="CommonLex.fs" />
+    <Compile Include="Modules/Shift.fs" />
+    <Compile Include="Modules/MultiR.fs"/>
+    <Compile Include="Modules/SingleR.fs" />
+    <Compile Include="CommonTop.fs" />
+    <Compile Include="VisualInterface.fs" />
+    <Compile Include="Tests/CommonTest.fs" />
+    <Compile Include="Tests/ShiftTests.fs" />
+    <Compile Include="Tests/MultiRTests.fs"/>
+    <Compile Include="Tests/SingleRTests.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Expecto" Version="5.1.2" />
+    <PackageReference Include="Expecto.FsCheck" Version="5.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.2.3" />
+  </ItemGroup>
+
+</Project>

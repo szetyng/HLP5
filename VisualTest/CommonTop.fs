@@ -5,7 +5,6 @@ module CommonTop
 
 open CommonLex
 open CommonData
-open SingleR
 
 /// allows different modules to return different instruction types
 type Instr =

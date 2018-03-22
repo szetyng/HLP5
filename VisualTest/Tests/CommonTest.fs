@@ -96,3 +96,10 @@ let MakeParseTests name tList =
     |>List.indexed
     |>List.map (fun (x,y) -> singleTest x y)
     |> Expecto.Tests.testList name
+
+/// Convenience function, convert int list of size 4 to NZCV status flag record. Used in Shift module 
+let intToFlags (s:int list) =
+    let toBool = function | 0 -> false | 1 -> true | s -> failwithf "Bad character in flag specification '%d'" s
+    match s |> List.map toBool with
+    | [ a ; b ; c ; d] -> { FN=a; FZ=b;FC=c;FV=d}
+    | _ -> failwithf "Wrong number of characters (should be 4) in flag specification %A" s

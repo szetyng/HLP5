@@ -31,7 +31,7 @@ let genTestData memVal regVal: DataPath<'INS> =
 /// Run program on a given CPU state and output result to file
 let simulateARM tD prog=
     let result = CommonTop.fullExecute (Ok tD) prog
-    let printRes a b = a + sprintf "%A \t \t %A \n" (fst b) (snd b)
+    let printRes a b = a + sprintf "%A \t %A \n" (fst b) (snd b)
 
     let printRegisters result = 
         match result with
