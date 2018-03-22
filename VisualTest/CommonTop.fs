@@ -137,6 +137,7 @@ let parseLine (symtab: SymbolTable option) (loadAddr: WAddr) (asmLine:string) =
 /// Accepts an array of multiple instruction lines stored as strings
 /// Parses each line in a two pass assembler to get multiple Parse types
 /// Executes each line on tD consecutively
+/// Can be improved error handling wise, see README
 let fullExecute tD asm = 
     let parsedResList = multiParseLine None (WA 0ul) asm |> fst
     let exec tD parsedRes = 
