@@ -1,4 +1,4 @@
-﻿module Move
+module Move
 open CommonData
 open CommonLex
 open FlexOp
@@ -59,11 +59,9 @@ let parse (ls: LineData) : Result<Parse<Instr>,string> option =
     // get dummy Instr from parseOpCode and update with parsed operands info
     // ins to be pipelined via Result.bind from parseOpCode
     let parseOperand (ls: LineData) (ins:Instr) :Result<Instr,string> =
-        let wordList = // [dest ; op1 ; SHIFT_op ; #expression]
-            ls.Operands.Split([|',' ; ' '|])
+        let wordList = // [dest ; op1 ; op2 ; SHIFT_op ; #expression]
+            ls.Operands.Split([|' ';','|], System.StringSplitOptions.RemoveEmptyEntries)
             |> Array.toList
-            |> List.filter (fun str -> if str <> "" then true else false)
-
         let (|CheckReg|_|) (str:string) = // check if opStr is register, return RName option
             match str.StartsWith("R") with
             | true  -> regNames.TryFind str
@@ -71,11 +69,13 @@ let parse (ls: LineData) : Result<Parse<Instr>,string> option =
         let (|CheckLit|_|) (str:string) = // check if opStr is Lit, return Lit option
             let mutable uval = 0u
             if System.UInt32.TryParse(str.Substring(1), &uval) 
-                then Some (makeLiteral uval)
+                then makeLiteral uval
                 else None
 
         let excludePC reg = // only for op2 if wordList.Length > 3
-            if reg <> R15 then Ok reg else Error "Cannot use PC register for op2 with shift"
+            match reg with
+            | R15 -> Error "Cannot use PC register for op2 with shift"
+            | _ -> Ok reg
         let getReg str = //None not allowed bc input string is already sorted as Reg/Num/Shift
             match str with
             | CheckReg reg -> Ok reg
